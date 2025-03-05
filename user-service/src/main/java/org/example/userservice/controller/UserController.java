@@ -50,4 +50,16 @@ public class UserController {
         UserDTO blockedUser = userService.blockUser(id);
         return ResponseEntity.ok(ApiResponse.success(blockedUser, "User blocked successfully", HttpStatus.OK));
     }
+
+    @PatchMapping("/{id}/unblock")
+    public ResponseEntity<ApiResponse<UserDTO>> unblockUser(@PathVariable String id) {
+        UserDTO unblockedUser = userService.unblockUser(id);
+        return ResponseEntity.ok(ApiResponse.success(unblockedUser, "User unblocked successfully", HttpStatus.OK));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserDTO>> deleteUser(@PathVariable String id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok(ApiResponse.success(null,  "User deleted successfully", HttpStatus.OK));
+    }
 }

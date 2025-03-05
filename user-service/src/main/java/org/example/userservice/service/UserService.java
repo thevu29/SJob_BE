@@ -22,12 +22,12 @@ public class UserService {
     private final UserMapper userMapper;
 
     public List<UserDTO> getUsers() {
-        List<User> users = userRepository.findAll();
+        List<User> users = userRepository.findAllByDeletedAtIsNull();
         return users.stream().map(userMapper::toDto).toList();
     }
 
     public UserDTO getUser(String id) {
-        User user = userRepository.findById(id)
+        User user = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return userMapper.toDto(user);
     }
@@ -64,5 +64,21 @@ public class UserService {
         user.setActive(false);
         User blockedUser = userRepository.save(user);
         return userMapper.toDto(blockedUser);
+    }
+
+    public UserDTO unblockUser(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        user.setActive(true);
+        User unblockedUser = userRepository.save(user);
+        return userMapper.toDto(unblockedUser);
+    }
+
+    public void deleteUser(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        userRepository.delete(user);
     }
 }
