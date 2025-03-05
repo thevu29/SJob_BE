@@ -1,0 +1,47 @@
+package org.example.userservice.entity;
+
+import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.LocalDateTime;
+
+@Document(collection = "users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ToString(exclude = {"password"})
+public class User {
+    @Id
+    private String id;
+
+    @Indexed(unique = true)
+    private String email;
+
+    private String password;
+
+    private UserRole role;
+
+    @CreatedDate
+    @Field("created_at")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Field("updated_at")
+    private LocalDateTime updatedAt;
+
+    @Field("deleted_at")
+    @Builder.Default
+    private LocalDateTime deletedAt = null;
+
+    @Field(name = "active")
+    @Builder.Default
+    private boolean active = true;
+}
+
