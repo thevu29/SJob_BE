@@ -10,7 +10,10 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
     List<User> findAllByDeletedAtIsNull();
+
     User findByEmail(String email);
+
     Optional<User> findByIdAndDeletedAtIsNull(String id);
+
     boolean existsByEmail(String email);
 }

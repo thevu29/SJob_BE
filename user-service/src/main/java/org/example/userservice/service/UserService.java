@@ -4,14 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.userservice.dto.UserDTO;
 import org.example.userservice.dto.request.UserCreationRequest;
 import org.example.userservice.dto.request.UserUpdateRequest;
+import org.example.userservice.entity.User;
 import org.example.userservice.exception.ResourceNotFoundException;
 import org.example.userservice.mapper.UserMapper;
-import org.example.userservice.entity.User;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service

@@ -60,6 +60,6 @@ public class UserController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok(ApiResponse.success(null,  "User deleted successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
     }
 }
