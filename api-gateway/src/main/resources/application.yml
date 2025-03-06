@@ -3,6 +3,14 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+            '[/**]':
+                allowedOrigins: "*"
+                allowedMethods: "*"
+                allowedHeaders: "*"
+                allowCredentials: true
+                maxAge: 3600
       discovery:
         locator:
           enabled: true
@@ -11,6 +19,10 @@ spring:
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/users/**
+        - id: job-seeker-service
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/job-seekers/**
 
 server:
   port: 8080
