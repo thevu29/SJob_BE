@@ -1,10 +1,11 @@
 package org.example.userservice.mapper;
 
 import org.example.userservice.dto.UserDTO;
-import org.example.userservice.dto.request.UserCreationRequest;
-import org.example.userservice.dto.request.UserUpdateRequest;
+import org.example.userservice.dto.request.CreateUserRequest;
+import org.example.userservice.dto.request.UpdateUserRequest;
 import org.example.userservice.entity.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
@@ -14,7 +15,13 @@ public interface UserMapper {
 
     User toEntity(UserDTO userDTO);
 
-    User toEntity(UserCreationRequest userCreationRequest);
+    @Mapping(target = "role", expression = "java(org.example.userservice.entity.UserRole.valueOf(createUserRequest.getRole().toUpperCase()))")
+    @Mapping(target = "active", constant = "true")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    User toEntity(CreateUserRequest createUserRequest);
 
-    void updateEntityFromRequest(UserUpdateRequest request, @MappingTarget User user);
+    void updateEntityFromRequest(UpdateUserRequest request, @MappingTarget User user);
 }

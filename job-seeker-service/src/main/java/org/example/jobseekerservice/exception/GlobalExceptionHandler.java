@@ -1,7 +1,7 @@
-package org.example.userservice.exception;
+package org.example.jobseekerservice.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.userservice.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -76,9 +76,16 @@ public class GlobalExceptionHandler {
         String errorMessage = ex.getMessage();
         log.warn("Message not readable: {}", errorMessage);
 
-        if (errorMessage.contains("UserRole")) {
+        if (errorMessage.contains("LocationType")) {
             ApiResponse<Object> response = ApiResponse.error(
-                    "Invalid role value. Allowed values: JOB_SEEKER, RECRUITER, ADMIN",
+                    "Invalid location type value. Allowed values: ONSITE, REMOTE, HYBRID",
+                    HttpStatus.BAD_REQUEST);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(response);
+        } else if (errorMessage.contains("EmployeeType")) {
+            ApiResponse<Object> response = ApiResponse.error(
+                    "Invalid employee type value. Allowed values: FULL_TIME, PART_TIME, INTERNSHIP, FREE_LANCE",
                     HttpStatus.BAD_REQUEST);
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

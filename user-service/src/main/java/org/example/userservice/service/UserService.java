@@ -2,8 +2,8 @@ package org.example.userservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.dto.UserDTO;
-import org.example.userservice.dto.request.UserCreationRequest;
-import org.example.userservice.dto.request.UserUpdateRequest;
+import org.example.userservice.dto.request.CreateUserRequest;
+import org.example.userservice.dto.request.UpdateUserRequest;
 import org.example.userservice.entity.User;
 import org.example.userservice.exception.ResourceNotFoundException;
 import org.example.userservice.mapper.UserMapper;
@@ -11,6 +11,7 @@ import org.example.userservice.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,13 +26,19 @@ public class UserService {
         return users.stream().map(userMapper::toDto).toList();
     }
 
-    public UserDTO getUser(String id) {
+    public List<UserDTO> getUsersByIds(List<String> ids) {
+        return userRepository.findByIdInAndDeletedAtIsNull(ids).stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
+
+    public UserDTO getUserById(String id) {
         User user = userRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return userMapper.toDto(user);
     }
 
-    public UserDTO createUser(UserCreationRequest request) {
+    public UserDTO createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email is already in use");
         }
@@ -42,7 +49,7 @@ public class UserService {
         return userMapper.toDto(savedUser);
     }
 
-    public UserDTO updateUser(String id, UserUpdateRequest request) {
+    public UserDTO updateUser(String id, UpdateUserRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -56,22 +63,22 @@ public class UserService {
         return userMapper.toDto(updatedUser);
     }
 
-    public UserDTO blockUser(String id) {
+    public UserDTO updateUserStatus(String id, boolean active) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        user.setActive(false);
-        User blockedUser = userRepository.save(user);
-        return userMapper.toDto(blockedUser);
+        user.setActive(active);
+        User updatedUser = userRepository.save(user);
+
+        return userMapper.toDto(updatedUser);
     }
 
-    public UserDTO unblockUser(String id) {
+    public void softDeleteUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        user.setActive(true);
-        User unblockedUser = userRepository.save(user);
-        return userMapper.toDto(unblockedUser);
+        user.setDeletedAt(LocalDateTime.now());
+        userRepository.save(user);
     }
 
     public void deleteUser(String id) {

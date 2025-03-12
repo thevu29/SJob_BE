@@ -2,10 +2,10 @@ package org.example.userservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.userservice.dto.ApiResponse;
 import org.example.userservice.dto.UserDTO;
-import org.example.userservice.dto.request.UserCreationRequest;
-import org.example.userservice.dto.request.UserUpdateRequest;
+import org.example.userservice.dto.request.CreateUserRequest;
+import org.example.userservice.dto.request.UpdateUserRequest;
+import org.example.userservice.dto.response.ApiResponse;
 import org.example.userservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +20,19 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsers() {
-        List<UserDTO> users = userService.getUsers();
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByIds(List<String> ids) {
+        List<UserDTO> users = userService.getUsersByIds(ids);
         return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserDTO>> getUser(@PathVariable String id) {
-        UserDTO user = userService.getUser(id);
+    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable String id) {
+        UserDTO user = userService.getUserById(id);
         return ResponseEntity.ok(ApiResponse.success(user, "User fetched successfully", HttpStatus.OK));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<UserDTO>> createUser(@Valid @RequestBody UserCreationRequest request) {
+    public ResponseEntity<ApiResponse<UserDTO>> createUser(@Valid @RequestBody CreateUserRequest request) {
         UserDTO createdUser = userService.createUser(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -40,24 +40,30 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable String id, @Valid @RequestBody UserUpdateRequest request) {
+    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserRequest request) {
         UserDTO updatedUser = userService.updateUser(id, request);
         return ResponseEntity.ok(ApiResponse.success(updatedUser, "User updated successfully", HttpStatus.OK));
     }
 
     @PatchMapping("/{id}/block")
     public ResponseEntity<ApiResponse<UserDTO>> blockUser(@PathVariable String id) {
-        UserDTO blockedUser = userService.blockUser(id);
+        UserDTO blockedUser = userService.updateUserStatus(id, false);
         return ResponseEntity.ok(ApiResponse.success(blockedUser, "User blocked successfully", HttpStatus.OK));
     }
 
     @PatchMapping("/{id}/unblock")
     public ResponseEntity<ApiResponse<UserDTO>> unblockUser(@PathVariable String id) {
-        UserDTO unblockedUser = userService.unblockUser(id);
+        UserDTO unblockedUser = userService.updateUserStatus(id, true);
         return ResponseEntity.ok(ApiResponse.success(unblockedUser, "User unblocked successfully", HttpStatus.OK));
     }
 
     @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserDTO>> softDeleteUser(@PathVariable String id) {
+        userService.softDeleteUser(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
+    }
+
+    @DeleteMapping("/{id}/hard")
     public ResponseEntity<ApiResponse<UserDTO>> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));

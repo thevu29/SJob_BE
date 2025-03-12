@@ -8,7 +8,7 @@ import org.example.userservice.entity.UserRole;
 @Getter
 @Setter
 @NoArgsConstructor
-public class UserUpdateRequest {
+public class UpdateUserRequest {
     private String password;
     private UserRole role;
 }

@@ -1,7 +1,6 @@
-package org.example.userservice.dto;
+package org.example.jobseekerservice.dto;
 
 import lombok.Data;
-import org.example.userservice.entity.UserRole;
 
 import java.time.LocalDateTime;
 
@@ -9,8 +8,9 @@ import java.time.LocalDateTime;
 public class UserDTO {
     private String id;
     private String email;
-    private UserRole role;
+    private String role;
     private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime deletedAt;
 }
