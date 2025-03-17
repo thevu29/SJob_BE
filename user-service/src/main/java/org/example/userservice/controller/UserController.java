@@ -39,13 +39,13 @@ public class UserController {
                 .body(ApiResponse.success(createdUser, "User created successfully", HttpStatus.CREATED));
     }
 
-    @PatchMapping("/{id}/block")
+    @PutMapping("/{id}/block")
     public ResponseEntity<ApiResponse<UserDTO>> blockUser(@PathVariable String id) {
         UserDTO blockedUser = userService.updateUserStatus(id, false);
         return ResponseEntity.ok(ApiResponse.success(blockedUser, "User blocked successfully", HttpStatus.OK));
     }
 
-    @PatchMapping("/{id}/unblock")
+    @PutMapping("/{id}/unblock")
     public ResponseEntity<ApiResponse<UserDTO>> unblockUser(@PathVariable String id) {
         UserDTO unblockedUser = userService.updateUserStatus(id, true);
         return ResponseEntity.ok(ApiResponse.success(unblockedUser, "User unblocked successfully", HttpStatus.OK));
