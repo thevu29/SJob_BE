@@ -11,10 +11,10 @@ import java.util.List;
 @FeignClient(name = "user-service")
 public interface UserServiceClient {
     @GetMapping("/api/users/{id}")
-    UserDTO getUserById(@PathVariable("id") String id);
+    ApiResponse<UserDTO> getUserById(@PathVariable("id") String id);
 
-    @GetMapping("/api/users")
-    List<UserDTO> getUsersByIds(@RequestParam("ids") List<String> ids);
+    @GetMapping("/api/users/ids")
+    ApiResponse<List<UserDTO>> getUsersByIds(@RequestParam("ids") List<String> ids);
 
     @PostMapping("/api/users")
     ApiResponse<UserDTO> createUser(@RequestBody CreateUserRequest request);

@@ -7,12 +7,16 @@ import org.example.jobseekerservice.dto.JobSeekerWithUserDTO;
 import org.example.jobseekerservice.dto.UserDTO;
 import org.example.jobseekerservice.dto.request.CreateJobSeekerRequest;
 import org.example.jobseekerservice.dto.request.CreateUserRequest;
+import org.example.jobseekerservice.dto.request.UpdateJobSeekerRequest;
 import org.example.jobseekerservice.dto.response.ApiResponse;
 import org.example.jobseekerservice.entity.JobSeeker;
+import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.JobSeekerMapper;
 import org.example.jobseekerservice.repository.JobSeekerRepository;
+import org.example.jobseekerservice.utils.helpers.FileHelper;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,6 +29,12 @@ public class JobSeekerService {
     private final JobSeekerRepository jobSeekerRepository;
     private final UserServiceClient userServiceClient;
     private final JobSeekerMapper jobSeekerMapper;
+    private final FileHelper fileHelper;
+
+    private UserDTO getUserById(String userId) {
+        ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
+        return response.getData();
+    }
 
     public List<JobSeekerWithUserDTO> getJobSeekers() {
         List<JobSeeker> jobSeekers = jobSeekerRepository.findAll();
@@ -33,7 +43,8 @@ public class JobSeekerService {
                 .map(JobSeeker::getUserId)
                 .collect(Collectors.toList());
 
-        List<UserDTO> users = userServiceClient.getUsersByIds(userIds);
+        ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
+        List<UserDTO> users = response.getData();
 
         Map<String, UserDTO> userMap = users.stream()
                 .filter(user -> user.getDeletedAt() == null)
@@ -46,6 +57,19 @@ public class JobSeekerService {
                         userMap.get(js.getUserId())
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public JobSeekerWithUserDTO getJobSeekerById(String id) {
+        JobSeeker jobSeeker = jobSeekerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
+
+        UserDTO user = getUserById(jobSeeker.getUserId());
+
+        if (user.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Job Seeker not found");
+        }
+
+        return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
     }
 
     public JobSeekerWithUserDTO createJobSeeker(CreateJobSeekerRequest request) {
@@ -63,6 +87,15 @@ public class JobSeekerService {
 
             JobSeeker jobSeeker = jobSeekerMapper.toEntity(request);
             jobSeeker.setUserId(user.getId());
+
+            if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+                try {
+                    String imageUrl = fileHelper.uploadFile(request.getImageFile());
+                    jobSeeker.setImage(imageUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to upload image", e);
+                }
+            }
 
             JobSeeker savedJobSeeker = jobSeekerRepository.save(jobSeeker);
 
@@ -82,5 +115,40 @@ public class JobSeekerService {
                 log.error("Failed to roll back user creation: {}", user.getId(), ex);
             }
         }
+    }
+
+    public JobSeekerWithUserDTO updateJobSeeker(String id, UpdateJobSeekerRequest request) {
+        JobSeeker jobSeeker = jobSeekerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
+
+        UserDTO user = getUserById(jobSeeker.getUserId());
+
+        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+            try {
+                if (jobSeeker.getImage() != null && !jobSeeker.getImage().isEmpty()) {
+                    fileHelper.deleteFile(jobSeeker.getImage());
+                }
+
+                String imageUrl = fileHelper.uploadFile(request.getImageFile());
+                jobSeeker.setImage(imageUrl);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to upload image", e);
+            }
+        }
+
+        jobSeekerMapper.toEntity(request, jobSeeker);
+        JobSeeker updatedJobSeeker = jobSeekerRepository.save(jobSeeker);
+
+        return jobSeekerMapper.toDto(jobSeekerMapper.toDto(updatedJobSeeker), user);
+    }
+
+    public void deleteJobSeeker(String id) {
+        JobSeeker jobSeeker = jobSeekerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
+
+        UserDTO user = getUserById(jobSeeker.getUserId());
+
+        jobSeekerRepository.delete(jobSeeker);
+        userServiceClient.deleteUser(user.getId());
     }
 }

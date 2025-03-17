@@ -4,9 +4,11 @@ import org.example.jobseekerservice.dto.JobSeekerDTO;
 import org.example.jobseekerservice.dto.JobSeekerWithUserDTO;
 import org.example.jobseekerservice.dto.UserDTO;
 import org.example.jobseekerservice.dto.request.CreateJobSeekerRequest;
+import org.example.jobseekerservice.dto.request.UpdateJobSeekerRequest;
 import org.example.jobseekerservice.entity.JobSeeker;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -18,6 +20,8 @@ public interface JobSeekerMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "seeking", constant = "false")
     JobSeeker toEntity(CreateJobSeekerRequest request);
+
+    void toEntity(UpdateJobSeekerRequest request, @MappingTarget JobSeeker jobSeeker);
 
     @Mapping(target = "id", source = "jobSeekerDTO.id")
     @Mapping(target = "userId", source = "jobSeekerDTO.userId")

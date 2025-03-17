@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class CreateJobSeekerRequest {
@@ -17,7 +18,7 @@ public class CreateJobSeekerRequest {
     @Pattern(regexp = "^[+]?[0-9]{10}$", message = "Phone number is invalid")
     private String phone;
 
-    private String image;
+    private MultipartFile imageFile;
 
     @NotNull(message = "Gender is required")
     private boolean gender;

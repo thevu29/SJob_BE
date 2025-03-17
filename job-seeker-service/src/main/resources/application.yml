@@ -17,6 +17,12 @@ spring:
     config:
       enabled: false
 
+aws:
+  access-key: AKIATJHQDR5H2YKXUDMY
+  secret-key: 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
+  region: ap-southeast-1
+  bucket-name: sjob-storage
+
 server:
   port: 8082
 
