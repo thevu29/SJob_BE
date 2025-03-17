@@ -19,9 +19,15 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByIds(List<String> ids) {
-        List<UserDTO> users = userService.getUsersByIds(ids);
+    @GetMapping()
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsers() {
+        List<UserDTO> users = userService.getUsers();
+        return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
+    }
+
+    @GetMapping("ids")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByIds(@RequestParam("ids") List<String> ids) {
+        List<UserDTO> users = userService.getUsersByIds(ids != null ? ids : List.of());
         return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
     }
 
@@ -52,7 +58,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserDTO>> softDeleteUser(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<?>> softDeleteUser(@PathVariable String id) {
         userService.softDeleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
     }

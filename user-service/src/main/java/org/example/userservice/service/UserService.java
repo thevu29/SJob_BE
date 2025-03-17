@@ -27,6 +27,10 @@ public class UserService {
     }
 
     public List<UserDTO> getUsersByIds(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
+
         return userRepository.findByIdInAndDeletedAtIsNull(ids).stream()
                 .map(userMapper::toDto)
                 .toList();
@@ -34,7 +38,7 @@ public class UserService {
 
     public UserDTO getUserById(String id) {
         User user = userRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toDto(user);
     }
 
@@ -49,23 +53,9 @@ public class UserService {
         return userMapper.toDto(savedUser);
     }
 
-    public UserDTO updateUser(String id, UpdateUserRequest request) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
-
-        userMapper.updateEntityFromRequest(request, user);
-
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
-
-        User updatedUser = userRepository.save(user);
-        return userMapper.toDto(updatedUser);
-    }
-
     public UserDTO updateUserStatus(String id, boolean active) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setActive(active);
         User updatedUser = userRepository.save(user);
@@ -75,7 +65,7 @@ public class UserService {
 
     public void softDeleteUser(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         user.setDeletedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -83,7 +73,7 @@ public class UserService {
 
     public void deleteUser(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         userRepository.delete(user);
     }
