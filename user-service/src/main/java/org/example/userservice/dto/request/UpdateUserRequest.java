@@ -10,5 +10,4 @@ import org.example.userservice.entity.UserRole;
 @NoArgsConstructor
 public class UpdateUserRequest {
     private String password;
-    private UserRole role;
 }

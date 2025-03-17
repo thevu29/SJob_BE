@@ -39,12 +39,6 @@ public class UserController {
                 .body(ApiResponse.success(createdUser, "User created successfully", HttpStatus.CREATED));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable String id, @Valid @RequestBody UpdateUserRequest request) {
-        UserDTO updatedUser = userService.updateUser(id, request);
-        return ResponseEntity.ok(ApiResponse.success(updatedUser, "User updated successfully", HttpStatus.OK));
-    }
-
     @PatchMapping("/{id}/block")
     public ResponseEntity<ApiResponse<UserDTO>> blockUser(@PathVariable String id) {
         UserDTO blockedUser = userService.updateUserStatus(id, false);
