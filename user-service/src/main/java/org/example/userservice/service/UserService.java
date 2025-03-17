@@ -3,7 +3,6 @@ package org.example.userservice.service;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.dto.UserDTO;
 import org.example.userservice.dto.request.CreateUserRequest;
-import org.example.userservice.dto.request.UpdateUserRequest;
 import org.example.userservice.entity.User;
 import org.example.userservice.exception.ResourceNotFoundException;
 import org.example.userservice.mapper.UserMapper;

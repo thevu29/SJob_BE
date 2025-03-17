@@ -2,11 +2,9 @@ package org.example.userservice.mapper;
 
 import org.example.userservice.dto.UserDTO;
 import org.example.userservice.dto.request.CreateUserRequest;
-import org.example.userservice.dto.request.UpdateUserRequest;
 import org.example.userservice.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -22,6 +20,4 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     User toEntity(CreateUserRequest createUserRequest);
-
-    void updateEntityFromRequest(UpdateUserRequest request, @MappingTarget User user);
 }

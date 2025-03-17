@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.dto.UserDTO;
 import org.example.userservice.dto.request.CreateUserRequest;
-import org.example.userservice.dto.request.UpdateUserRequest;
 import org.example.userservice.dto.response.ApiResponse;
 import org.example.userservice.service.UserService;
 import org.springframework.http.HttpStatus;
