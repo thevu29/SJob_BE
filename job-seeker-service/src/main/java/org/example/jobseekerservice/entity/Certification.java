@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "certifications")
 public class Certification {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

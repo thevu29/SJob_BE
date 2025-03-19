@@ -3,7 +3,7 @@ package org.example.jobseekerservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "educations")
 public class Education {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,10 +30,10 @@ public class Education {
     private String description;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @ManyToOne
     @JoinColumn(name = "job_seeker_id", nullable = false)

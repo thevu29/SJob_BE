@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "experiences")
 public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

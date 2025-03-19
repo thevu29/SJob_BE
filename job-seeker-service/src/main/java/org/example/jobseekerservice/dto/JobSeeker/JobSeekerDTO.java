@@ -1,4 +1,4 @@
-package org.example.jobseekerservice.dto;
+package org.example.jobseekerservice.dto.JobSeeker;
 
 import lombok.Data;
 

@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "resumes")
 public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

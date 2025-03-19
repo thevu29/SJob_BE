@@ -15,6 +15,10 @@ spring:
           uri: lb://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/job-seekers/**
+        - id: job-seeker-service-educations
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/educations/**
 
 server:
   port: 8080

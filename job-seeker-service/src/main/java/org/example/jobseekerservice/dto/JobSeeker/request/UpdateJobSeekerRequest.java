@@ -1,4 +1,4 @@
-package org.example.jobseekerservice.dto.request;
+package org.example.jobseekerservice.dto.JobSeeker.request;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
