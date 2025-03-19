@@ -22,6 +22,7 @@
         <module>user-service</module>
         <module>job-seeker-service</module>
         <module>recruiter-service</module>
+        <module>job-service</module>
     </modules>
 
 </project>
