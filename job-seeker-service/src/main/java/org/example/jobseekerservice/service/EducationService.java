@@ -52,6 +52,10 @@ public class EducationService {
         Education education = educationRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
 
+        if (education.getStartDate().isAfter(education.getEndDate())) {
+            throw new IllegalArgumentException("Start date must be before end date");
+        }
+
         educationMapper.toEntity(request, education);
         Education updatedEducation = educationRepository.save(education);
 
