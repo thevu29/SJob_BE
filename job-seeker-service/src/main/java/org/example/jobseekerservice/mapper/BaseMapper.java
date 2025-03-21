@@ -1,7 +1,12 @@
 package org.example.jobseekerservice.mapper;
 
 import org.example.jobseekerservice.entity.JobSeeker;
+import org.example.jobseekerservice.exception.InvalidDateFormatException;
 import org.mapstruct.Named;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
 
 public interface BaseMapper {
     @Named("jobSeekerIdToJobSeeker")
@@ -20,5 +25,20 @@ public interface BaseMapper {
             return null;
         }
         return jobSeeker.getId();
+    }
+
+
+    @Named("stringToLocalDate")
+    default LocalDate stringToLocalDate(String dateString) {
+        if (dateString == null) {
+            return null;
+        }
+
+        try {
+            YearMonth yearMonth = YearMonth.parse(dateString);
+            return yearMonth.atDay(1);
+        } catch (DateTimeParseException e) {
+            throw new InvalidDateFormatException("Date must be in format yyyy-MM");
+        }
     }
 }

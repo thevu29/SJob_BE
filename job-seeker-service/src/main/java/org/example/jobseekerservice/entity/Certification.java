@@ -2,11 +2,8 @@ package org.example.jobseekerservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -24,18 +21,16 @@ public class Certification {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String organization;
+    @Column(name = "issue_date", nullable = false)
+    private LocalDate issueDate;
 
-    @OneToMany(mappedBy = "certification")
-    @ToString.Exclude
-    private List<JobSeekerCertification> jobSeekerCertifications;
+    @Column(name = "expire_date", nullable = false)
+    private LocalDate expireDate;
 
-    @Column(name = "created_at", nullable = false)
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @Column(name = "image_or_file", nullable = true)
+    private String imageOrFile;
 
-    @Column(name = "updated_at", nullable = false)
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+    @ManyToOne
+    @JoinColumn(name = "job_seeker_id", nullable = false)
+    private JobSeeker jobSeeker;
 }
