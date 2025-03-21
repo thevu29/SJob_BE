@@ -26,18 +26,4 @@ public interface EducationMapper extends BaseMapper {
     @Mapping(target = "endDate", source = "endDate", qualifiedByName = "stringToLocalDate")
     @Mapping(target = "jobSeeker", ignore = true)
     void toEntity(UpdateEducationRequest request, @MappingTarget Education education);
-
-    @Named("stringToLocalDate")
-    default LocalDate stringToLocalDate(String dateString) {
-        if (dateString == null) {
-            return null;
-        }
-
-        try {
-            YearMonth yearMonth = YearMonth.parse(dateString);
-            return yearMonth.atDay(1);
-        } catch (DateTimeParseException e) {
-            throw new InvalidDateFormatException("Date must be in format yyyy-MM");
-        }
-    }
 }
