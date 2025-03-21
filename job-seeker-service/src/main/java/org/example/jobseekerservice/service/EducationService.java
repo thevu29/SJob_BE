@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.jobseekerservice.dto.Education.EducationDTO;
 import org.example.jobseekerservice.dto.Education.request.CreateEducationRequest;
 import org.example.jobseekerservice.dto.Education.request.UpdateEducationRequest;
-import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.jobseekerservice.entity.Education;
 import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.EducationMapper;
-import org.example.jobseekerservice.mapper.JobSeekerMapper;
 import org.example.jobseekerservice.repository.EducationRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +19,6 @@ public class EducationService {
     private final JobSeekerService jobSeekerService;
     private final EducationRepository educationRepository;
     private final EducationMapper educationMapper;
-    private final JobSeekerMapper jobSeekerMapper;
 
     public List<EducationDTO> getEducations() {
         List<Education> educations = educationRepository.findAll();
@@ -38,11 +35,7 @@ public class EducationService {
     }
 
     public EducationDTO createEducation(CreateEducationRequest request) {
-        try {
-            jobSeekerService.getJobSeekerById(request.getJobSeekerId());
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        }
+        jobSeekerService.getJobSeekerById(request.getJobSeekerId());
 
         Education education = educationMapper.toEntity(request);
 
