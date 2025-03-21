@@ -1,6 +1,7 @@
 package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.jobseekerservice.dto.Skill.SkillDTO;
 import org.example.jobseekerservice.dto.Skill.request.CreateSkillRequest;
 import org.example.jobseekerservice.dto.Skill.request.UpdateSkillRequest;
@@ -22,6 +23,16 @@ public class SkillService {
 
     public List<SkillDTO> getAllSkills() {
         List<Skill> skills = skillRepository.findAll();
+
+        return skills.stream()
+                .map(skillMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<SkillDTO> getJobSeekerSkills(String jobSeekerId) {
+        JobSeekerWithUserDTO jobSeeker = jobSeekerService.getJobSeekerById(jobSeekerId);
+
+        List<Skill> skills = skillRepository.findByJobSeekerId(jobSeeker.getId());
 
         return skills.stream()
                 .map(skillMapper::toDto)

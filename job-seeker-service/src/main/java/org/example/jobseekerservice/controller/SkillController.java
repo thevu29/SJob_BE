@@ -28,6 +28,15 @@ public class SkillController {
         );
     }
 
+    @GetMapping("job-seeker/{jobSeekerId}")
+    public ResponseEntity<ApiResponse<List<SkillDTO>>> getJobSeekerSkills(@PathVariable String jobSeekerId) {
+        List<SkillDTO> skills = skillService.getJobSeekerSkills(jobSeekerId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(skills, "Skill fetched successfully", HttpStatus.OK)
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<SkillDTO>> getSkillById(@PathVariable String id) {
         SkillDTO skill = skillService.getSkillById(id);

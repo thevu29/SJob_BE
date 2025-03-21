@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.jobseekerservice.dto.Education.EducationDTO;
 import org.example.jobseekerservice.dto.Education.request.CreateEducationRequest;
 import org.example.jobseekerservice.dto.Education.request.UpdateEducationRequest;
+import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.jobseekerservice.entity.Education;
 import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.EducationMapper;
@@ -22,6 +23,16 @@ public class EducationService {
 
     public List<EducationDTO> getEducations() {
         List<Education> educations = educationRepository.findAll();
+        return educations.stream()
+                .map(educationMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<EducationDTO> getJobSeekerEducations(String jobSeekerId) {
+        JobSeekerWithUserDTO jobSeeker = jobSeekerService.getJobSeekerById(jobSeekerId);
+
+        List<Education> educations = educationRepository.findByJobSeekerId(jobSeeker.getId());
+
         return educations.stream()
                 .map(educationMapper::toDto)
                 .collect(Collectors.toList());

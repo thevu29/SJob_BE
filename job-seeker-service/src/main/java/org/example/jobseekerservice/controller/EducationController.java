@@ -28,6 +28,15 @@ public class EducationController {
         );
     }
 
+    @GetMapping("job-seeker/{jobSeekerId}")
+    public ResponseEntity<ApiResponse<List<EducationDTO>>> getJobSeekerEducations(@PathVariable String jobSeekerId) {
+        List<EducationDTO> educations = educationService.getJobSeekerEducations(jobSeekerId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(educations, "Educations fetched successfully", HttpStatus.OK)
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<EducationDTO>> getEducationById(@PathVariable String id) {
         EducationDTO education = educationService.getEducationById(id);
