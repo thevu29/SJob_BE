@@ -29,7 +29,7 @@ public class EducationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<EducationDTO>> getEducation(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<EducationDTO>> getEducationById(@PathVariable String id) {
         EducationDTO education = educationService.getEducationById(id);
 
         return ResponseEntity.ok(

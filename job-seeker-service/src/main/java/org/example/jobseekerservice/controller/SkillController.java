@@ -29,7 +29,7 @@ public class SkillController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<SkillDTO>> getSkill(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<SkillDTO>> getSkillById(@PathVariable String id) {
         SkillDTO skill = skillService.getSkillById(id);
 
         return ResponseEntity.ok(

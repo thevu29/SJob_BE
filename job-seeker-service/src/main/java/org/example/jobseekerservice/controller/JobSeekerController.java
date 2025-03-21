@@ -28,7 +28,7 @@ public class JobSeekerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> getJobSeeker(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> getJobSeekerById(@PathVariable String id) {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.getJobSeekerById(id);
         return ResponseEntity.ok(
                 ApiResponse.success(jobSeeker, "Job Seeker fetched successfully", HttpStatus.OK)
