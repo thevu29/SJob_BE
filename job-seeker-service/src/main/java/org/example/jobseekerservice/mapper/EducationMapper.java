@@ -4,7 +4,6 @@ import org.example.jobseekerservice.dto.Education.EducationDTO;
 import org.example.jobseekerservice.dto.Education.request.CreateEducationRequest;
 import org.example.jobseekerservice.dto.Education.request.UpdateEducationRequest;
 import org.example.jobseekerservice.entity.Education;
-import org.example.jobseekerservice.entity.JobSeeker;
 import org.example.jobseekerservice.exception.InvalidDateFormatException;
 import org.mapstruct.*;
 
@@ -16,8 +15,6 @@ import java.time.format.DateTimeParseException;
 public interface EducationMapper extends BaseMapper {
     @Mapping(target = "jobSeekerId", source = "jobSeeker", qualifiedByName = "jobSeekerToJobSeekerId")
     EducationDTO toDto(Education education);
-
-    Education toEntity(EducationDTO educationDTO);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "startDate", source = "startDate", qualifiedByName = "stringToLocalDate")
