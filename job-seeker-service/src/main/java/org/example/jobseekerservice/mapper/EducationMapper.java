@@ -4,12 +4,7 @@ import org.example.jobseekerservice.dto.Education.EducationDTO;
 import org.example.jobseekerservice.dto.Education.request.CreateEducationRequest;
 import org.example.jobseekerservice.dto.Education.request.UpdateEducationRequest;
 import org.example.jobseekerservice.entity.Education;
-import org.example.jobseekerservice.exception.InvalidDateFormatException;
 import org.mapstruct.*;
-
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.time.format.DateTimeParseException;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface EducationMapper extends BaseMapper {
