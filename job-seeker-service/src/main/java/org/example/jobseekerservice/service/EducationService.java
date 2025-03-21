@@ -38,11 +38,14 @@ public class EducationService {
     }
 
     public EducationDTO createEducation(CreateEducationRequest request) {
+        try {
+            jobSeekerService.getJobSeekerById(request.getJobSeekerId());
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        }
+
         Education education = educationMapper.toEntity(request);
 
-        if (jobSeekerService.getJobSeekerById(request.getJobSeekerId()) == null) {
-            throw new ResourceNotFoundException("Job seeker not found");
-        }
         if (education.getStartDate().isAfter(education.getEndDate())) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
