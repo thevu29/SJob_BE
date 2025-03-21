@@ -13,7 +13,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-public interface EducationMapper {
+public interface EducationMapper extends BaseMapper {
     @Mapping(target = "jobSeekerId", source = "jobSeeker", qualifiedByName = "jobSeekerToJobSeekerId")
     EducationDTO toDto(Education education);
 
@@ -42,23 +42,5 @@ public interface EducationMapper {
         } catch (DateTimeParseException e) {
             throw new InvalidDateFormatException("Date must be in format yyyy-MM");
         }
-    }
-
-    @Named("jobSeekerIdToJobSeeker")
-    default JobSeeker jobSeekerIdToJobSeeker(String jobSeekerId) {
-        if (jobSeekerId == null) {
-            return null;
-        }
-        JobSeeker jobSeeker = new JobSeeker();
-        jobSeeker.setId(jobSeekerId);
-        return jobSeeker;
-    }
-
-    @Named("jobSeekerToJobSeekerId")
-    default String jobSeekerToJobSeekerId(JobSeeker jobSeeker) {
-        if (jobSeeker == null) {
-            return null;
-        }
-        return jobSeeker.getId();
     }
 }
