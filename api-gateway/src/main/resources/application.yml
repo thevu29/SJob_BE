@@ -31,6 +31,10 @@ spring:
           uri: lb://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/experiences/**
+        - id: job-seeker-service-resumes
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/resumes/**
 
 server:
   port: 8080
