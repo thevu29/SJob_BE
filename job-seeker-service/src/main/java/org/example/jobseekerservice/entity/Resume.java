@@ -2,6 +2,7 @@ package org.example.jobseekerservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "resumes")
 public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -20,18 +22,18 @@ public class Resume {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String url;
+
     @Column(name = "uploaded_at", nullable = false)
+    @CreationTimestamp
     private LocalDateTime uploadedAt;
 
     @Column(nullable = false)
-    private boolean main;
+    @Builder.Default
+    private boolean main = false;
 
     @ManyToOne
     @JoinColumn(name = "job_seeker_id", nullable = false)
     private JobSeeker jobSeeker;
-
-    @PrePersist
-    public void prePersist() {
-        this.uploadedAt = LocalDateTime.now();
-    }
 }

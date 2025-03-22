@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "job_seekers")
 public class JobSeeker {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -39,23 +40,23 @@ public class JobSeeker {
     @Builder.Default
     private boolean seeking = false;
 
-    @OneToMany(mappedBy = "jobSeeker")
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Resume> resumes;
 
-    @OneToMany(mappedBy = "jobSeeker")
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private List<JobSeekerCertification> jobSeekerCertifications;
+    private List<Certification> certifications;
 
-    @OneToMany(mappedBy = "jobSeeker")
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<Skill> skills;
 
-    @OneToMany(mappedBy = "jobSeeker")
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private List<Education> jobSeekerEducations;
+    private List<Education> educations;
 
-    @OneToMany(mappedBy = "jobSeeker")
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
-    private List<Experience> jobSeekerExperiences;
+    private List<Experience> experiences;
 }

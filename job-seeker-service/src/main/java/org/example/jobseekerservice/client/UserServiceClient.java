@@ -1,7 +1,7 @@
 package org.example.jobseekerservice.client;
 
-import org.example.jobseekerservice.dto.UserDTO;
-import org.example.jobseekerservice.dto.request.CreateUserRequest;
+import org.example.jobseekerservice.dto.JobSeeker.UserDTO;
+import org.example.jobseekerservice.dto.JobSeeker.request.CreateUserRequest;
 import org.example.jobseekerservice.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;

@@ -1,10 +1,10 @@
 package org.example.jobseekerservice.mapper;
 
-import org.example.jobseekerservice.dto.JobSeekerDTO;
-import org.example.jobseekerservice.dto.JobSeekerWithUserDTO;
-import org.example.jobseekerservice.dto.UserDTO;
-import org.example.jobseekerservice.dto.request.CreateJobSeekerRequest;
-import org.example.jobseekerservice.dto.request.UpdateJobSeekerRequest;
+import org.example.jobseekerservice.dto.JobSeeker.JobSeekerDTO;
+import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.jobseekerservice.dto.JobSeeker.UserDTO;
+import org.example.jobseekerservice.dto.JobSeeker.request.CreateJobSeekerRequest;
+import org.example.jobseekerservice.dto.JobSeeker.request.UpdateJobSeekerRequest;
 import org.example.jobseekerservice.entity.JobSeeker;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

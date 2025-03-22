@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,6 +91,13 @@ public class GlobalExceptionHandler {
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(response);
+        } else if (errorMessage.contains("LocalDate")) {
+            ApiResponse<Object> response = ApiResponse.error(
+                    "Invalid date format. Please use ISO format (yyyy-MM-dd)",
+                    HttpStatus.BAD_REQUEST);
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(response);
         }
 
         ApiResponse<Object> response = ApiResponse.error(
@@ -97,6 +105,30 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(InvalidDateFormatException.class)
+    public ResponseEntity<ApiResponse<Object>> handleInvalidDateFormatException(InvalidDateFormatException ex) {
+        ApiResponse<Object> response = ApiResponse.error(
+                ex.getMessage(),
+                HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDateTimeParseException(DateTimeParseException ex) {
+        log.error("Invalid date format: {}", ex.getMessage());
+
+        ApiResponse<Object> response = ApiResponse.error(
+                "Invalid date format. Please use ISO format (yyyy-MM-dd)",
+                HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 }

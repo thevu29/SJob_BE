@@ -10,12 +10,13 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "skills")
 public class Skill {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne

@@ -3,6 +3,8 @@ package org.example.jobseekerservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -10,6 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @ToString
+@Table(name = "experiences")
 public class Experience {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -21,7 +24,6 @@ public class Experience {
     @Column(nullable = false)
     private String position;
 
-    @Column(nullable = false)
     private String location;
 
     @Enumerated(EnumType.STRING)
@@ -35,10 +37,10 @@ public class Experience {
     private EmployeeType employeeType;
 
     @Column(name = "start_date", nullable = false)
-    private String startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date", nullable = false)
-    private String endDate;
+    private LocalDate endDate;
 
     @ManyToOne
     @JoinColumn(name = "job_seeker_id", nullable = false)
