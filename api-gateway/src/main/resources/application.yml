@@ -15,6 +15,14 @@ spring:
           uri: lb://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/job-seekers/**
+        - id: recruiter-service
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/api/recruiters/**
+        - id: job-service
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/jobs/**
         - id: job-seeker-service-educations
           uri: lb://JOB-SEEKER-SERVICE
           predicates:
