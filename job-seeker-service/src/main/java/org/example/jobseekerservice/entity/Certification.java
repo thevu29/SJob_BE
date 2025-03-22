@@ -27,7 +27,7 @@ public class Certification {
     @Column(name = "expire_date", nullable = false)
     private LocalDate expireDate;
 
-    @Column(name = "image_or_file", nullable = true)
+    @Column(name = "image_or_file")
     private String imageOrFile;
 
     @ManyToOne
