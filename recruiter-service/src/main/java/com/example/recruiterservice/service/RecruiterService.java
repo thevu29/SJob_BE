@@ -56,4 +56,8 @@ public class RecruiterService {
             }
         }
     }
+
+    public boolean checkIfRecruiterExists(String id) {
+        return recruiterRepository.existsById(id);
+    }
 }

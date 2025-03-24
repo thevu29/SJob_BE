@@ -28,4 +28,9 @@ public class RecruiterController {
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(recruiter, "Recruiter created successfully", HttpStatus.CREATED));
     }
+
+    @GetMapping("/exists/{id}")
+    public boolean checkIfRecruiterExists(@PathVariable String id) {
+        return recruiterService.checkIfRecruiterExists(id);
+    }
 }
