@@ -10,11 +10,15 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/api/users/**
+            - Path=/user-service/v3/api-docs/**
+          filters:
+            - RewritePath=/user-service(?<segment>/?.*), $\{segment}
         - id: job-seeker-service
           uri: lb://JOB-SEEKER-SERVICE
           predicates:
-            - Path=/api/job-seekers/**
+            - Path=/job-seeker-service/v3/api-docs/**
+          filters:
+            - RewritePath=/job-seeker-service(?<segment>/?.*), $\{segment}
         - id: recruiter-service
           uri: lb://RECRUITER-SERVICE
           predicates:
@@ -43,6 +47,14 @@ spring:
           uri: lb://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/resumes/**
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Job Seeker Service
+        url: /job-seeker-service/v3/api-docs
 
 server:
   port: 8080

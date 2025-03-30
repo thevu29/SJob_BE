@@ -3,14 +3,17 @@ spring:
     name: user-service
   data:
     mongodb:
-      uri: mongodb+srv://thevu29:thevu29@sjob.lgiue.mongodb.net/?retryWrites=true&w=majority&appName=SJob
+      uri: ${MONGO_URI}
       database: user-service-db
-  cloud:
-    config:
-      enabled: false
+  config:
+    import: optional:classpath:application.dev.properties
 
 server:
   port: 8081
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
 
 mongock:
   migration-scan-package: org.example.userservice.migration

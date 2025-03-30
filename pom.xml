@@ -18,7 +18,6 @@
     <modules>
         <module>discovery-server</module>
         <module>api-gateway</module>
-        <module>config-server</module>
         <module>user-service</module>
         <module>job-seeker-service</module>
         <module>recruiter-service</module>
