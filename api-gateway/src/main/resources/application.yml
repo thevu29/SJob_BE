@@ -7,18 +7,26 @@ spring:
         locator:
           enabled: true
       routes:
-        - id: user-service
+        - id: user-service-api-docs
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/v3/api-docs/**
           filters:
             - RewritePath=/user-service(?<segment>/?.*), $\{segment}
-        - id: job-seeker-service
+        - id: user-service-api
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+        - id: job-seeker-service-api-docs
           uri: lb://JOB-SEEKER-SERVICE
           predicates:
             - Path=/job-seeker-service/v3/api-docs/**
           filters:
             - RewritePath=/job-seeker-service(?<segment>/?.*), $\{segment}
+        - id: job-seeker-service
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/job-seekers/**
         - id: recruiter-service
           uri: lb://RECRUITER-SERVICE
           predicates:
@@ -55,6 +63,11 @@ springdoc:
         url: /user-service/v3/api-docs
       - name: Job Seeker Service
         url: /job-seeker-service/v3/api-docs
+    config-url: /v3/api-docs/swagger-config
+    disable-swagger-default-url: true
+    path: /swagger-ui.html
+  api-docs:
+    enabled: true
 
 server:
   port: 8080
