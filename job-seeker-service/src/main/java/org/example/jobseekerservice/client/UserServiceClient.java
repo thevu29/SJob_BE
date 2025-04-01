@@ -19,6 +19,6 @@ public interface UserServiceClient {
     @PostMapping("/api/users")
     ApiResponse<UserDTO> createUser(@RequestBody CreateUserRequest request);
 
-    @DeleteMapping("/api/users/{id}/hard")
+    @DeleteMapping("/api/users/hard/{id}")
     void deleteUser(@PathVariable("id") String id);
 }

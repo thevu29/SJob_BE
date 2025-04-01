@@ -7,6 +7,10 @@ import org.example.userservice.entity.User;
 import org.example.userservice.exception.ResourceNotFoundException;
 import org.example.userservice.mapper.UserMapper;
 import org.example.userservice.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +24,34 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
+    private String escapeRegexSpecialChars(String input) {
+        if (input == null) return "";
+        return input.replaceAll("[-\\[\\]{}()*+?.,\\\\^$|#\\s]", "\\\\$0");
+    }
+
     public List<UserDTO> getUsers() {
         List<User> users = userRepository.findAllByDeletedAtIsNull();
         return users.stream().map(userMapper::toDto).toList();
+    }
+
+    public Page<UserDTO> findAdmins(
+            String emailPattern,
+            Boolean active,
+            int page,
+            int size,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        String sanitizedPattern = escapeRegexSpecialChars(emailPattern);
+
+        boolean filterByStatus = active != null;
+        boolean isActive = Boolean.TRUE.equals(active);
+
+        Page<User> userPage =  userRepository.findAdmins(sanitizedPattern, isActive, filterByStatus, pageable);
+
+        return userPage.map(userMapper::toDto);
     }
 
     public List<UserDTO> getUsersByIds(List<String> ids) {

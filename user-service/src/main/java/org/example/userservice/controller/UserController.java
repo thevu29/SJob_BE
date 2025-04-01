@@ -6,6 +6,8 @@ import org.example.userservice.dto.UserDTO;
 import org.example.userservice.dto.request.CreateUserRequest;
 import org.example.userservice.dto.response.ApiResponse;
 import org.example.userservice.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +20,23 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping()
-    public ResponseEntity<ApiResponse<List<UserDTO>>> getUsers() {
+    @GetMapping("all")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> getAllUsers() {
         List<UserDTO> users = userService.getUsers();
         return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findAdmins(
+            @RequestParam(value = "q", required = false) String emailPattern,
+            @RequestParam(value = "status", required = false) Boolean active,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
+    ) {
+        Page<UserDTO> pages = userService.findAdmins(emailPattern, active, page - 1, size, sortBy, direction);
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Users fetched successfully"));
     }
 
     @GetMapping("ids")
@@ -44,16 +59,16 @@ public class UserController {
                 .body(ApiResponse.success(createdUser, "User created successfully", HttpStatus.CREATED));
     }
 
-    @PutMapping("/{id}/block")
+    @PutMapping("/block/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> blockUser(@PathVariable String id) {
         UserDTO blockedUser = userService.updateUserStatus(id, false);
         return ResponseEntity.ok(ApiResponse.success(blockedUser, "User blocked successfully", HttpStatus.OK));
     }
 
-    @PutMapping("/{id}/unblock")
-    public ResponseEntity<ApiResponse<UserDTO>> unblockUser(@PathVariable String id) {
-        UserDTO unblockedUser = userService.updateUserStatus(id, true);
-        return ResponseEntity.ok(ApiResponse.success(unblockedUser, "User unblocked successfully", HttpStatus.OK));
+    @PutMapping("/activate/{id}")
+    public ResponseEntity<ApiResponse<UserDTO>> activateUser(@PathVariable String id) {
+        UserDTO activatedUser = userService.updateUserStatus(id, true);
+        return ResponseEntity.ok(ApiResponse.success(activatedUser, "User activated successfully", HttpStatus.OK));
     }
 
     @DeleteMapping("/{id}")
@@ -62,7 +77,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
     }
 
-    @DeleteMapping("/{id}/hard")
+    @DeleteMapping("/hard/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
