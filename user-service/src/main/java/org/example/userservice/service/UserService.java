@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.userservice.dto.UserDTO;
 import org.example.userservice.dto.request.CreateUserRequest;
 import org.example.userservice.entity.User;
+import org.example.userservice.entity.UserRole;
 import org.example.userservice.exception.ResourceNotFoundException;
 import org.example.userservice.mapper.UserMapper;
 import org.example.userservice.repository.UserRepository;
@@ -34,7 +35,18 @@ public class UserService {
         return users.stream().map(userMapper::toDto).toList();
     }
 
-    public Page<UserDTO> findAdmins(
+    public List<UserDTO> findUsers(String email, String role, Boolean active) {
+        String sanitizedEmail = escapeRegexSpecialChars(email);
+        UserRole userRole = UserRole.valueOf(role);
+
+        boolean filterByActive = active != null;
+        boolean isActive = Boolean.TRUE.equals(active);
+
+        List<User> users = userRepository.findUsers(sanitizedEmail, userRole, isActive, filterByActive);
+        return users.stream().map(userMapper::toDto).toList();
+    }
+
+    public Page<UserDTO> findPagedAdmins(
             String emailPattern,
             Boolean active,
             int page,
@@ -44,6 +56,7 @@ public class UserService {
     ) {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
+
         String sanitizedPattern = escapeRegexSpecialChars(emailPattern);
 
         boolean filterByStatus = active != null;

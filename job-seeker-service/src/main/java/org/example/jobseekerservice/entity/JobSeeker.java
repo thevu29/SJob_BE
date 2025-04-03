@@ -2,7 +2,10 @@ package org.example.jobseekerservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -12,13 +15,23 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ToString
-@Table(name = "job_seekers")
+@Table(
+        name = "job_seekers",
+        indexes = {
+        @Index(name = "idx_jobseeker_userid", columnList = "user_id"),
+        @Index(name = "idx_jobseeker_name", columnList = "name"),
+        @Index(name = "idx_jobseeker_phone", columnList = "phone"),
+        @Index(name = "idx_jobseeker_seeking", columnList = "seeking"),
+        @Index(name = "idx_jobseeker_address", columnList = "address"),
+        @Index(name = "idx_jobseeker_search", columnList = "name, phone, address")
+    }
+)
 public class JobSeeker {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(unique = true, nullable = false, name = "user_id")
+    @Column(unique = true, nullable = false)
     private String userId;
 
     @Column(nullable = false)
@@ -39,6 +52,14 @@ public class JobSeeker {
 
     @Builder.Default
     private boolean seeking = false;
+
+    @Column(nullable = false)
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude

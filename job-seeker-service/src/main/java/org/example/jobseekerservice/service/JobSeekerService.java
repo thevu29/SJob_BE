@@ -14,9 +14,16 @@ import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.JobSeekerMapper;
 import org.example.jobseekerservice.repository.JobSeekerRepository;
 import org.example.jobseekerservice.utils.helpers.FileHelper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -31,12 +38,116 @@ public class JobSeekerService {
     private final JobSeekerMapper jobSeekerMapper;
     private final FileHelper fileHelper;
 
+    private String escapeRegexSpecialChars(String input) {
+        if (input == null) return "";
+        return input.replaceAll("[-\\[\\]{}()*+?.,\\\\^$|#\\s]", "\\\\$0");
+    }
+
     private UserDTO getUserById(String userId) {
         ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
         return response.getData();
     }
 
-    public List<JobSeekerWithUserDTO> getJobSeekers() {
+    private Map<String, UserDTO> fetchAndMapUsers(List<String> userIds) {
+        if (userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
+
+        if (response != null && response.getData() != null) {
+            return response.getData().stream()
+                    .collect(Collectors.toMap(
+                            UserDTO::getId,
+                            Function.identity(),
+                            (existing, replacement) -> existing
+                    ));
+        }
+
+        return Collections.emptyMap();
+    }
+
+    private List<JobSeekerWithUserDTO> mapToJobSeekerWithUserDTOs(
+            List<JobSeeker> jobSeekers,
+            Map<String, UserDTO> userMap
+    ) {
+        return jobSeekers.stream()
+                .filter(js -> js.getUserId() != null && userMap.containsKey(js.getUserId()))
+                .map(js -> jobSeekerMapper.toDto(
+                        jobSeekerMapper.toDto(js),
+                        userMap.get(js.getUserId())
+                ))
+                .toList();
+    }
+
+    private List<String> fetchMatchingUserIds(String query, Boolean active) {
+        String sanitizedPattern = escapeRegexSpecialChars(query);
+
+        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findUsers(
+                sanitizedPattern,
+                "JOB_SEEKER",
+                active
+        );
+
+        if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
+            return usersResponse.getData().stream()
+                    .filter(user -> user.getDeletedAt() == null)
+                    .map(UserDTO::getId)
+                    .toList();
+        }
+
+        return Collections.emptyList();
+    }
+
+    public Page<JobSeekerWithUserDTO> findPagedJobSeekers(
+            String query,
+            Boolean active,
+            Boolean seeking,
+            int page,
+            int size,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        String columnName = switch (sortBy) {
+            case "name" -> "name";
+            case "updatedAt" -> "updated_at";
+            case "createdAt" -> "created_at";
+            default -> "id";
+        };
+
+        Sort sort = Sort.by(direction, columnName);
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        List<String> matchingUserIds = fetchMatchingUserIds(query, active);
+
+        System.out.println("userIds is empty: " + matchingUserIds.isEmpty());
+
+        Page<JobSeeker> jobSeekers = jobSeekerRepository.findBySearchCriteria(
+                query,
+                matchingUserIds,
+                seeking,
+                pageable
+        );
+
+        System.out.println("jobSeekers is empty: " + jobSeekers.getContent());
+
+        if (jobSeekers.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
+        List<String> jobSeekerUserIds = jobSeekers.getContent().stream()
+                .map(JobSeeker::getUserId)
+                .distinct()
+                .toList();
+
+        Map<String, UserDTO> userMap = fetchAndMapUsers(jobSeekerUserIds);
+
+        List<JobSeekerWithUserDTO> content = mapToJobSeekerWithUserDTOs(jobSeekers.getContent(), userMap);
+
+        return new PageImpl<>(content, pageable, jobSeekers.getTotalElements());
+    }
+
+    public List<JobSeekerWithUserDTO> getAllJobSeekers() {
         List<JobSeeker> jobSeekers = jobSeekerRepository.findAll();
 
         List<String> userIds = jobSeekers.stream()
@@ -47,16 +158,9 @@ public class JobSeekerService {
         List<UserDTO> users = response.getData();
 
         Map<String, UserDTO> userMap = users.stream()
-                .filter(user -> user.getDeletedAt() == null)
                 .collect(Collectors.toMap(UserDTO::getId, Function.identity()));
 
-        return jobSeekers.stream()
-                .filter(js -> userMap.containsKey(js.getUserId()))
-                .map(js -> jobSeekerMapper.toDto(
-                        jobSeekerMapper.toDto(js),
-                        userMap.get(js.getUserId())
-                ))
-                .collect(Collectors.toList());
+        return mapToJobSeekerWithUserDTOs(jobSeekers, userMap);
     }
 
     public JobSeekerWithUserDTO getJobSeekerById(String id) {

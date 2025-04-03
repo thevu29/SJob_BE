@@ -16,7 +16,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="job-seeker-service-db@localhost" uuid="0ed06791-cb2f-460b-9e3b-e5e64b16c2af">
+    <data-source source="LOCAL" name="job-seeker-service-db@localhost" uuid="1283ad51-7809-43b7-98d4-60f5868896e1">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>

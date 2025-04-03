@@ -25,7 +25,7 @@ public class Resume {
     @Column(nullable = false)
     private String url;
 
-    @Column(name = "uploaded_at", nullable = false)
+    @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime uploadedAt;
 
@@ -34,6 +34,6 @@ public class Resume {
     private boolean main = false;
 
     @ManyToOne
-    @JoinColumn(name = "job_seeker_id", nullable = false)
+    @JoinColumn(nullable = false)
     private JobSeeker jobSeeker;
 }

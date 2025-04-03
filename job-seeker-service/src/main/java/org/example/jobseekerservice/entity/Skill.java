@@ -20,6 +20,6 @@ public class Skill {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "job_seeker_id", nullable = false)
+    @JoinColumn(nullable = false)
     private JobSeeker jobSeeker;
 }

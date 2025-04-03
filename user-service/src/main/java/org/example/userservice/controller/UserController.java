@@ -27,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findAdmins(
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findPagedAdmins(
             @RequestParam(value = "q", required = false) String emailPattern,
             @RequestParam(value = "status", required = false) Boolean active,
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -35,8 +35,18 @@ public class UserController {
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {
-        Page<UserDTO> pages = userService.findAdmins(emailPattern, active, page - 1, size, sortBy, direction);
+        Page<UserDTO> pages = userService.findPagedAdmins(emailPattern, active, page - 1, size, sortBy, direction);
         return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Users fetched successfully"));
+    }
+
+    @GetMapping("find")
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findUsers(
+            @RequestParam(value = "email", defaultValue = "") String email,
+            @RequestParam(value = "role", defaultValue = "JOB_SEEKER") String role,
+            @RequestParam(value = "active", required = false) Boolean active
+    ) {
+        List<UserDTO> users = userService.findUsers(email, role, active);
+        return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
     }
 
     @GetMapping("ids")

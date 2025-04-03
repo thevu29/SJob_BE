@@ -16,6 +16,13 @@ public interface UserServiceClient {
     @GetMapping("/api/users/ids")
     ApiResponse<List<UserDTO>> getUsersByIds(@RequestParam("ids") List<String> ids);
 
+    @GetMapping("/api/users/find")
+    ApiResponse<List<UserDTO>> findUsers(
+            @RequestParam(value = "email", defaultValue = "") String email,
+            @RequestParam(value = "role", defaultValue = "JOB_SEEKER") String role,
+            @RequestParam(value = "active", required = false) Boolean active
+    );
+
     @PostMapping("/api/users")
     ApiResponse<UserDTO> createUser(@RequestBody CreateUserRequest request);
 
