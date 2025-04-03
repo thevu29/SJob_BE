@@ -1,5 +1,6 @@
 package com.example.jobservice.mapper;
 
+import com.example.jobservice.entity.Field;
 import com.example.jobservice.exception.InvalidDateFormatException;
 import org.mapstruct.Named;
 
@@ -18,5 +19,22 @@ public interface BaseMapper {
         } catch (DateTimeParseException e) {
             throw new InvalidDateFormatException("Date must be in format yyyy-MM-dd");
         }
+    }
+
+    @Named("fieldToFieldId")
+    default String fieldToFieldId(Field field) {
+        if (field == null) {
+            return null;
+        }
+        return field.getId();
+    }
+    @Named("fieldIdToField")
+    default Field fieldToFieldId(String fieldId) {
+        if (fieldId == null) {
+            return null;
+        }
+        Field field = new Field();
+        field.setId(fieldId);
+        return field;
     }
 }

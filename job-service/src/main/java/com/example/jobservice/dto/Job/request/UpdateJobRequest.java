@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class UpdateJobRequest {
@@ -30,5 +31,7 @@ public class UpdateJobRequest {
     private String education;
 
     private String experience;
+
+    private String[] fieldDetails;
 
 }

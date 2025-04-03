@@ -1,10 +1,12 @@
 package com.example.jobservice.dto.Job.request;
 
+import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 public class CreateJobRequest {
@@ -41,4 +43,6 @@ public class CreateJobRequest {
     @NotBlank(message = "Experience is required")
     private String experience;
 
+    @NotNull(message = "Field Detail is required")
+    private String[] fieldDetails;
 }

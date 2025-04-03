@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -63,5 +65,9 @@ public class Job {
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private JobStatus status = JobStatus.OPEN;
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private Set<JobField> jobFields = new HashSet<>();
 
 }

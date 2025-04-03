@@ -13,14 +13,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/jobs")
 @RequiredArgsConstructor
 public class JobController {
     private final JobService jobService;
     @GetMapping
-    public String getJobs() {
-        return "Jobs";
+    public ResponseEntity<ApiResponse<List<JobDTO>>> getAllJobs() {
+        List<JobDTO> jobDTOList = jobService.getJobs();
+        return ResponseEntity.ok(
+                ApiResponse.success(jobDTOList, "Jobs fetched successfully", HttpStatus.OK)
+        );
     }
 
     @PostMapping("/recruiters/{recruiterId}")
@@ -30,6 +35,14 @@ public class JobController {
                 status(HttpStatus.CREATED)
                 .body(ApiResponse.success(job, "Job created successfully", HttpStatus.CREATED));
 
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<JobDTO>> getJob(@PathVariable String id) {
+        JobDTO job = jobService.getJob(id);
+        return ResponseEntity.ok(
+                ApiResponse.success(job, "Job fetched successfully", HttpStatus.OK)
+        );
     }
 
     @PatchMapping("/{id}")

@@ -2,9 +2,9 @@ spring:
   application:
     name: job-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/job-service-db
-    username: postgres
-    password: password
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:job-service-db}?currentSchema=job_service
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:123}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -13,9 +13,17 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: job_service
   cloud:
     config:
       enabled: false
+  config:
+    import: optional:classpath:application.dev.properties
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
 server:
     port: 8084
 

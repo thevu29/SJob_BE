@@ -35,6 +35,14 @@ spring:
           uri: lb://JOB-SERVICE
           predicates:
             - Path=/api/jobs/**
+        - id: job-service-fields
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/fields/**
+        - id: job-service-field-details
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/field-details/**
         - id: job-seeker-service-educations
           uri: lb://JOB-SEEKER-SERVICE
           predicates:

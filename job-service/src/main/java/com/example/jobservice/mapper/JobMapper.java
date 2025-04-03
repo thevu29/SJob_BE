@@ -23,4 +23,6 @@ public interface JobMapper {
     Job toEntity(CreateJobRequest createJobRequest);
 
     void updateJobFromRequest(UpdateJobRequest updateJobRequest, @MappingTarget Job job);
+
+
 }
