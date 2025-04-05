@@ -57,6 +57,7 @@ public class JobSeekerService {
 
         if (response != null && response.getData() != null) {
             return response.getData().stream()
+                    .filter(user -> user.getDeletedAt() == null)
                     .collect(Collectors.toMap(
                             UserDTO::getId,
                             Function.identity(),
@@ -120,8 +121,6 @@ public class JobSeekerService {
 
         List<String> matchingUserIds = fetchMatchingUserIds(query, active);
 
-        System.out.println("userIds is empty: " + matchingUserIds.isEmpty());
-
         Page<JobSeeker> jobSeekers = jobSeekerRepository.findBySearchCriteria(
                 query,
                 matchingUserIds,
@@ -129,18 +128,16 @@ public class JobSeekerService {
                 pageable
         );
 
-        System.out.println("jobSeekers is empty: " + jobSeekers.getContent());
-
         if (jobSeekers.isEmpty()) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
 
-        List<String> jobSeekerUserIds = jobSeekers.getContent().stream()
+        List<String> userIds = jobSeekers.getContent().stream()
                 .map(JobSeeker::getUserId)
                 .distinct()
                 .toList();
 
-        Map<String, UserDTO> userMap = fetchAndMapUsers(jobSeekerUserIds);
+        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
 
         List<JobSeekerWithUserDTO> content = mapToJobSeekerWithUserDTOs(jobSeekers.getContent(), userMap);
 
@@ -152,13 +149,9 @@ public class JobSeekerService {
 
         List<String> userIds = jobSeekers.stream()
                 .map(JobSeeker::getUserId)
-                .collect(Collectors.toList());
+                .toList();
 
-        ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
-        List<UserDTO> users = response.getData();
-
-        Map<String, UserDTO> userMap = users.stream()
-                .collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
 
         return mapToJobSeekerWithUserDTOs(jobSeekers, userMap);
     }
@@ -214,7 +207,7 @@ public class JobSeekerService {
         if (user != null && user.getId() != null) {
             try {
                 log.info("Rolling back user creation: {}", user.getId());
-                userServiceClient.deleteUser(user.getId());
+                userServiceClient.hardDeleteUser(user.getId());
             } catch (Exception ex) {
                 log.error("Failed to roll back user creation: {}", user.getId(), ex);
             }
@@ -226,6 +219,10 @@ public class JobSeekerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
 
         UserDTO user = getUserById(jobSeeker.getUserId());
+
+        if (user.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Job Seeker not found");
+        }
 
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
             try {
@@ -252,7 +249,11 @@ public class JobSeekerService {
 
         UserDTO user = getUserById(jobSeeker.getUserId());
 
+        if (user.getDeletedAt() != null) {
+            throw new ResourceNotFoundException("Job Seeker not found");
+        }
+
         jobSeekerRepository.delete(jobSeeker);
-        userServiceClient.deleteUser(user.getId());
+        userServiceClient.softDeleteUser(user.getId());
     }
 }
