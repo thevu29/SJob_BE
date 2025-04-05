@@ -15,7 +15,7 @@ public interface JobSeekerRepository extends JpaRepository<JobSeeker, String> {
     WHERE (:seeking IS NULL OR js.seeking = :seeking)
     AND (
         -- match by userIds (if provided)
-        (:userIds IS NULL OR js.user_id IN (:userIds))
+        (:userIds IS NOT NULL AND js.user_id IN (:userIds))
  
         -- OR match by search query in specified fields
         OR (
@@ -33,7 +33,7 @@ public interface JobSeekerRepository extends JpaRepository<JobSeeker, String> {
     WHERE (:seeking IS NULL OR js.seeking = :seeking)
     AND (
         -- match by userIds (if provided)
-        (:userIds IS NULL OR js.user_id IN (:userIds))
+        (:userIds IS NOT NULL AND js.user_id IN (:userIds))
  
         -- OR match by search query in specified fields
         OR (
