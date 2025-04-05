@@ -15,7 +15,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -30,39 +29,31 @@ public class UserService {
         return input.replaceAll("[-\\[\\]{}()*+?.,\\\\^$|#\\s]", "\\\\$0");
     }
 
-    public List<UserDTO> getUsers() {
-        List<User> users = userRepository.findAllByDeletedAtIsNull();
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
         return users.stream().map(userMapper::toDto).toList();
     }
 
-    public List<UserDTO> findUsers(String email, String role, Boolean active) {
-        String sanitizedEmail = escapeRegexSpecialChars(email);
-        UserRole userRole = UserRole.valueOf(role);
-
-        boolean filterByActive = active != null;
-        boolean isActive = Boolean.TRUE.equals(active);
-
-        List<User> users = userRepository.findUsers(sanitizedEmail, userRole, isActive, filterByActive);
-        return users.stream().map(userMapper::toDto).toList();
-    }
-
-    public Page<UserDTO> findPagedAdmins(
-            String emailPattern,
+    public Page<UserDTO> findPagedUsers(
+            String query,
             Boolean active,
+            String role,
             int page,
             int size,
             String sortBy,
             Sort.Direction direction
     ) {
         Sort sort = Sort.by(direction, sortBy);
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        String sanitizedPattern = escapeRegexSpecialChars(emailPattern);
+        String sanitizedQuery = escapeRegexSpecialChars(query);
 
         boolean filterByStatus = active != null;
         boolean isActive = Boolean.TRUE.equals(active);
 
-        Page<User> userPage =  userRepository.findAdmins(sanitizedPattern, isActive, filterByStatus, pageable);
+        UserRole userRole = UserRole.valueOf(role);
+
+        Page<User> userPage =  userRepository.findPagedUsers(sanitizedQuery, isActive, filterByStatus, userRole, pageable);
 
         return userPage.map(userMapper::toDto);
     }
@@ -72,13 +63,13 @@ public class UserService {
             return List.of();
         }
 
-        return userRepository.findByIdInAndDeletedAtIsNull(ids).stream()
+        return userRepository.findByIdIn(ids).stream()
                 .map(userMapper::toDto)
                 .toList();
     }
 
     public UserDTO getUserById(String id) {
-        User user = userRepository.findByIdAndDeletedAtIsNull(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         return userMapper.toDto(user);
     }
@@ -104,17 +95,13 @@ public class UserService {
         return userMapper.toDto(updatedUser);
     }
 
-    public void softDeleteUser(String id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        user.setDeletedAt(LocalDateTime.now());
-        userRepository.save(user);
-    }
-
     public void deleteUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (user.getRole() == UserRole.ADMIN) {
+            throw new IllegalArgumentException("Cannot delete admin user");
+        }
 
         userRepository.delete(user);
     }

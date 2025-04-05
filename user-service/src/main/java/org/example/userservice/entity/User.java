@@ -36,10 +36,6 @@ public class User {
     @Field("updated_at")
     private LocalDateTime updatedAt;
 
-    @Field("deleted_at")
-    @Builder.Default
-    private LocalDateTime deletedAt = null;
-
     @Field(name = "active")
     @Builder.Default
     private boolean active = true;

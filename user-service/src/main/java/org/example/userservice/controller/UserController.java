@@ -22,31 +22,22 @@ public class UserController {
 
     @GetMapping("all")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getAllUsers() {
-        List<UserDTO> users = userService.getUsers();
+        List<UserDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findPagedAdmins(
-            @RequestParam(value = "q", required = false) String emailPattern,
-            @RequestParam(value = "status", required = false) Boolean active,
+    public ResponseEntity<ApiResponse<List<UserDTO>>> findPagedUsers(
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "active", required = false) Boolean active,
+            @RequestParam(value = "role", defaultValue = "ADMIN") String role,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {
-        Page<UserDTO> pages = userService.findPagedAdmins(emailPattern, active, page - 1, size, sortBy, direction);
+        Page<UserDTO> pages = userService.findPagedUsers(query, active, role, page, size, sortBy, direction);
         return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Users fetched successfully"));
-    }
-
-    @GetMapping("find")
-    public ResponseEntity<ApiResponse<List<UserDTO>>> findUsers(
-            @RequestParam(value = "email", defaultValue = "") String email,
-            @RequestParam(value = "role", defaultValue = "JOB_SEEKER") String role,
-            @RequestParam(value = "active", required = false) Boolean active
-    ) {
-        List<UserDTO> users = userService.findUsers(email, role, active);
-        return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
     }
 
     @GetMapping("ids")
@@ -82,12 +73,6 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<?>> softDeleteUser(@PathVariable String id) {
-        userService.softDeleteUser(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
-    }
-
-    @DeleteMapping("/hard/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
