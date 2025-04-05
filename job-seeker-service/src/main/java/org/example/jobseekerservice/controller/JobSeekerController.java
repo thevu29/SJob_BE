@@ -36,7 +36,7 @@ public class JobSeekerController {
                 query,
                 active,
                 seeking,
-                page - 1,
+                page,
                 size,
                 sortBy,
                 direction

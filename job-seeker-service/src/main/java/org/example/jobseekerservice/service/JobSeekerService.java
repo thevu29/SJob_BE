@@ -57,7 +57,6 @@ public class JobSeekerService {
 
         if (response != null && response.getData() != null) {
             return response.getData().stream()
-                    .filter(user -> user.getDeletedAt() == null)
                     .collect(Collectors.toMap(
                             UserDTO::getId,
                             Function.identity(),
@@ -81,18 +80,21 @@ public class JobSeekerService {
                 .toList();
     }
 
-    private List<String> fetchMatchingUserIds(String query, Boolean active) {
+    private List<String> fetchMatchingUserIds(String query, Boolean active, int page, int size, String sortBy, Sort.Direction direction) {
         String sanitizedPattern = escapeRegexSpecialChars(query);
 
-        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findUsers(
+        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
                 sanitizedPattern,
+                active,
                 "JOB_SEEKER",
-                active
+                page,
+                size,
+                sortBy,
+                direction
         );
 
         if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
             return usersResponse.getData().stream()
-                    .filter(user -> user.getDeletedAt() == null)
                     .map(UserDTO::getId)
                     .toList();
         }
@@ -117,9 +119,15 @@ public class JobSeekerService {
         };
 
         Sort sort = Sort.by(direction, columnName);
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        List<String> matchingUserIds = fetchMatchingUserIds(query, active);
+        boolean isActiveFilter = active != null;
+
+        List<String> matchingUserIds = fetchMatchingUserIds(query, active, page, size, sortBy, direction);
+
+        if (matchingUserIds.isEmpty() && isActiveFilter) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
 
         Page<JobSeeker> jobSeekers = jobSeekerRepository.findBySearchCriteria(
                 query,
@@ -162,10 +170,6 @@ public class JobSeekerService {
 
         UserDTO user = getUserById(jobSeeker.getUserId());
 
-        if (user.getDeletedAt() != null) {
-            throw new ResourceNotFoundException("Job Seeker not found");
-        }
-
         return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
     }
 
@@ -207,7 +211,7 @@ public class JobSeekerService {
         if (user != null && user.getId() != null) {
             try {
                 log.info("Rolling back user creation: {}", user.getId());
-                userServiceClient.hardDeleteUser(user.getId());
+                userServiceClient.deleteUser(user.getId());
             } catch (Exception ex) {
                 log.error("Failed to roll back user creation: {}", user.getId(), ex);
             }
@@ -219,10 +223,6 @@ public class JobSeekerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
 
         UserDTO user = getUserById(jobSeeker.getUserId());
-
-        if (user.getDeletedAt() != null) {
-            throw new ResourceNotFoundException("Job Seeker not found");
-        }
 
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
             try {
@@ -249,11 +249,7 @@ public class JobSeekerService {
 
         UserDTO user = getUserById(jobSeeker.getUserId());
 
-        if (user.getDeletedAt() != null) {
-            throw new ResourceNotFoundException("Job Seeker not found");
-        }
-
         jobSeekerRepository.delete(jobSeeker);
-        userServiceClient.softDeleteUser(user.getId());
+        userServiceClient.deleteUser(user.getId());
     }
 }

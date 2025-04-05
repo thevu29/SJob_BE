@@ -14,18 +14,17 @@ public interface JobSeekerRepository extends JpaRepository<JobSeeker, String> {
     SELECT js.* FROM job_seeker_service.job_seekers js
     WHERE (:seeking IS NULL OR js.seeking = :seeking)
     AND (
-        -- if query is empty or null, return all records
-        (:query IS NULL OR :query = '')
-    
-        -- match by job seeker fields regardless of userIds
-        OR LOWER(js.name) LIKE LOWER(CONCAT('%', :query, '%'))
-        OR LOWER(js.phone) LIKE LOWER(CONCAT('%', :query, '%'))
-        OR LOWER(js.address) LIKE LOWER(CONCAT('%', :query, '%'))
-    
         -- match by userIds (if provided)
+        (:userIds IS NULL OR js.user_id IN (:userIds))
+ 
+        -- OR match by search query in specified fields
         OR (
-            COALESCE(:userIds) IS NOT NULL
-            AND js.user_id IN (:userIds)
+            (:query IS NOT NULL AND :query <> '')
+            AND (
+                LOWER(js.name) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(js.phone) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(js.address) LIKE LOWER(CONCAT('%', :query, '%'))
+            )
         )
     )
     """,
@@ -33,13 +32,17 @@ public interface JobSeekerRepository extends JpaRepository<JobSeeker, String> {
     SELECT COUNT(*) FROM job_seekers js
     WHERE (:seeking IS NULL OR js.seeking = :seeking)
     AND (
-        (:query IS NULL OR :query = '')
-        OR LOWER(js.name) LIKE LOWER(CONCAT('%', :query, '%'))
-        OR LOWER(js.phone) LIKE LOWER(CONCAT('%', :query, '%'))
-        OR LOWER(js.address) LIKE LOWER(CONCAT('%', :query, '%'))
+        -- match by userIds (if provided)
+        (:userIds IS NULL OR js.user_id IN (:userIds))
+ 
+        -- OR match by search query in specified fields
         OR (
-            COALESCE(:userIds) IS NOT NULL
-            AND js.user_id IN (:userIds)
+            (:query IS NOT NULL AND :query <> '')
+            AND (
+                LOWER(js.name) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(js.phone) LIKE LOWER(CONCAT('%', :query, '%'))
+                OR LOWER(js.address) LIKE LOWER(CONCAT('%', :query, '%'))
+            )
         )
     )
     """,
