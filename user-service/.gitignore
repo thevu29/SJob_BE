@@ -1,5 +1,6 @@
 HELP.md
 target/
+out/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -34,3 +35,9 @@ build/
 
 ### Environment ###
 application.dev.properties
+
+### Mac OS ###
+.DS_Store
+
+### Windows ###
+Thumbs.db
