@@ -16,41 +16,41 @@ spring:
           predicates:
             - Path=/api/users/**
         - id: job-seeker-service-api-docs
-          uri: lb://JOB-SEEKER-SERVICE
+          uri: lb:http://JOB-SEEKER-SERVICE
           predicates:
             - Path=/job-seeker-service/v3/api-docs/**
           filters:
             - RewritePath=/job-seeker-service(?<segment>/?.*), $\{segment}
         - id: job-seeker-service
-          uri: lb://JOB-SEEKER-SERVICE
+          uri: lb:http://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/job-seekers/**
         - id: recruiter-service
-          uri: lb://RECRUITER-SERVICE
+          uri: lb:http://RECRUITER-SERVICE
           predicates:
             - Path=/api/recruiters/**
         - id: job-service
-          uri: lb://JOB-SERVICE
+          uri: lb:http://JOB-SERVICE
           predicates:
             - Path=/api/jobs/**
         - id: job-seeker-service-educations
-          uri: lb://JOB-SEEKER-SERVICE
+          uri: lb:http://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/educations/**
         - id: job-seeker-service-skills
-          uri: lb://JOB-SEEKER-SERVICE
+          uri: lb:http://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/skills/**
         - id: job-seeker-service-certifications
-          uri: lb://JOB-SEEKER-SERVICE
+          uri: lb:http://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/certifications/**
         - id: job-seeker-service-experiences
-          uri: lb://JOB-SEEKER-SERVICE
+          uri: lb:http://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/experiences/**
         - id: job-seeker-service-resumes
-          uri: lb://JOB-SEEKER-SERVICE
+          uri: lb:http://JOB-SEEKER-SERVICE
           predicates:
             - Path=/api/resumes/**
 
