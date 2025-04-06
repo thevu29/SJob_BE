@@ -1,0 +1,17 @@
+spring:
+  data:
+    mongodb:
+      uri: ${mongo.uri}
+      database: user-service-db
+
+server:
+  port: 8081
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+mongock:
+  migration-scan-package: org.example.userservice.migration
+  track-ignored: false
+  enabled: true
