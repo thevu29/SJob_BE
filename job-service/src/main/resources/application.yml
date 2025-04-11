@@ -6,9 +6,17 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:123}
     driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    schemas: job_service
+    default-schema: job_service
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    out-of-order: true
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:

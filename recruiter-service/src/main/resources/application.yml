@@ -3,17 +3,23 @@ spring:
     name: recruiter-service
   data:
     mongodb:
-      uri: mongodb+srv://thevu29:thevu29@sjob.lgiue.mongodb.net/?retryWrites=true&w=majority&appName=SJob
+      uri: ${MONGO_URI}
       database: recruiter-service-db
   cloud:
     config:
       enabled: false
-
+  config:
+    import: optional:classpath:application.dev.properties
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
 aws:
-  access-key: AKIATJHQDR5H2YKXUDMY
-  secret-key: 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
-  region: ap-southeast-1
-  bucket-name: sjob-storage
+  access-key: ${AWS_ACCESS_KEY}
+  secret-key: ${AWS_SECRET_KEY}
+  region: ${AWS_REGION}
+  bucket-name: ${AWS_BUCKET_NAME}
 
 server:
   port: 8083

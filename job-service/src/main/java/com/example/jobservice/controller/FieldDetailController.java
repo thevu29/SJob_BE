@@ -1,5 +1,6 @@
 package com.example.jobservice.controller;
 
+import com.example.jobservice.dto.Field.FieldDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import com.example.jobservice.dto.FieldDetail.request.CreateFieldDetailRequest;
 import com.example.jobservice.dto.FieldDetail.request.UpdateFieldDetailRequest;
@@ -65,6 +66,14 @@ public class FieldDetailController {
         fieldDetailService.importFileCSV(file);
         return ResponseEntity.ok(
                 ApiResponse.success(null,"Nhập file thành công", HttpStatus.OK)
+        );
+    }
+
+    @PostMapping("/by-names")
+    public ResponseEntity<ApiResponse<List<FieldDetailDTO>>> getFieldDetailsByNames(@RequestBody List<String> names) {
+        List<FieldDetailDTO> fieldDetails = fieldDetailService.getFieldDetailsByNames(names);
+        return ResponseEntity.ok(
+                ApiResponse.success(fieldDetails, "Lấy danh sách ngành nghề theo tên thành công", HttpStatus.OK)
         );
     }
 

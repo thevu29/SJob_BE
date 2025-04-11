@@ -14,6 +14,12 @@ public interface UserServiceClient {
     @PostMapping("/api/users")
     ApiResponse<UserDTO> createUser(@RequestBody CreateUserRequest request);
 
-    @DeleteMapping("/api/users/{id}/hard")
+    @GetMapping("/api/users/ids")
+    ApiResponse<List<UserDTO>> getUsersByIds(@RequestParam("ids") List<String> ids);
+
+    @GetMapping("/api/users/{id}")
+    ApiResponse<UserDTO> getUserById(@PathVariable("id") String id);
+
+    @DeleteMapping("/api/users/hard/{id}")
     void deleteUser(@PathVariable("id") String id);
 }

@@ -32,6 +32,7 @@ public class FieldDetailService {
     private final FieldDetailRepository fieldDetailRepository;
     private final FieldRepository fieldRepository;
     private final FieldDetailMapper fieldDetailMapper;
+    private final CSVHelper csvHelper;
 
     public List<FieldDetailDTO> getFieldDetails() {
         List<FieldDetail> fields = fieldDetailRepository.findAll();
@@ -73,7 +74,7 @@ public class FieldDetailService {
     public void importFileCSV(MultipartFile file) {
         try {
             // Validate file
-            CSVHelper.validateCSVFile(file);
+            csvHelper.validateCSVFile(file);
 
             // Parse CSV to DTO
             List<FieldDetailImportDTO> fieldDetailImportDTOS = CSVHelper.csvToFieldDetailImportDTOs(file.getInputStream());
@@ -113,5 +114,12 @@ public class FieldDetailService {
         } catch (IOException e) {
             throw new RuntimeException("Nhập file thất bại: " + e.getMessage());
         }
+    }
+
+    public List<FieldDetailDTO> getFieldDetailsByNames(List<String> names) {
+        List<FieldDetail> fieldDetails = fieldDetailRepository.findByNameIn(names);
+        return fieldDetails.stream()
+                .map(fieldDetailMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

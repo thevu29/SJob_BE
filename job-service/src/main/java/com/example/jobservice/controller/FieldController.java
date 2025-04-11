@@ -67,4 +67,12 @@ public class FieldController {
                 ApiResponse.success(null, "Nhập file thành công", HttpStatus.OK)
         );
     }
+
+    @PostMapping("/by-names")
+    public ResponseEntity<ApiResponse<List<FieldDTO>>> getFieldsByNames(@RequestBody List<String> names) {
+        List<FieldDTO> fields = fieldService.getFieldsByNames(names);
+        return ResponseEntity.ok(
+                ApiResponse.success(fields, "Lấy danh sách ngành nghề theo tên thành công", HttpStatus.OK)
+        );
+    }
 }

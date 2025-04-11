@@ -20,10 +20,10 @@ public class UpdateJobRequest {
 
     private String benefit;
 
-    @Future(message = "Deadline must be a future date")
+    @Future(message = "Hạn nộp hồ sơ phải là một ngày trong tương lai")
     private LocalDate deadline;
 
-    @Min(value = 1, message = "Slots must be at least 1")
+    @Min(value = 1, message = "Số lượng tuyển dụng phải lớn hơn 0")
     private Integer slots;
 
     private String type;

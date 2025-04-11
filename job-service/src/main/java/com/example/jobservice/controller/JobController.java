@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class JobController {
     public ResponseEntity<ApiResponse<List<JobDTO>>> getAllJobs() {
         List<JobDTO> jobDTOList = jobService.getJobs();
         return ResponseEntity.ok(
-                ApiResponse.success(jobDTOList, "Jobs fetched successfully", HttpStatus.OK)
+                ApiResponse.success(jobDTOList, "Lấy danh sách các việc làm thành công", HttpStatus.OK)
         );
     }
 
@@ -33,7 +34,7 @@ public class JobController {
         JobDTO job = jobService.createJob(createJobRequest, recruiterId);
         return ResponseEntity.
                 status(HttpStatus.CREATED)
-                .body(ApiResponse.success(job, "Job created successfully", HttpStatus.CREATED));
+                .body(ApiResponse.success(job, "Tạo việc làm thành công", HttpStatus.CREATED));
 
     }
 
@@ -41,7 +42,7 @@ public class JobController {
     public ResponseEntity<ApiResponse<JobDTO>> getJob(@PathVariable String id) {
         JobDTO job = jobService.getJob(id);
         return ResponseEntity.ok(
-                ApiResponse.success(job, "Job fetched successfully", HttpStatus.OK)
+                ApiResponse.success(job, "Lấy chi tiết việc làm thành công", HttpStatus.OK)
         );
     }
 
@@ -49,7 +50,7 @@ public class JobController {
     public ResponseEntity<ApiResponse<JobDTO>> updateJob(@Valid @RequestBody UpdateJobRequest updateJobRequest, @PathVariable String id) {
         JobDTO job = jobService.updateJob(updateJobRequest, id);
         return ResponseEntity.ok(
-                ApiResponse.success(job, "Job updated successfully", HttpStatus.OK)
+                ApiResponse.success(job, "Cập nhật việc làm thành công", HttpStatus.OK)
         );
     }
 
@@ -57,8 +58,18 @@ public class JobController {
     public ResponseEntity<ApiResponse<?>> deleteJob(@PathVariable String id) {
         jobService.deleteJob(id);
         return ResponseEntity.ok(
-                ApiResponse.success(null,"Job deleted successfully", HttpStatus.OK)
+                ApiResponse.success(null,"Xóa việc làm thành công", HttpStatus.OK)
         );
     }
+    @PostMapping("/import")
+    public ResponseEntity<ApiResponse<?>> importFile(@RequestParam("file") MultipartFile file) {
+        jobService.importFileCSV(file);
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Nhập file thành công", HttpStatus.OK)
+        );
+    }
+
+
+
 
 }

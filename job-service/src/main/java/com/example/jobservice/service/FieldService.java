@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 public class FieldService {
     private final FieldRepository fieldRepository;
     private final FieldMapper fieldMapper;
+    private final CSVHelper csvHelper;
 
     public List<FieldDTO> getFields() {
         List<Field> fields = fieldRepository.findAll();
@@ -65,7 +66,7 @@ public class FieldService {
     public void importCSVFile(MultipartFile file) {
         try {
             // Validate file
-            CSVHelper.validateCSVFile(file);
+            csvHelper.validateCSVFile(file);
 
             // Parse CSV to DTO
             List<FieldImportDTO> fieldDTOs = CSVHelper.csvToFieldImportDTOs(file.getInputStream());
@@ -78,5 +79,12 @@ public class FieldService {
         } catch (IOException e) {
             throw new RuntimeException("Nhập file thất bại: " + e.getMessage());
         }
+    }
+
+    public List<FieldDTO> getFieldsByNames(List<String> names) {
+        List<Field> fields = fieldRepository.findByNameIn(names);
+        return fields.stream()
+                .map(fieldMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

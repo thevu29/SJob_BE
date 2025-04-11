@@ -1,17 +1,25 @@
-package com.example.jobservice.dto.Job.request;
+package com.example.jobservice.dto.Job;
 
-import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import jakarta.validation.constraints.*;
-import lombok.Builder;
-import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Set;
+
 
 @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class CreateJobRequest {
+public class JobImportDTO {
+
+    @NotNull(message = "Nhà tuyển dụng không được để trống")
+    private String recruiter;
+
+    @NotNull(message = "Ngành nghề/Lĩnh vực không được để trống")
+    private String fieldDetails;
+
     @NotBlank(message = "Tên không được để trống")
     private String name;
 
@@ -45,6 +53,5 @@ public class CreateJobRequest {
     @NotBlank(message = "Kinh nghiệm không được để trống")
     private String experience;
 
-    @NotNull(message = "Ngành nghề/Lĩnh vực không được để trống")
-    private String[] fieldDetails;
+
 }
