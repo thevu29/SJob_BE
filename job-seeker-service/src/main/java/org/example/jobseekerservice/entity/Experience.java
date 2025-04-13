@@ -27,22 +27,22 @@ public class Experience {
     private String location;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "location_type", nullable = false)
+    @Column(nullable = false)
     private LocationType locationType;
 
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "employee_type", nullable = false)
+    @Column(nullable = false)
     private EmployeeType employeeType;
 
-    @Column(name = "start_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate endDate;
 
     @ManyToOne
-    @JoinColumn(name = "job_seeker_id", nullable = false)
+    @JoinColumn(nullable = false)
     private JobSeeker jobSeeker;
 }

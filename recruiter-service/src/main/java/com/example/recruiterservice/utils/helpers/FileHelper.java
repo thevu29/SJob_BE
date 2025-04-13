@@ -28,8 +28,8 @@ public class FileHelper {
     private final String bucketName;
 
     public FileHelper(
-            @Value("${aws.access-key}") String accessKey,
-            @Value("${aws.secret-key}") String secretKey,
+            @Value("${aws.access-user-key}") String accessKey,
+            @Value("${aws.secret-user-key}") String secretKey,
             @Value("${aws.region}") String region,
             @Value("${aws.bucket-name}") String bucketName
     ) {

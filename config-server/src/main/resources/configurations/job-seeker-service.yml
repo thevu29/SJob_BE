@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:job-seeker-service-db}
+    username: ${db.user:postgres}
+    password: ${db.password:123}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: job_seeker_service
+
+aws:
+  access-key: ${aws.access.key}
+  secret-key: ${aws.secret.key}
+  region: ${aws.region}
+  bucket-name: ${aws.bucket.name}
+
+server:
+  port: 8082
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs

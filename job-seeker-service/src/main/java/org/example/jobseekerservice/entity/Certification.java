@@ -21,16 +21,16 @@ public class Certification {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "issue_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate issueDate;
 
-    @Column(name = "expire_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate expireDate;
 
-    @Column(name = "image_or_file")
+    @Column()
     private String imageOrFile;
 
     @ManyToOne
-    @JoinColumn(name = "job_seeker_id", nullable = false)
+    @JoinColumn(nullable = false)
     private JobSeeker jobSeeker;
 }

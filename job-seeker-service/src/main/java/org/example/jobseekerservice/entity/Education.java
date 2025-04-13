@@ -29,13 +29,13 @@ public class Education {
 
     private String description;
 
-    @Column(name = "start_date", nullable = false)
+    @Column( nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate endDate;
 
     @ManyToOne
-    @JoinColumn(name = "job_seeker_id", nullable = false)
+    @JoinColumn(nullable = false)
     private JobSeeker jobSeeker;
 }

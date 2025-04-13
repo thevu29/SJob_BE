@@ -20,6 +20,6 @@ public interface UserServiceClient {
     @GetMapping("/api/users/{id}")
     ApiResponse<UserDTO> getUserById(@PathVariable("id") String id);
 
-    @DeleteMapping("/api/users/hard/{id}")
+    @DeleteMapping("/api/users/{id}")
     void deleteUser(@PathVariable("id") String id);
 }

@@ -7,7 +7,10 @@ import org.example.jobseekerservice.dto.JobSeeker.request.CreateJobSeekerRequest
 import org.example.jobseekerservice.dto.JobSeeker.request.UpdateJobSeekerRequest;
 import org.example.jobseekerservice.dto.response.ApiResponse;
 import org.example.jobseekerservice.service.JobSeekerService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +23,31 @@ public class JobSeekerController {
     private final JobSeekerService jobSeekerService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JobSeekerWithUserDTO>>> getJobSeekers() {
-        List<JobSeekerWithUserDTO> jobSeekers = jobSeekerService.getJobSeekers();
+    public ResponseEntity<ApiResponse<List<JobSeekerWithUserDTO>>> getJobSeekers(
+            @RequestParam(value = "query", defaultValue = "") String query,
+            @RequestParam(value = "seeking", required = false) Boolean seeking,
+            @RequestParam(value = "active", required = false) Boolean active,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
+    ) {
+        Page<JobSeekerWithUserDTO> pages = jobSeekerService.findPagedJobSeekers(
+                query,
+                active,
+                seeking,
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Job Seekers fetched successfully"));
+    }
+
+    @GetMapping("all")
+    public ResponseEntity<ApiResponse<List<JobSeekerWithUserDTO>>> getAllJobSeekers() {
+        List<JobSeekerWithUserDTO> jobSeekers = jobSeekerService.getAllJobSeekers();
         return ResponseEntity.ok(
                 ApiResponse.success(jobSeekers, "Job Seekers fetched successfully", HttpStatus.OK)
         );
@@ -35,7 +61,7 @@ public class JobSeekerController {
         );
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> createJobSeeker(@Valid @ModelAttribute CreateJobSeekerRequest request) {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.createJobSeeker(request);
         return ResponseEntity

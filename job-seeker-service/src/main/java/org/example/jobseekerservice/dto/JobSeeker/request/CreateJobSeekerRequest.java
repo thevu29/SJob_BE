@@ -1,5 +1,6 @@
 package org.example.jobseekerservice.dto.JobSeeker.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -18,6 +19,7 @@ public class CreateJobSeekerRequest {
     @Pattern(regexp = "^[+]?[0-9]{10}$", message = "Phone number is invalid")
     private String phone;
 
+    @Schema(type = "string", format = "binary")
     private MultipartFile imageFile;
 
     @NotNull(message = "Gender is required")

@@ -1,0 +1,30 @@
+spring:
+  data:
+    mongodb:
+      uri: ${mongo.uri}
+      database: recruiter-service-db
+#  cloud:
+#    config:
+#      enabled: false
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+aws:
+  access-user-key: ${aws.access.user.key}
+  secret-user-key: ${aws.secret.user.key}
+  region: ${aws.region}
+  bucket-name: ${aws.bucket.name}
+
+server:
+  port: 8083
+
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+#    register-with-eureka: true
+#    fetch-registry: true
+#  instance:
+#    prefer-ip-address: true

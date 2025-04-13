@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -61,25 +58,32 @@ public class RecruiterService {
         );
     }
 
-    public List<RecruiterWithUserDTO> getAllRecruiters() {
-        List<Recruiter> recruiters = recruiterRepository.findAll();
+    private Map<String, UserDTO> fetchAndMapUsers(List<String> userIds) {
+        if (userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
-        // Get all user IDs
-        List<String> userIds = recruiters.stream()
-                .map(Recruiter::getUserId)
-                .collect(Collectors.toList());
-
-        // Get user data
         ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
-        List<UserDTO> users = response.getData();
 
-        // Create user map for active users
-        Map<String, UserDTO> userMap = users.stream()
-                .filter(user -> user.getDeletedAt() == null)
-                .collect(Collectors.toMap(UserDTO::getId, Function.identity()));
+        if (response != null && response.getData() != null) {
+            return response.getData().stream()
+                    .collect(Collectors.toMap(
+                            UserDTO::getId,
+                            Function.identity(),
+                            (existing, replacement) -> existing
+                    ));
+        }
+
+        return Collections.emptyMap();
+    }
+
+    private List<RecruiterWithUserDTO> mapToRecruiterWithUserDTOs(
+            List<Recruiter> recruiters,
+            Map<String, UserDTO> userMap
+    ) {
 
         return recruiters.stream()
-                .filter(r -> userMap.containsKey(r.getUserId()))
+                .filter(r -> r.getUserId() != null && userMap.containsKey(r.getUserId()))
                 .map(recruiter -> {
                     FieldDTO field = null;
                     field = getFieldById(recruiter.getFieldId());
@@ -90,6 +94,20 @@ public class RecruiterService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+
+    public List<RecruiterWithUserDTO> getAllRecruiters() {
+        List<Recruiter> recruiters = recruiterRepository.findAll();
+
+        // Get all user IDs
+        List<String> userIds = recruiters.stream()
+                .map(Recruiter::getUserId)
+                .collect(Collectors.toList());
+
+        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
+
+        return mapToRecruiterWithUserDTOs(recruiters, userMap);
+
     }
 
     public RecruiterWithUserDTO createRecruiter(CreateRecruiterRequest request) {

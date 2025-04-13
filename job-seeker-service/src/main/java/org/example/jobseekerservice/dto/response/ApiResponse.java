@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ public class ApiResponse<T> {
     private LocalDateTime timestamp;
 
     private T data;
+    private Meta meta;
     private List<String> errors;
     private Map<String, String> validationErrors;
 
@@ -66,6 +68,24 @@ public class ApiResponse<T> {
                 .status(status.value())
                 .timestamp(LocalDateTime.now())
                 .data(data)
+                .build();
+    }
+
+    public static <T> ApiResponse<List<T>> successWithPage(Page<T> page, String message) {
+        Meta meta = Meta.builder()
+                .page(page.getNumber() + 1)
+                .totalPages(page.getTotalPages())
+                .totalElements(page.getTotalElements())
+                .take(page.getNumberOfElements())
+                .build();
+
+        return ApiResponse.<List<T>>builder()
+                .success(true)
+                .message(message)
+                .status(HttpStatus.OK.value())
+                .timestamp(LocalDateTime.now())
+                .data(page.getContent())
+                .meta(meta)
                 .build();
     }
 

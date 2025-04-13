@@ -1,0 +1,71 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        - id: user-service-api-docs
+          uri: lb:http://USER-SERVICE
+          predicates:
+            - Path=/user-service/v3/api-docs/**
+          filters:
+            - RewritePath=/user-service(?<segment>/?.*), $\{segment}
+        - id: user-service-api
+          uri: lb:http://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+        - id: job-seeker-service-api-docs
+          uri: lb:http://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/job-seeker-service/v3/api-docs/**
+          filters:
+            - RewritePath=/job-seeker-service(?<segment>/?.*), $\{segment}
+        - id: job-seeker-service
+          uri: lb:http://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/job-seekers/**
+        - id: recruiter-service
+          uri: lb:http://RECRUITER-SERVICE
+          predicates:
+            - Path=/api/recruiters/**
+        - id: job-service
+          uri: lb:http://JOB-SERVICE
+          predicates:
+            - Path=/api/jobs/**
+        - id: job-seeker-service-educations
+          uri: lb:http://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/educations/**
+        - id: job-seeker-service-skills
+          uri: lb:http://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/skills/**
+        - id: job-seeker-service-certifications
+          uri: lb:http://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/certifications/**
+        - id: job-seeker-service-experiences
+          uri: lb:http://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/experiences/**
+        - id: job-seeker-service-resumes
+          uri: lb:http://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/resumes/**
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Job Seeker Service
+        url: /job-seeker-service/v3/api-docs
+    config-url: /v3/api-docs/swagger-config
+    disable-swagger-default-url: true
+    path: /swagger-ui.html
+  api-docs:
+    enabled: true
+
+server:
+  port: 8080
