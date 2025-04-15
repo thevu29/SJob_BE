@@ -1,11 +1,11 @@
 package org.example.userservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.userservice.dto.UserDTO;
-import org.example.userservice.dto.request.CreateUserRequest;
+import org.common.dto.User.UserCreationDTO;
+import org.common.dto.User.UserDTO;
+import org.common.enums.UserRole;
+import org.common.exception.ResourceNotFoundException;
 import org.example.userservice.entity.User;
-import org.example.userservice.entity.UserRole;
-import org.example.userservice.exception.ResourceNotFoundException;
 import org.example.userservice.mapper.UserMapper;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -53,7 +53,7 @@ public class UserService {
 
         UserRole userRole = UserRole.valueOf(role);
 
-        Page<User> userPage =  userRepository.findPagedUsers(sanitizedQuery, isActive, filterByStatus, userRole, pageable);
+        Page<User> userPage = userRepository.findPagedUsers(sanitizedQuery, isActive, filterByStatus, userRole, pageable);
 
         return userPage.map(userMapper::toDto);
     }
@@ -71,17 +71,20 @@ public class UserService {
     public UserDTO getUserById(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
         return userMapper.toDto(user);
     }
 
-    public UserDTO createUser(CreateUserRequest request) {
+    public UserDTO createUser(UserCreationDTO request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email is already in use");
         }
 
         User user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
         User savedUser = userRepository.save(user);
+
         return userMapper.toDto(savedUser);
     }
 

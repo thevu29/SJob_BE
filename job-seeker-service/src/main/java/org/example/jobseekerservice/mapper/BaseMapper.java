@@ -1,7 +1,7 @@
 package org.example.jobseekerservice.mapper;
 
+import org.common.exception.InvalidDateFormatException;
 import org.example.jobseekerservice.entity.JobSeeker;
-import org.example.jobseekerservice.exception.InvalidDateFormatException;
 import org.mapstruct.Named;
 
 import java.time.LocalDate;

@@ -112,7 +112,7 @@ public class RecruiterService {
 
     public RecruiterWithUserDTO createRecruiter(CreateRecruiterRequest request) {
         UserDTO user = null;
-        try{
+        try {
             CreateUserRequest createUserRequest = CreateUserRequest.builder()
                     .email(request.getEmail())
                     .password(request.getPassword())

@@ -1,7 +1,7 @@
 package org.example.userservice.mapper;
 
-import org.example.userservice.dto.UserDTO;
-import org.example.userservice.dto.request.CreateUserRequest;
+import org.common.dto.User.UserCreationDTO;
+import org.common.dto.User.UserDTO;
 import org.example.userservice.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -11,12 +11,10 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface UserMapper {
     UserDTO toDto(User user);
 
-    User toEntity(UserDTO userDTO);
-
-    @Mapping(target = "role", expression = "java(org.example.userservice.entity.UserRole.valueOf(createUserRequest.getRole().toUpperCase()))")
+    @Mapping(target = "role", expression = "java(org.common.enums.UserRole.valueOf(request.getRole().toUpperCase()))")
     @Mapping(target = "active", constant = "true")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    User toEntity(CreateUserRequest createUserRequest);
+    User toEntity(UserCreationDTO request);
 }

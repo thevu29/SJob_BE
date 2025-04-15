@@ -1,4 +1,10 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9090/realms/sjob"
+          jwk-set-uri: "http://localhost:9090/realms/sjob/protocol/openid-connect/certs"
   datasource:
     url: jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:job-seeker-service-db}
     username: ${db.user:postgres}
@@ -6,22 +12,41 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: job_seeker_service
+  flyway:
+    enabled: true
+    baseline-version: 0
+    baseline-on-migrate: true
+    locations: classpath:database/migration
+    schemas: job_seeker_service
 
 aws:
-  access-key: ${aws.access.key}
-  secret-key: ${aws.secret.key}
+  access-key: ${aws.access-key}
+  secret-key: ${aws.secret-key}
   region: ${aws.region}
-  bucket-name: ${aws.bucket.name}
-
-server:
-  port: 8082
+  bucket-name: ${aws.bucket-name}
 
 springdoc:
   api-docs:
     path: /v3/api-docs
+
+server:
+  port: 8082
+
+gateway:
+  url: ${gateway.url}
+
+service:
+  user:
+    url: http://localhost:8081
+
+keycloak:
+  client:
+    client-id: job-seeker-service
+    client-secret: ${keycloak.job-seeker-service.client.secret}
+    token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token

@@ -1,11 +1,11 @@
 package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.common.exception.ResourceNotFoundException;
+import org.example.jobseekerservice.dto.Experience.ExperienceCreationDTO;
 import org.example.jobseekerservice.dto.Experience.ExperienceDTO;
-import org.example.jobseekerservice.dto.Experience.request.CreateExperienceRequest;
-import org.example.jobseekerservice.dto.Experience.request.UpdateExperienceRequest;
+import org.example.jobseekerservice.dto.Experience.ExperienceUpdateDTO;
 import org.example.jobseekerservice.entity.Experience;
-import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.ExperienceMapper;
 import org.example.jobseekerservice.repository.ExperienceRepository;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ public class ExperienceService {
         return experienceMapper.toDto(experience);
     }
 
-    public ExperienceDTO createExperience(CreateExperienceRequest request) {
+    public ExperienceDTO createExperience(ExperienceCreationDTO request) {
         jobSeekerService.getJobSeekerById(request.getJobSeekerId());
 
         Experience experience = experienceMapper.toEntity(request);
@@ -53,7 +53,7 @@ public class ExperienceService {
         return experienceMapper.toDto(createdExperience);
     }
 
-    public ExperienceDTO updateExperience(String experienceId, UpdateExperienceRequest request) {
+    public ExperienceDTO updateExperience(String experienceId, ExperienceUpdateDTO request) {
         Experience experience = experienceRepository.findById(experienceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Experience not found"));
 

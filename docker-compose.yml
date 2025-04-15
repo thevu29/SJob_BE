@@ -1,0 +1,17 @@
+services:
+  keycloak:
+    container_name: keycloak-sjob
+    image: quay.io/keycloak/keycloak:latest
+    ports:
+      - 9090:8080
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    networks:
+      - sjob-network
+    command:
+      - "start-dev"
+
+networks:
+  sjob-network:
+    driver: bridge

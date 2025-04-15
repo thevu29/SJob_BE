@@ -1,0 +1,32 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9090/realms/sjob"
+          jwk-set-uri: "http://localhost:9090/realms/sjob/protocol/openid-connect/certs"
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+server:
+  port: 8085
+
+gateway:
+  url: ${gateway.url}
+
+service:
+  job-seeker:
+    url: http://localhost:8082
+
+keycloak:
+  server-url: http://localhost:9090
+  realm: sjob
+  client-id: admin-cli
+  username: admin
+  password: admin
+  client:
+    client-id: auth-service
+    client-secret: ${keycloak.auth-service.client.secret}
+    token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token

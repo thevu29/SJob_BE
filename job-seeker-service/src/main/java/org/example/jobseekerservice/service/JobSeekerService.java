@@ -2,23 +2,19 @@ package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.common.dto.User.UserCreationDTO;
+import org.common.dto.User.UserDTO;
+import org.common.dto.response.ApiResponse;
+import org.common.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.client.UserServiceClient;
-import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.example.jobseekerservice.dto.JobSeeker.UserDTO;
-import org.example.jobseekerservice.dto.JobSeeker.request.CreateJobSeekerRequest;
-import org.example.jobseekerservice.dto.JobSeeker.request.CreateUserRequest;
-import org.example.jobseekerservice.dto.JobSeeker.request.UpdateJobSeekerRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.entity.JobSeeker;
-import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.JobSeekerMapper;
 import org.example.jobseekerservice.repository.JobSeekerRepository;
 import org.example.jobseekerservice.utils.helpers.FileHelper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -173,30 +169,21 @@ public class JobSeekerService {
         return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
     }
 
-    public JobSeekerWithUserDTO createJobSeeker(CreateJobSeekerRequest request) {
+    public JobSeekerWithUserDTO createJobSeeker(JobSeekerCreationDTO request) {
         UserDTO user = null;
 
         try {
-            CreateUserRequest createUserRequest = CreateUserRequest.builder()
+            UserCreationDTO userCreationRequest = UserCreationDTO.builder()
                     .email(request.getEmail())
                     .password(request.getPassword())
                     .role("JOB_SEEKER")
                     .build();
 
-            ApiResponse<UserDTO> response = userServiceClient.createUser(createUserRequest);
+            ApiResponse<UserDTO> response = userServiceClient.createUser(userCreationRequest);
             user = response.getData();
 
             JobSeeker jobSeeker = jobSeekerMapper.toEntity(request);
             jobSeeker.setUserId(user.getId());
-
-            if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
-                try {
-                    String imageUrl = fileHelper.uploadFile(request.getImageFile());
-                    jobSeeker.setImage(imageUrl);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to upload image", e);
-                }
-            }
 
             JobSeeker savedJobSeeker = jobSeekerRepository.save(jobSeeker);
 
@@ -218,7 +205,7 @@ public class JobSeekerService {
         }
     }
 
-    public JobSeekerWithUserDTO updateJobSeeker(String id, UpdateJobSeekerRequest request) {
+    public JobSeekerWithUserDTO updateJobSeeker(String id, JobSeekerUpdateDTO request) {
         JobSeeker jobSeeker = jobSeekerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
 

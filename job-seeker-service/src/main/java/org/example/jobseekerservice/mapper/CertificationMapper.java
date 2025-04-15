@@ -1,8 +1,8 @@
 package org.example.jobseekerservice.mapper;
 
+import org.example.jobseekerservice.dto.Certifitcaion.CertificationCreationDTO;
 import org.example.jobseekerservice.dto.Certifitcaion.CertificationDTO;
-import org.example.jobseekerservice.dto.Certifitcaion.request.CreateCertificationRequest;
-import org.example.jobseekerservice.dto.Certifitcaion.request.UpdateCertificationRequest;
+import org.example.jobseekerservice.dto.Certifitcaion.CertificationUpdateDTO;
 import org.example.jobseekerservice.entity.Certification;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -18,10 +18,10 @@ public interface CertificationMapper extends BaseMapper {
     @Mapping(target = "issueDate", source = "issueDate", qualifiedByName = "stringToLocalDate")
     @Mapping(target = "expireDate", source = "expireDate", qualifiedByName = "stringToLocalDate")
     @Mapping(target = "jobSeeker", source = "jobSeekerId", qualifiedByName = "jobSeekerIdToJobSeeker")
-    Certification toEntity(CreateCertificationRequest request);
+    Certification toEntity(CertificationCreationDTO request);
 
     @Mapping(target = "issueDate", source = "issueDate", qualifiedByName = "stringToLocalDate")
     @Mapping(target = "expireDate", source = "expireDate", qualifiedByName = "stringToLocalDate")
     @Mapping(target = "jobSeeker", ignore = true)
-    void toEntity(UpdateCertificationRequest request, @MappingTarget Certification certification);
+    void toEntity(CertificationUpdateDTO request, @MappingTarget Certification certification);
 }

@@ -4,26 +4,35 @@ spring:
   application:
     name: config-server
   config:
-    import: optional:classpath:application.env.properties
+    import: optional:classpath:application.env.yml
   cloud:
     config:
       server:
         native:
           search-locations: classpath:/configurations
         overrides:
-          mongo.uri: ${mongo.uri}
-          db.host: ${db.host}
-          db.port: ${db.port}
-          db.database: ${db.database}
-          db.user: ${db.user}
-          db.password: ${db.password}
-          aws.region: ${aws.region}
-          aws.access.key: ${aws.access.key}
-          aws.secret.key: ${aws.secret.key}
-          aws.bucket.name: ${aws.bucket.name}
-          aws.access.user.key: ${aws.access.user.key}
-          aws.secret.user.key: ${aws.secret.user.key}
+          mongo:
+            uri: ${mongo.uri}
+          db:
+            host: ${db.host}
+            port: ${db.port}
+            database: ${db.database}
+            user: ${db.user}
+            password: ${db.password}
+          aws:
+            region: ${aws.region}
+            access-key: ${aws.access-key}
+            secret-key: ${aws.secret-key}
+            bucket-name: ${aws.bucket-name}
+          gateway:
+            url: ${gateway.url}
+          keycloak:
+            auth-service:
+              client:
+                secret: ${keycloak.auth-service.client.secret}
+            job-seeker-service:
+              client:
+                secret: ${keycloak.job-seeker-service.client.secret}
 
-
-server :
+server:
   port: 8888

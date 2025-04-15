@@ -3,6 +3,7 @@ package org.example.userservice.config;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,6 +11,9 @@ import java.util.List;
 
 @Configuration
 public class OpenAPIConfig {
+    @Value("${gateway.url}")
+    private String gatewayUrl;
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
@@ -19,7 +23,7 @@ public class OpenAPIConfig {
                         .description("API documentation for the User Service")
                 )
                 .servers(List.of(
-                        new Server().url("http://localhost:8080").description("Local server")
+                        new Server().url(gatewayUrl).description("Local server")
                 ));
     }
 }

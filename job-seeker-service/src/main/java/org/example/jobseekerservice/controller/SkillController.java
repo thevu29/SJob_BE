@@ -2,10 +2,10 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Skill.SkillCreationDTO;
 import org.example.jobseekerservice.dto.Skill.SkillDTO;
-import org.example.jobseekerservice.dto.Skill.request.CreateSkillRequest;
-import org.example.jobseekerservice.dto.Skill.request.UpdateSkillRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Skill.SkillUpdateDTO;
 import org.example.jobseekerservice.service.SkillService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +47,7 @@ public class SkillController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<SkillDTO>> createSkill(@Valid @RequestBody CreateSkillRequest request) {
+    public ResponseEntity<ApiResponse<SkillDTO>> createSkill(@Valid @RequestBody SkillCreationDTO request) {
         SkillDTO createdSkill = skillService.createSkill(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -58,7 +58,7 @@ public class SkillController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<SkillDTO>> updateSkill(
             @PathVariable String id,
-            @Valid @RequestBody UpdateSkillRequest request
+            @Valid @RequestBody SkillUpdateDTO request
     ) {
         SkillDTO updatedSkill = skillService.updateSkill(id, request);
         return ResponseEntity.ok(

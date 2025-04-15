@@ -35,5 +35,4 @@ public class CreateRecruiterRequest {
     private int members;
 
 
-
 }

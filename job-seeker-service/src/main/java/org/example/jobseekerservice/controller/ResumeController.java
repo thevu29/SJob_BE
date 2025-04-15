@@ -2,10 +2,10 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Resume.ResumeCreationDTO;
 import org.example.jobseekerservice.dto.Resume.ResumeDTO;
-import org.example.jobseekerservice.dto.Resume.request.CreateResumeRequest;
-import org.example.jobseekerservice.dto.Resume.request.UpdateResumeRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Resume.ResumeUpdateDTO;
 import org.example.jobseekerservice.service.ResumeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +47,7 @@ public class ResumeController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ResumeDTO>> createResume(@Valid @ModelAttribute CreateResumeRequest request) {
+    public ResponseEntity<ApiResponse<ResumeDTO>> createResume(@Valid @ModelAttribute ResumeCreationDTO request) {
         ResumeDTO createdResume = resumeService.createResume(request);
 
         return ResponseEntity
@@ -58,7 +58,7 @@ public class ResumeController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<ResumeDTO>> updateResume(
             @PathVariable String id,
-            @Valid @ModelAttribute UpdateResumeRequest request
+            @Valid @ModelAttribute ResumeUpdateDTO request
     ) {
         ResumeDTO updatedResume = resumeService.updateResume(id, request);
 

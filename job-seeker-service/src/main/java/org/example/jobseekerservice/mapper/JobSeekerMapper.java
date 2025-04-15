@@ -1,10 +1,10 @@
 package org.example.jobseekerservice.mapper;
 
+import org.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.common.dto.User.UserDTO;
 import org.example.jobseekerservice.dto.JobSeeker.JobSeekerDTO;
-import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.example.jobseekerservice.dto.JobSeeker.UserDTO;
-import org.example.jobseekerservice.dto.JobSeeker.request.CreateJobSeekerRequest;
-import org.example.jobseekerservice.dto.JobSeeker.request.UpdateJobSeekerRequest;
+import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.entity.JobSeeker;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,9 +19,9 @@ public interface JobSeekerMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "seeking", constant = "false")
-    JobSeeker toEntity(CreateJobSeekerRequest request);
+    JobSeeker toEntity(JobSeekerCreationDTO request);
 
-    void toEntity(UpdateJobSeekerRequest request, @MappingTarget JobSeeker jobSeeker);
+    void toEntity(JobSeekerUpdateDTO request, @MappingTarget JobSeeker jobSeeker);
 
     @Mapping(target = "id", source = "jobSeekerDTO.id")
     @Mapping(target = "userId", source = "jobSeekerDTO.userId")

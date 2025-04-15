@@ -2,10 +2,10 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Education.EducationCreationDTO;
 import org.example.jobseekerservice.dto.Education.EducationDTO;
-import org.example.jobseekerservice.dto.Education.request.CreateEducationRequest;
-import org.example.jobseekerservice.dto.Education.request.UpdateEducationRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Education.EducationUpdateDTO;
 import org.example.jobseekerservice.service.EducationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +47,7 @@ public class EducationController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<EducationDTO>> createEducation(@Valid @RequestBody CreateEducationRequest request) {
+    public ResponseEntity<ApiResponse<EducationDTO>> createEducation(@Valid @RequestBody EducationCreationDTO request) {
         EducationDTO education = educationService.createEducation(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -58,7 +58,7 @@ public class EducationController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<EducationDTO>> updateEducation(
             @PathVariable String id,
-            @Valid @RequestBody UpdateEducationRequest request
+            @Valid @RequestBody EducationUpdateDTO request
     ) {
         EducationDTO education = educationService.updateEducation(id, request);
         return ResponseEntity.ok(

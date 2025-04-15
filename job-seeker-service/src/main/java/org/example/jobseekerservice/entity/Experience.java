@@ -2,6 +2,8 @@ package org.example.jobseekerservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.jobseekerservice.enums.EmployeeType;
+import org.example.jobseekerservice.enums.LocationType;
 
 import java.time.LocalDate;
 

@@ -29,7 +29,7 @@ public class Education {
 
     private String description;
 
-    @Column( nullable = false)
+    @Column(nullable = false)
     private LocalDate startDate;
 
     @Column(nullable = false)

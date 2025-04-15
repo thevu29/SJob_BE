@@ -1,17 +1,26 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9090/realms/sjob"
+          jwk-set-uri: "http://localhost:9090/realms/sjob/protocol/openid-connect/certs"
   data:
     mongodb:
       uri: ${mongo.uri}
       database: user-service-db
 
-server:
-  port: 8081
+mongock:
+  migration-scan-package: org.example.userservice.migration
+  track-ignored: false
+  enabled: true
 
 springdoc:
   api-docs:
     path: /v3/api-docs
 
-mongock:
-  migration-scan-package: org.example.userservice.migration
-  track-ignored: false
-  enabled: true
+server:
+  port: 8081
+
+gateway:
+  url: ${gateway.url}

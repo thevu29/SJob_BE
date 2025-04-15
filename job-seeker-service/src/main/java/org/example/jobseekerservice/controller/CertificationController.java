@@ -2,10 +2,10 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Certifitcaion.CertificationCreationDTO;
 import org.example.jobseekerservice.dto.Certifitcaion.CertificationDTO;
-import org.example.jobseekerservice.dto.Certifitcaion.request.CreateCertificationRequest;
-import org.example.jobseekerservice.dto.Certifitcaion.request.UpdateCertificationRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Certifitcaion.CertificationUpdateDTO;
 import org.example.jobseekerservice.service.CertificationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,7 +45,7 @@ public class CertificationController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CertificationDTO>> createCertification(
-            @Valid @ModelAttribute CreateCertificationRequest request) {
+            @Valid @ModelAttribute CertificationCreationDTO request) {
 
         CertificationDTO createdCertification = certificationService.createCertification(request);
 
@@ -58,7 +58,7 @@ public class CertificationController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<CertificationDTO>> updateCertification(
             @PathVariable String id,
-            @Valid @ModelAttribute UpdateCertificationRequest request) {
+            @Valid @ModelAttribute CertificationUpdateDTO request) {
 
         CertificationDTO updatedCertification = certificationService.updateCertification(id, request);
 

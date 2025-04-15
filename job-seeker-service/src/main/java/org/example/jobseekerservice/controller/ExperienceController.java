@@ -2,10 +2,10 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Experience.ExperienceCreationDTO;
 import org.example.jobseekerservice.dto.Experience.ExperienceDTO;
-import org.example.jobseekerservice.dto.Experience.request.CreateExperienceRequest;
-import org.example.jobseekerservice.dto.Experience.request.UpdateExperienceRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.Experience.ExperienceUpdateDTO;
 import org.example.jobseekerservice.service.ExperienceService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +47,7 @@ public class ExperienceController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ExperienceDTO>> createExperience(@Valid @RequestBody CreateExperienceRequest request) {
+    public ResponseEntity<ApiResponse<ExperienceDTO>> createExperience(@Valid @RequestBody ExperienceCreationDTO request) {
         ExperienceDTO createdExperience = experienceService.createExperience(request);
 
         return ResponseEntity
@@ -58,7 +58,7 @@ public class ExperienceController {
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<ExperienceDTO>> updateExperience(
             @PathVariable String id,
-            @Valid @RequestBody UpdateExperienceRequest request
+            @Valid @RequestBody ExperienceUpdateDTO request
     ) {
         ExperienceDTO updatedExperience = experienceService.updateExperience(id, request);
 
