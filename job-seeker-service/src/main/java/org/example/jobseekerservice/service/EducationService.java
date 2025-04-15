@@ -1,12 +1,12 @@
 package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.common.exception.ResourceNotFoundException;
+import org.example.jobseekerservice.dto.Education.EducationCreationDTO;
 import org.example.jobseekerservice.dto.Education.EducationDTO;
-import org.example.jobseekerservice.dto.Education.request.CreateEducationRequest;
-import org.example.jobseekerservice.dto.Education.request.UpdateEducationRequest;
-import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.jobseekerservice.dto.Education.EducationUpdateDTO;
 import org.example.jobseekerservice.entity.Education;
-import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.EducationMapper;
 import org.example.jobseekerservice.repository.EducationRepository;
 import org.springframework.stereotype.Service;
@@ -40,12 +40,12 @@ public class EducationService {
 
     public EducationDTO getEducationById(String id) {
         Education education = educationRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
 
         return educationMapper.toDto(education);
     }
 
-    public EducationDTO createEducation(CreateEducationRequest request) {
+    public EducationDTO createEducation(EducationCreationDTO request) {
         jobSeekerService.getJobSeekerById(request.getJobSeekerId());
 
         Education education = educationMapper.toEntity(request);
@@ -59,9 +59,9 @@ public class EducationService {
         return educationMapper.toDto(createdEducation);
     }
 
-    public EducationDTO updateEducation(String id, UpdateEducationRequest request) {
+    public EducationDTO updateEducation(String id, EducationUpdateDTO request) {
         Education education = educationRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
 
         if (education.getStartDate().isAfter(education.getEndDate())) {
             throw new IllegalArgumentException("Start date must be before end date");
@@ -75,7 +75,7 @@ public class EducationService {
 
     public void deleteEducation(String id) {
         Education education = educationRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Education not found"));
 
         educationRepository.delete(education);
     }

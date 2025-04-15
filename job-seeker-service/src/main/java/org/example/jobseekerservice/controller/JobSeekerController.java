@@ -2,10 +2,10 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.example.jobseekerservice.dto.JobSeeker.request.CreateJobSeekerRequest;
-import org.example.jobseekerservice.dto.JobSeeker.request.UpdateJobSeekerRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.service.JobSeekerService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -61,18 +61,18 @@ public class JobSeekerController {
         );
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> createJobSeeker(@Valid @ModelAttribute CreateJobSeekerRequest request) {
+    @PostMapping
+    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> createJobSeeker(@Valid @RequestBody JobSeekerCreationDTO request) {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.createJobSeeker(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(jobSeeker, "Job Seeker created successfully", HttpStatus.CREATED));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> updateJobSeeker(
             @PathVariable String id,
-            @Valid @ModelAttribute UpdateJobSeekerRequest request
+            @Valid @ModelAttribute JobSeekerUpdateDTO request
     ) {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.updateJobSeeker(id, request);
         return ResponseEntity.ok(

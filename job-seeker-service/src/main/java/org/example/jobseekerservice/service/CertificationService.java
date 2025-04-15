@@ -1,11 +1,11 @@
 package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.common.exception.ResourceNotFoundException;
+import org.example.jobseekerservice.dto.Certifitcaion.CertificationCreationDTO;
 import org.example.jobseekerservice.dto.Certifitcaion.CertificationDTO;
-import org.example.jobseekerservice.dto.Certifitcaion.request.CreateCertificationRequest;
-import org.example.jobseekerservice.dto.Certifitcaion.request.UpdateCertificationRequest;
+import org.example.jobseekerservice.dto.Certifitcaion.CertificationUpdateDTO;
 import org.example.jobseekerservice.entity.Certification;
-import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.CertificationMapper;
 import org.example.jobseekerservice.repository.CertificationRepository;
 import org.example.jobseekerservice.utils.helpers.FileHelper;
@@ -37,18 +37,18 @@ public class CertificationService {
         List<Certification> certifications = certificationRepository.findByJobSeekerId(jobSeekerId);
 
         return certifications.stream()
-            .map(certificationMapper::toDto)
-            .collect(Collectors.toList());
+                .map(certificationMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public CertificationDTO getCertificationById(String certificationId) {
         Certification certification = certificationRepository.findById(certificationId)
-            .orElseThrow(() -> new ResourceNotFoundException("Certification not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found"));
 
         return certificationMapper.toDto(certification);
     }
 
-    public CertificationDTO createCertification(CreateCertificationRequest request) {
+    public CertificationDTO createCertification(CertificationCreationDTO request) {
         jobSeekerService.getJobSeekerById(request.getJobSeekerId());
 
         Certification certification = certificationMapper.toEntity(request);
@@ -71,9 +71,9 @@ public class CertificationService {
         return certificationMapper.toDto(createdCertification);
     }
 
-    public CertificationDTO updateCertification(String certificationId, UpdateCertificationRequest request) {
+    public CertificationDTO updateCertification(String certificationId, CertificationUpdateDTO request) {
         Certification certification = certificationRepository.findById(certificationId)
-            .orElseThrow(() -> new ResourceNotFoundException("Certification not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found"));
 
         if (certification.getIssueDate().isAfter(certification.getExpireDate())) {
             throw new RuntimeException("Issue date must be before expire date");
@@ -100,7 +100,7 @@ public class CertificationService {
 
     public void deleteCertification(String certificationId) {
         Certification certification = certificationRepository.findById(certificationId)
-            .orElseThrow(() -> new ResourceNotFoundException("Certification not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Certification not found"));
 
         if (certification.getImageOrFile() != null && !certification.getImageOrFile().isEmpty()) {
             fileHelper.deleteFile(certification.getImageOrFile());

@@ -11,20 +11,20 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
+@NoArgsConstructor 
 @AllArgsConstructor
 @Builder
 @ToString
 @Table(
         name = "job_seekers",
         indexes = {
-        @Index(name = "idx_jobseeker_userid", columnList = "user_id"),
-        @Index(name = "idx_jobseeker_name", columnList = "name"),
-        @Index(name = "idx_jobseeker_phone", columnList = "phone"),
-        @Index(name = "idx_jobseeker_seeking", columnList = "seeking"),
-        @Index(name = "idx_jobseeker_address", columnList = "address"),
-        @Index(name = "idx_jobseeker_search", columnList = "name, phone, address")
-    }
+                @Index(name = "idx_jobseeker_userid", columnList = "user_id"),
+                @Index(name = "idx_jobseeker_name", columnList = "name"),
+                @Index(name = "idx_jobseeker_phone", columnList = "phone"),
+                @Index(name = "idx_jobseeker_seeking", columnList = "seeking"),
+                @Index(name = "idx_jobseeker_address", columnList = "address"),
+                @Index(name = "idx_jobseeker_search", columnList = "name, phone, address")
+        }
 )
 public class JobSeeker {
     @Id
@@ -37,27 +37,22 @@ public class JobSeeker {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String phone;
 
     private String image;
 
-    @Column(nullable = false)
     private boolean gender;
 
     private String about;
 
-    @Column(nullable = false)
     private String address;
 
     @Builder.Default
     private boolean seeking = false;
 
-    @Column(nullable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 

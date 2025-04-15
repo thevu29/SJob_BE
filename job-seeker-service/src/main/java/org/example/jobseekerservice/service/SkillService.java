@@ -1,12 +1,12 @@
 package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.jobseekerservice.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.common.exception.ResourceNotFoundException;
+import org.example.jobseekerservice.dto.Skill.SkillCreationDTO;
 import org.example.jobseekerservice.dto.Skill.SkillDTO;
-import org.example.jobseekerservice.dto.Skill.request.CreateSkillRequest;
-import org.example.jobseekerservice.dto.Skill.request.UpdateSkillRequest;
+import org.example.jobseekerservice.dto.Skill.SkillUpdateDTO;
 import org.example.jobseekerservice.entity.Skill;
-import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.SkillMapper;
 import org.example.jobseekerservice.repository.SkillRepository;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class SkillService {
         return skillMapper.toDto(skill);
     }
 
-    public SkillDTO createSkill(CreateSkillRequest request) {
+    public SkillDTO createSkill(SkillCreationDTO request) {
         jobSeekerService.getJobSeekerById(request.getJobSeekerId());
 
         Skill skill = skillMapper.toEntity(request);
@@ -55,7 +55,7 @@ public class SkillService {
         return skillMapper.toDto(createdSkill);
     }
 
-    public SkillDTO updateSkill(String id, UpdateSkillRequest request) {
+    public SkillDTO updateSkill(String id, SkillUpdateDTO request) {
         Skill skill = skillRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Skill not found"));
 

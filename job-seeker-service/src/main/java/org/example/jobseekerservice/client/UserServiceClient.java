@@ -1,23 +1,24 @@
 package org.example.jobseekerservice.client;
 
-import org.example.jobseekerservice.dto.JobSeeker.UserDTO;
-import org.example.jobseekerservice.dto.JobSeeker.request.CreateUserRequest;
-import org.example.jobseekerservice.dto.response.ApiResponse;
+import org.common.dto.User.UserCreationDTO;
+import org.common.dto.User.UserDTO;
+import org.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "user-service")
+@FeignClient(name = "user-service", url = "${service.user.url}", path = "/api/users", configuration = FeignClientInterceptor.class)
 public interface UserServiceClient {
-    @GetMapping("/api/users/{id}")
-    ApiResponse<UserDTO> getUserById(@PathVariable("id") String id);
+    @GetMapping("/{id}")
+    ApiResponse<UserDTO> getUserById(@PathVariable String id);
 
-    @GetMapping("/api/users/ids")
-    ApiResponse<List<UserDTO>> getUsersByIds(@RequestParam("ids") List<String> ids);
+    @GetMapping("/ids")
+    ApiResponse<List<UserDTO>> getUsersByIds(@RequestParam List<String> ids);
 
-    @GetMapping("/api/users")
+    @GetMapping
     ApiResponse<List<UserDTO>> findPagedUsers(
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "active", required = false) Boolean active,
@@ -28,9 +29,9 @@ public interface UserServiceClient {
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     );
 
-    @PostMapping("/api/users")
-    ApiResponse<UserDTO> createUser(@RequestBody CreateUserRequest request);
+    @PostMapping
+    ApiResponse<UserDTO> createUser(@RequestBody UserCreationDTO request);
 
-    @DeleteMapping("/api/users/{id}")
-    void deleteUser(@PathVariable("id") String id);
+    @DeleteMapping("/{id}")
+    void deleteUser(@PathVariable String id);
 }

@@ -2,9 +2,9 @@ package org.example.userservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.userservice.dto.UserDTO;
-import org.example.userservice.dto.request.CreateUserRequest;
-import org.example.userservice.dto.response.ApiResponse;
+import org.common.dto.User.UserCreationDTO;
+import org.common.dto.User.UserDTO;
+import org.common.dto.response.ApiResponse;
 import org.example.userservice.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -53,7 +53,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<UserDTO>> createUser(@Valid @RequestBody CreateUserRequest request) {
+    public ResponseEntity<ApiResponse<UserDTO>> createUser(@Valid @RequestBody UserCreationDTO request) {
         UserDTO createdUser = userService.createUser(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

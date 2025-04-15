@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface ResumeRepository extends JpaRepository<Resume, String> {
     Optional<Resume> findByJobSeekerIdAndMainTrue(String jobSeekerId);
+
     int countByJobSeekerIdAndMainTrue(String jobSeekerId);
+
     List<Resume> findByJobSeekerId(String jobSeekerId);
 }

@@ -1,11 +1,11 @@
 package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.common.exception.ResourceNotFoundException;
+import org.example.jobseekerservice.dto.Resume.ResumeCreationDTO;
 import org.example.jobseekerservice.dto.Resume.ResumeDTO;
-import org.example.jobseekerservice.dto.Resume.request.CreateResumeRequest;
-import org.example.jobseekerservice.dto.Resume.request.UpdateResumeRequest;
+import org.example.jobseekerservice.dto.Resume.ResumeUpdateDTO;
 import org.example.jobseekerservice.entity.Resume;
-import org.example.jobseekerservice.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.mapper.ResumeMapper;
 import org.example.jobseekerservice.repository.ResumeRepository;
 import org.example.jobseekerservice.utils.helpers.FileHelper;
@@ -59,7 +59,7 @@ public class ResumeService {
         return resumeMapper.toDto(resume);
     }
 
-    public ResumeDTO createResume(CreateResumeRequest request) {
+    public ResumeDTO createResume(ResumeCreationDTO request) {
         jobSeekerService.getJobSeekerById(request.getJobSeekerId());
 
         Resume resume = resumeMapper.toEntity(request);
@@ -86,7 +86,7 @@ public class ResumeService {
         return resumeMapper.toDto(createdResume);
     }
 
-    public ResumeDTO updateResume(String id, UpdateResumeRequest request) {
+    public ResumeDTO updateResume(String id, ResumeUpdateDTO request) {
         Resume resume = resumeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Resume not found"));
 
