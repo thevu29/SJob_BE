@@ -12,16 +12,24 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
 public class FileHelper {
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10mb
+    private static final Set<String> ALLOWED_CONTENT_TYPES = new HashSet<>(Arrays.asList(
+            "image/jpeg", "image/png", "application/pdf"
+    ));
+
     private final S3Client s3Client;
     private final String bucketName;
 
     public FileHelper(
-            @Value("${aws.access-key}") String accessKey,
-            @Value("${aws.secret-key}") String secretKey,
+            @Value("${aws.access-user-key}") String accessKey,
+            @Value("${aws.secret-user-key}") String secretKey,
             @Value("${aws.region}") String region,
             @Value("${aws.bucket-name}") String bucketName
     ) {
@@ -33,10 +41,23 @@ public class FileHelper {
                 .build();
     }
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be null or empty");
         }
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new IllegalArgumentException("File size exceeds the maximum limit of 10MB");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType)) {
+            throw new IllegalArgumentException("Only image or PDF files are allowed");
+        }
+    }
+
+    public String uploadFile(MultipartFile file) throws IOException {
+        validateFile(file);
 
         String originalFilename = file.getOriginalFilename();
         String fileExtension = originalFilename != null ?

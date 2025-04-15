@@ -1,5 +1,6 @@
 package com.example.recruiterservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,8 @@ public class RecruiterWithUserDTO {
     private int members;
 
     private String email;
+
+    private String fieldName;
 
     private String role;
 
