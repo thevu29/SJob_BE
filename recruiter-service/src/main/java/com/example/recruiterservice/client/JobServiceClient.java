@@ -2,15 +2,14 @@ package com.example.recruiterservice.client;
 
 import com.example.recruiterservice.dto.FieldDTO;
 import com.example.recruiterservice.dto.FieldDetailDTO;
-import com.example.recruiterservice.dto.UserDTO;
-import com.example.recruiterservice.dto.request.CreateUserRequest;
-import com.example.recruiterservice.dto.response.ApiResponse;
+import org.common.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
-
 
 @FeignClient(name = "job-service")
 public interface JobServiceClient {

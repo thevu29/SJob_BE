@@ -1,7 +1,6 @@
 package com.example.recruiterservice.utils.helpers;
 
 
-
 import com.example.recruiterservice.dto.RecruiterImportDTO;
 import com.example.recruiterservice.exception.FileUploadException;
 import com.example.recruiterservice.utils.validations.ValidationUtils;
@@ -17,7 +16,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class CSVHelper {
@@ -90,7 +88,6 @@ public class CSVHelper {
             );
         }
     }
-
 
 
 }

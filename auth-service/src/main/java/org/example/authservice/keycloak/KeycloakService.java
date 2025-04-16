@@ -2,7 +2,10 @@ package org.example.authservice.keycloak;
 
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.Auth.TokenDTO;
 import org.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.common.dto.Recruiter.RecruiterCreationDTO;
+import org.example.authservice.dto.LoginDTO;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -54,6 +57,17 @@ public class KeycloakService {
                 throw new RuntimeException("Failed to create user in Keycloak. Status: " + response.getStatus());
             } else {
                 String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
+
+                CredentialRepresentation passwordCred = new CredentialRepresentation();
+                passwordCred.setTemporary(false);
+                passwordCred.setType(CredentialRepresentation.PASSWORD);
+                passwordCred.setValue(password);
+
+                keycloak.realm(properties.getRealm())
+                        .users()
+                        .get(userId)
+                        .resetPassword(passwordCred);
+
                 assignRealmRoleToUser(userId, role);
             }
         }
@@ -63,8 +77,12 @@ public class KeycloakService {
         createUserInKeycloak(request.getEmail(), request.getPassword(), "job_seeker");
     }
 
+    public void createRecruiter(RecruiterCreationDTO request) {
+        createUserInKeycloak(request.getEmail(), request.getPassword(), "recruiter");
+    }
+
     public String getAccessToken() {
-        String url = clientProperties.getTokenUri();
+        String url = clientProperties.getTokenUrl();
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -83,5 +101,35 @@ public class KeycloakService {
         }
 
         throw new RuntimeException("Failed to get access token from Keycloak");
+    }
+
+    public TokenDTO login(LoginDTO data) {
+        String url = clientProperties.getTokenUrl();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        System.out.println(clientProperties.getClientId() + " " + clientProperties.getClientSecret() + " " + url);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "password");
+        body.add("client_id", clientProperties.getClientId());
+        body.add("client_secret", clientProperties.getClientSecret());
+        body.add("username", data.getEmail());
+        body.add("password", data.getPassword());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        ResponseEntity<TokenDTO> response = restTemplate.postForEntity(
+                url,
+                request,
+                TokenDTO.class
+        );
+
+        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+            return response.getBody();
+        }
+
+        throw new RuntimeException("Failed to login to Keycloak");
     }
 }

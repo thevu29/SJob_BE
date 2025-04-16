@@ -1,7 +1,5 @@
 package com.example.jobservice.service;
 
-import com.example.jobservice.dto.Field.FieldDTO;
-import com.example.jobservice.dto.Field.FieldImportDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailImportDTO;
 import com.example.jobservice.dto.FieldDetail.request.CreateFieldDetailRequest;

@@ -1,10 +1,8 @@
 package com.example.jobservice.dto.Job;
 
-import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Data
 public class JobDTO {

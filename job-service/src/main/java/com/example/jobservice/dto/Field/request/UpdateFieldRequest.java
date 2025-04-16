@@ -1,6 +1,5 @@
 package com.example.jobservice.dto.Field.request;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data

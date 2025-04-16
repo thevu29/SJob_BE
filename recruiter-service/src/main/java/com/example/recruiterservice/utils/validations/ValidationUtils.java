@@ -6,7 +6,6 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.springframework.stereotype.Component;
 
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,7 +14,7 @@ public class ValidationUtils {
     private final Validator validator;
 
     public ValidationUtils(ValidatorFactory factory) {
-        this.validator =  factory.getValidator();
+        this.validator = factory.getValidator();
     }
 
     public <T> void validateCSVRecord(T record, int rowNumber) {

@@ -1,6 +1,5 @@
 package com.example.recruiterservice.repository;
 
-import com.example.recruiterservice.dto.RecruiterDTO;
 import com.example.recruiterservice.entity.Recruiter;
 import org.springframework.data.mongodb.repository.MongoRepository;
 

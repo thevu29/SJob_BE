@@ -20,9 +20,9 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: job_service
-#  cloud:
-#    config:
-#      enabled: false
+  #  cloud:
+  #    config:
+  #      enabled: false
   servlet:
     multipart:
       enabled: true

@@ -5,7 +5,6 @@ import com.example.jobservice.exception.InvalidDateFormatException;
 import org.mapstruct.Named;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 
 public interface BaseMapper {
@@ -28,6 +27,7 @@ public interface BaseMapper {
         }
         return field.getId();
     }
+
     @Named("fieldIdToField")
     default Field fieldToFieldId(String fieldId) {
         if (fieldId == null) {

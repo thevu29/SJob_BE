@@ -1,13 +1,13 @@
 package com.example.recruiterservice.controller;
 
 import com.example.recruiterservice.dto.RecruiterDTO;
-import com.example.recruiterservice.dto.RecruiterWithUserDTO;
-import com.example.recruiterservice.dto.request.CreateRecruiterRequest;
 import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
-import com.example.recruiterservice.dto.response.ApiResponse;
 import com.example.recruiterservice.service.RecruiterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.Recruiter.RecruiterCreationDTO;
+import org.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.common.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +28,7 @@ public class RecruiterController {
                 ApiResponse.success(recruiters, "Lấy danh sách nhà tuyển dụng thành công", HttpStatus.OK)
         );
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> getRecruiterById(@PathVariable String id) {
         RecruiterWithUserDTO recruiter = recruiterService.getRecruiterById(id);
@@ -37,7 +38,7 @@ public class RecruiterController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> createRecruiter(@Valid @ModelAttribute CreateRecruiterRequest request) {
+    public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> createRecruiter(@Valid @RequestBody RecruiterCreationDTO request) {
         RecruiterWithUserDTO recruiter = recruiterService.createRecruiter(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)

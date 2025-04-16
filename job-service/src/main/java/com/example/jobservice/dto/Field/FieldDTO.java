@@ -1,6 +1,6 @@
 package com.example.jobservice.dto.Field;
 
-import lombok.*;
+import lombok.Data;
 
 @Data
 public class FieldDTO {

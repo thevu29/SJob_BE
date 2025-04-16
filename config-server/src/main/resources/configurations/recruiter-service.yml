@@ -1,16 +1,20 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9090/realms/sjob"
+          jwk-set-uri: "http://localhost:9090/realms/sjob/protocol/openid-connect/certs"
   data:
     mongodb:
       uri: ${mongo.uri}
       database: recruiter-service-db
-#  cloud:
-#    config:
-#      enabled: false
   servlet:
     multipart:
       enabled: true
       max-file-size: 5MB
       max-request-size: 5MB
+
 aws:
   access-user-key: ${aws.access.user.key}
   secret-user-key: ${aws.secret.user.key}
@@ -20,11 +24,12 @@ aws:
 server:
   port: 8083
 
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://localhost:8761/eureka/
-#    register-with-eureka: true
-#    fetch-registry: true
-#  instance:
-#    prefer-ip-address: true
+service:
+  user:
+    url: http://localhost:8081
+
+keycloak:
+  client:
+    client-id: recruiter-service
+    client-secret: ${keycloak.recruiter-service.client.secret}
+    token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token

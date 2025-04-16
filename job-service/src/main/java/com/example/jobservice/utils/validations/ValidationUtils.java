@@ -14,7 +14,7 @@ public class ValidationUtils {
     private final Validator validator;
 
     public ValidationUtils(ValidatorFactory factory) {
-        this.validator =  factory.getValidator();
+        this.validator = factory.getValidator();
     }
 
     public <T> void validateCSVRecord(T record, int rowNumber) {

@@ -8,8 +8,6 @@ import com.example.jobservice.service.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobController {
     private final JobService jobService;
+
     @GetMapping
     public ResponseEntity<ApiResponse<List<JobDTO>>> getAllJobs() {
         List<JobDTO> jobDTOList = jobService.getJobs();
@@ -58,9 +57,10 @@ public class JobController {
     public ResponseEntity<ApiResponse<?>> deleteJob(@PathVariable String id) {
         jobService.deleteJob(id);
         return ResponseEntity.ok(
-                ApiResponse.success(null,"Xóa việc làm thành công", HttpStatus.OK)
+                ApiResponse.success(null, "Xóa việc làm thành công", HttpStatus.OK)
         );
     }
+
     @PostMapping("/import")
     public ResponseEntity<ApiResponse<?>> importFile(@RequestParam("file") MultipartFile file) {
         jobService.importFileCSV(file);
@@ -68,8 +68,6 @@ public class JobController {
                 ApiResponse.success(null, "Nhập file thành công", HttpStatus.OK)
         );
     }
-
-
 
 
 }

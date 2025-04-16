@@ -7,12 +7,10 @@ import com.example.jobservice.dto.Field.request.UpdateFieldRequest;
 import com.example.jobservice.entity.Field;
 import com.example.jobservice.exception.ResourceNotFoundException;
 import com.example.jobservice.mapper.FieldMapper;
-
 import com.example.jobservice.repository.FieldRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.MappingTarget;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,6 +54,7 @@ public class FieldService {
         Field updatedField = fieldRepository.save(field);
         return fieldMapper.toDto(updatedField);
     }
+
     public void deleteField(String fieldId) {
         Field field = fieldRepository.findById(fieldId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Ngành nghề/Lĩnh vực với id: " + fieldId));

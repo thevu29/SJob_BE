@@ -2,11 +2,11 @@ package com.example.recruiterservice.service;
 
 import com.example.recruiterservice.client.JobServiceClient;
 import com.example.recruiterservice.client.UserServiceClient;
-import com.example.recruiterservice.dto.*;
+import com.example.recruiterservice.dto.FieldDTO;
+import com.example.recruiterservice.dto.RecruiterDTO;
+import com.example.recruiterservice.dto.RecruiterImportDTO;
 import com.example.recruiterservice.dto.request.CreateRecruiterRequest;
-import com.example.recruiterservice.dto.request.CreateUserRequest;
 import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
-import com.example.recruiterservice.dto.response.ApiResponse;
 import com.example.recruiterservice.entity.Recruiter;
 import com.example.recruiterservice.exception.FileUploadException;
 import com.example.recruiterservice.mapper.RecruiterMapper;
@@ -15,6 +15,11 @@ import com.example.recruiterservice.utils.helpers.CSVHelper;
 import com.example.recruiterservice.utils.helpers.FileHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.Recruiter.RecruiterCreationDTO;
+import org.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.common.dto.User.UserCreationDTO;
+import org.common.dto.User.UserDTO;
+import org.common.dto.response.ApiResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -110,39 +115,63 @@ public class RecruiterService {
 
     }
 
-    public RecruiterWithUserDTO createRecruiter(CreateRecruiterRequest request) {
+    public RecruiterWithUserDTO createRecruiter(RecruiterCreationDTO request) {
         UserDTO user = null;
+
         try {
-            CreateUserRequest createUserRequest = CreateUserRequest.builder()
+            UserCreationDTO createUserRequest = UserCreationDTO.builder()
                     .email(request.getEmail())
                     .password(request.getPassword())
                     .role("RECRUITER")
                     .build();
+
             ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
             user = userResponse.getData();
 
             Recruiter recruiter = recruiterMapper.toEntity(request);
             recruiter.setUserId(user.getId());
 
-            if (request.getImage() != null && !request.getImage().isEmpty()) {
-                try {
-                    String imageUrl = fileHelper.uploadFile(request.getImage());
-                    recruiter.setImage(imageUrl);
-                } catch (IOException e) {
-                    throw new RuntimeException("Upload ảnh thất bại", e);
-                }
-            }
-
             Recruiter savedRecruiter = recruiterRepository.save(recruiter);
+
             return recruiterMapper.toDto(recruiterMapper.toDto(savedRecruiter), user);
-
-
         } catch (Exception e) {
             handleUserRollback(user);
             throw new RuntimeException("Tạo nhà tuyển dụng thất bại", e);
         }
-
     }
+
+//    public RecruiterWithUserDTO createRecruiter(CreateRecruiterRequest request) {
+//        UserDTO user = null;
+//        try {
+//            CreateUserRequest createUserRequest = CreateUserRequest.builder()
+//                    .email(request.getEmail())
+//                    .password(request.getPassword())
+//                    .role("RECRUITER")
+//                    .build();
+//            ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
+//            user = userResponse.getData();
+//
+//            Recruiter recruiter = recruiterMapper.toEntity(request);
+//            recruiter.setUserId(user.getId());
+//
+//            if (request.getImage() != null && !request.getImage().isEmpty()) {
+//                try {
+//                    String imageUrl = fileHelper.uploadFile(request.getImage());
+//                    recruiter.setImage(imageUrl);
+//                } catch (IOException e) {
+//                    throw new RuntimeException("Upload ảnh thất bại", e);
+//                }
+//            }
+//
+//            Recruiter savedRecruiter = recruiterRepository.save(recruiter);
+//            return recruiterMapper.toDto(recruiterMapper.toDto(savedRecruiter), user);
+//
+//
+//        } catch (Exception e) {
+//            handleUserRollback(user);
+//            throw new RuntimeException("Tạo nhà tuyển dụng thất bại", e);
+//        }
+//    }
 
     public void handleUserRollback(UserDTO user) {
         if (user != null && user.getId() != null) {
@@ -223,7 +252,7 @@ public class RecruiterService {
             // 4. Create recruiters using existing method
             for (RecruiterImportDTO dto : recruiterImportDTOS) {
                 CreateRecruiterRequest request = convertToCreateRequest(dto, fieldMap);
-                createRecruiter(request);
+//                createRecruiter(request);
             }
         } catch (IOException e) {
             throw new FileUploadException("Nhập file thất bại: " + e.getMessage());

@@ -1,13 +1,10 @@
 package com.example.jobservice.dto.Job.request;
 
-import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 @Data
 @Builder

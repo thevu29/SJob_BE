@@ -1,7 +1,7 @@
 package com.example.recruiterservice.exception;
 
-import com.example.recruiterservice.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -99,6 +99,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
+
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<ApiResponse<Object>> handleFileUploadException(FileUploadException ex) {
         ApiResponse<Object> response = ApiResponse.error(ex.getMessage(), HttpStatus.BAD_REQUEST);

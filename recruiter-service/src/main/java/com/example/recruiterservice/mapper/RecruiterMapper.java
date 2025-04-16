@@ -2,11 +2,12 @@ package com.example.recruiterservice.mapper;
 
 import com.example.recruiterservice.dto.FieldDTO;
 import com.example.recruiterservice.dto.RecruiterDTO;
-import com.example.recruiterservice.dto.RecruiterWithUserDTO;
-import com.example.recruiterservice.dto.UserDTO;
 import com.example.recruiterservice.dto.request.CreateRecruiterRequest;
 import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.entity.Recruiter;
+import org.common.dto.Recruiter.RecruiterCreationDTO;
+import org.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.common.dto.User.UserDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -21,6 +22,8 @@ public interface RecruiterMapper {
     @Mapping(target = "fieldId", source = "fieldId")
     @Mapping(target = "image", ignore = true)
     Recruiter toEntity(CreateRecruiterRequest request);
+
+    Recruiter toEntity(RecruiterCreationDTO request);
 
     @Mapping(target = "image", ignore = true)
     void toEntity(UpdateRecruiterRequest request, @MappingTarget Recruiter recruiter);
@@ -41,7 +44,6 @@ public interface RecruiterMapper {
     @Mapping(target = "createdAt", source = "userDTO.createdAt")
     @Mapping(target = "updatedAt", source = "userDTO.updatedAt")
     RecruiterWithUserDTO toDto(RecruiterDTO recruiterDTO, UserDTO userDTO);
-
 
     @Mapping(target = "id", source = "recruiterDTO.id")
     @Mapping(target = "userId", source = "recruiterDTO.userId")

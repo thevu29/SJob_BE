@@ -6,7 +6,6 @@ import com.example.jobservice.dto.Field.request.CreateFieldRequest;
 import com.example.jobservice.dto.Field.request.UpdateFieldRequest;
 import com.example.jobservice.dto.response.ApiResponse;
 import com.example.jobservice.service.FieldService;
-import com.example.jobservice.utils.helpers.CSVHelper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -45,6 +44,7 @@ public class FieldController {
                 status(HttpStatus.CREATED)
                 .body(ApiResponse.success(fieldDTO, "Tạo Ngành nghề/Lĩnh vực thành công", HttpStatus.CREATED));
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<FieldDTO>> updateField(@Valid @RequestBody UpdateFieldRequest updateFieldRequest, @PathVariable String id) {
         FieldDTO fieldDTO = fieldService.updateField(updateFieldRequest, id);
@@ -52,11 +52,12 @@ public class FieldController {
                 ApiResponse.success(fieldDTO, "Cập nhật Ngành nghề/Lĩnh vực thành công", HttpStatus.OK)
         );
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> deleteField(@PathVariable String id) {
         fieldService.deleteField(id);
         return ResponseEntity.ok(
-                ApiResponse.success(null,"Xóa Ngành nghề/Lĩnh vực thành công", HttpStatus.OK)
+                ApiResponse.success(null, "Xóa Ngành nghề/Lĩnh vực thành công", HttpStatus.OK)
         );
     }
 

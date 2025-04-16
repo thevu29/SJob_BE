@@ -19,6 +19,8 @@ gateway:
 service:
   job-seeker:
     url: http://localhost:8082
+  recruiter:
+    url: http://localhost:8083
 
 keycloak:
   server-url: http://localhost:9090
@@ -29,4 +31,4 @@ keycloak:
   client:
     client-id: auth-service
     client-secret: ${keycloak.auth-service.client.secret}
-    token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token
+    token-url: http://localhost:9090/realms/sjob/protocol/openid-connect/token

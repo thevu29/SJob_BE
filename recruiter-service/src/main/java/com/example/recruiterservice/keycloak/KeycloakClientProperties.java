@@ -1,4 +1,4 @@
-package org.example.authservice.keycloak;
+package com.example.recruiterservice.keycloak;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -10,5 +10,5 @@ import org.springframework.stereotype.Component;
 public class KeycloakClientProperties {
     private String clientId;
     private String clientSecret;
-    private String tokenUrl;
+    private String tokenUri;
 }

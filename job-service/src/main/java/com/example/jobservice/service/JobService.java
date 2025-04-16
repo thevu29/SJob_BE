@@ -1,7 +1,6 @@
 package com.example.jobservice.service;
 
 import com.example.jobservice.client.RecruiterServiceClient;
-import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.JobImportDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
@@ -18,11 +17,9 @@ import com.example.jobservice.mapper.JobMapper;
 import com.example.jobservice.repository.FieldDetailRepository;
 import com.example.jobservice.repository.JobFieldRepository;
 import com.example.jobservice.repository.JobRepository;
-
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,7 +37,8 @@ public class JobService {
     private final RecruiterServiceClient recruiterServiceClient;
     private final JobMapper jobMapper;
     private final JobFieldRepository jobFieldRepository;
-    private final FieldDetailRepository fieldDetailRepository;;
+    private final FieldDetailRepository fieldDetailRepository;
+    ;
     private final CSVHelper csvHelper;
 
     public List<JobDTO> getJobs() {
@@ -57,9 +55,9 @@ public class JobService {
         return jobMapper.toDto(job);
     }
 
-    public JobDTO createJob(CreateJobRequest createJobRequest,String recruiterId) {
-        try{
-            if(!recruiterServiceClient.checkIfRecruiterExists(recruiterId)){
+    public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
+        try {
+            if (!recruiterServiceClient.checkIfRecruiterExists(recruiterId)) {
                 throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng với id:" + recruiterId);
             }
             Job job = jobMapper.toEntity(createJobRequest);
@@ -71,7 +69,7 @@ public class JobService {
             Job savedJob = jobRepository.save(job);
 
             // Add job fields
-            for(String fieldDetailId : createJobRequest.getFieldDetails()){
+            for (String fieldDetailId : createJobRequest.getFieldDetails()) {
                 JobField jobField = new JobField();
 
                 Job job1 = new Job();

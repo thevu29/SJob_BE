@@ -1,6 +1,5 @@
 package com.example.jobservice.controller;
 
-import com.example.jobservice.dto.Field.FieldDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import com.example.jobservice.dto.FieldDetail.request.CreateFieldDetailRequest;
 import com.example.jobservice.dto.FieldDetail.request.UpdateFieldDetailRequest;
@@ -9,7 +8,6 @@ import com.example.jobservice.service.FieldDetailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,6 +43,7 @@ public class FieldDetailController {
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(fieldDetailDTO, "Tạo chi tiết Ngành nghề/Lĩnh vực thành công", HttpStatus.CREATED));
     }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<FieldDetailDTO>> updateFieldDetail(@Valid @RequestBody UpdateFieldDetailRequest updateFieldDetailRequest, @PathVariable String id) {
         FieldDetailDTO fieldDetailDTO = fieldDetailService.updateFieldDetail(updateFieldDetailRequest, id);
@@ -57,15 +56,15 @@ public class FieldDetailController {
     public ResponseEntity<ApiResponse<?>> deleteFieldDetail(@PathVariable String id) {
         fieldDetailService.deleteFieldDetail(id);
         return ResponseEntity.ok(
-                ApiResponse.success(null,"Xóa chi tiết Ngành nghề/Lĩnh vực thành công", HttpStatus.OK)
+                ApiResponse.success(null, "Xóa chi tiết Ngành nghề/Lĩnh vực thành công", HttpStatus.OK)
         );
     }
 
     @PostMapping(value = "/import")
-    public ResponseEntity<ApiResponse<?>>importFile(@RequestParam("file") @Valid MultipartFile file) {
+    public ResponseEntity<ApiResponse<?>> importFile(@RequestParam("file") @Valid MultipartFile file) {
         fieldDetailService.importFileCSV(file);
         return ResponseEntity.ok(
-                ApiResponse.success(null,"Nhập file thành công", HttpStatus.OK)
+                ApiResponse.success(null, "Nhập file thành công", HttpStatus.OK)
         );
     }
 

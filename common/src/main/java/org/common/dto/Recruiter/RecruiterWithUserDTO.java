@@ -1,6 +1,5 @@
-package com.example.recruiterservice.dto;
+package org.common.dto.Recruiter;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
