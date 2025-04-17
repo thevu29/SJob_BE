@@ -1,4 +1,4 @@
-package com.example.jobservice.dto.Recruiter;
+package org.common.dto.Recruiter;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.example.jobservice.dto.Field;
+package org.common.dto.Field;
 
 import lombok.Data;
 

@@ -38,6 +38,9 @@ spring:
             recruiter-service:
               client:
                 secret: ${keycloak.recruiter-service.client.secret}
+            job-service:
+              client:
+                secret: ${keycloak.job-service.client.secret}
 
 server:
   port: 8888

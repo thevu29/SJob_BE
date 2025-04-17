@@ -24,6 +24,9 @@ aws:
 server:
   port: 8083
 
+gateway:
+  url: ${gateway.url}
+
 service:
   user:
     url: http://localhost:8081

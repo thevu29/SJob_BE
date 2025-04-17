@@ -1,7 +1,10 @@
 package com.example.jobservice.exception;
 
-import com.example.jobservice.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.response.ApiResponse;
+import org.common.exception.FileUploadException;
+import org.common.exception.InvalidDateFormatException;
+import org.common.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

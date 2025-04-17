@@ -1,13 +1,13 @@
 package com.example.jobservice.controller;
 
 
-import com.example.jobservice.dto.Field.FieldDTO;
 import com.example.jobservice.dto.Field.request.CreateFieldRequest;
 import com.example.jobservice.dto.Field.request.UpdateFieldRequest;
-import com.example.jobservice.dto.response.ApiResponse;
 import com.example.jobservice.service.FieldService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.common.dto.Field.FieldDTO;
+import org.common.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
