@@ -24,6 +24,8 @@ spring:
             access-key: ${aws.access-key}
             secret-key: ${aws.secret-key}
             bucket-name: ${aws.bucket-name}
+            access-user-key: ${aws.access-user-key}
+            secret-user-key: ${aws.secret-user-key}
           gateway:
             url: ${gateway.url}
           keycloak:
