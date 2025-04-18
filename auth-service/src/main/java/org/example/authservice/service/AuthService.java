@@ -10,6 +10,7 @@ import org.common.dto.response.ApiResponse;
 import org.example.authservice.client.JobSeekerServiceClient;
 import org.example.authservice.client.RecruiterServiceClient;
 import org.example.authservice.dto.LoginDTO;
+import org.example.authservice.dto.RefreshTokenDTO;
 import org.example.authservice.keycloak.KeycloakService;
 import org.springframework.stereotype.Service;
 
@@ -34,5 +35,13 @@ public class AuthService {
 
     public TokenDTO login(LoginDTO request) {
         return keycloakService.login(request);
+    }
+
+    public TokenDTO refreshToken(RefreshTokenDTO request) {
+        return keycloakService.refreshToken(request.getRefreshToken());
+    }
+
+    public void logout(String refreshToken) {
+        keycloakService.logout(refreshToken);
     }
 }

@@ -31,4 +31,3 @@ keycloak:
   client:
     client-id: auth-service
     client-secret: ${keycloak.auth-service.client.secret}
-    token-url: http://localhost:9090/realms/sjob/protocol/openid-connect/token
