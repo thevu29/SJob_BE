@@ -21,6 +21,10 @@ aws:
   region: ${aws.region}
   bucket-name: ${aws.bucket.name}
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
 server:
   port: 8083
 

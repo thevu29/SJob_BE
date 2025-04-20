@@ -1,13 +1,15 @@
 package com.example.recruiterservice.controller;
 
-import com.example.recruiterservice.dto.RecruiterDTO;
 import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.service.RecruiterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.common.dto.Recruiter.RecruiterCreationDTO;
+import org.common.dto.Recruiter.RecruiterDTO;
 import org.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.common.dto.response.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,27 @@ public class RecruiterController {
     private final RecruiterService recruiterService;
 
     @GetMapping
+    public ResponseEntity<ApiResponse<List<RecruiterWithUserDTO>>> getRecruiters(
+            @RequestParam(value = "query", defaultValue = "") String query,
+            @RequestParam(value = "active", required = false) Boolean active,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
+    ) {
+        Page<RecruiterWithUserDTO> pages = recruiterService.findPagedRecruiters(
+                query,
+                active,
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách nhà tuyển dụng thành công"));
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<RecruiterWithUserDTO>>> getAllRecruiters() {
         List<RecruiterWithUserDTO> recruiters = recruiterService.getAllRecruiters();
         return ResponseEntity.ok(

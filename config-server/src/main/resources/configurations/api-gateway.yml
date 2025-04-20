@@ -33,6 +33,20 @@ spring:
           filters:
             - RewritePath=/auth-service(?<segment>/?.*), /${segment}
 
+        - id: job-service-api-docs
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/job-service/v3/api-docs/**
+          filters:
+            - RewritePath=/job-service(?<segment>/?.*), /${segment}
+
+        - id: recruiter-service-api-docs
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/recruiter-service/v3/api-docs/**
+          filters:
+            - RewritePath=/recruiter-service(?<segment>/?.*), /${segment}
+
         # API routes
         - id: user-service-api
           uri: lb://USER-SERVICE
@@ -78,6 +92,14 @@ spring:
           uri: lb://JOB-SERVICE
           predicates:
             - Path=/api/jobs/**
+        - id: job-service-fields
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/fields/**
+        - id: job-service-field-details
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/field-details/**
 
 springdoc:
   swagger-ui:
@@ -88,6 +110,10 @@ springdoc:
         url: /job-seeker-service/v3/api-docs
       - name: Auth Service
         url: /auth-service/v3/api-docs
+      - name: Job Service
+        url: /job-service/v3/api-docs
+      - name: Recruiter Service
+        url: /recruiter-service/v3/api-docs
     disable-swagger-default-url: true
     path: /swagger-ui.html
     api-docs:
