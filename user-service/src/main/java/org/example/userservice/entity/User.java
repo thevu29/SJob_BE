@@ -29,6 +29,12 @@ public class User {
 
     private UserRole role;
 
+    private String otp;
+
+    private LocalDateTime otpExpiresAt;
+
+    private boolean isOtpVerified;
+
     @CreatedDate
     @Field("created_at")
     private LocalDateTime createdAt;
