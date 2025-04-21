@@ -11,7 +11,7 @@ spring:
       database: user-service-db
 
 mongock:
-  migration-scan-package: org.example.userservice.migration
+  migration-scan-package: org.example.userservice.database.migration
   track-ignored: false
   enabled: true
 

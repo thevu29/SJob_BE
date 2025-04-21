@@ -1,4 +1,4 @@
-package org.example.userservice.seed;
+package org.example.userservice.database.seed;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

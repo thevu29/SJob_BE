@@ -1,5 +1,6 @@
 package org.example.authservice.keycloak;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import org.common.dto.Auth.TokenDTO;
@@ -20,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,17 @@ public class KeycloakService {
     private final RestTemplate restTemplate;
     private final KeycloakProperties properties;
     private final KeycloakClientProperties clientProperties;
+
+    private String TOKEN_URL;
+    private String LOGOUT_URL;
+
+    @PostConstruct
+    private void init() {
+        TOKEN_URL = "%s/realms/%s/protocol/openid-connect/token"
+                .formatted(properties.getServerUrl(), properties.getRealm());
+        LOGOUT_URL = "%s/realms/%s/protocol/openid-connect/logout"
+                .formatted(properties.getServerUrl(), properties.getRealm());
+    }
 
     private void assignRealmRoleToUser(String userId, String roleName) {
         RealmResource realmResource = keycloak.realm(properties.getRealm());
@@ -82,8 +95,6 @@ public class KeycloakService {
     }
 
     public String getAccessToken() {
-        String url = clientProperties.getTokenUrl();
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -94,22 +105,31 @@ public class KeycloakService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+        ResponseEntity<Map> response = restTemplate.postForEntity(TOKEN_URL, request, Map.class);
 
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            return response.getBody().get("access_token").toString();
-        }
-
-        throw new RuntimeException("Failed to get access token from Keycloak");
+        return Objects.requireNonNull(response.getBody()).get("access_token").toString();
     }
 
-    public TokenDTO login(LoginDTO data) {
-        String url = clientProperties.getTokenUrl();
-
+    public TokenDTO refreshToken(String refreshToken) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        System.out.println(clientProperties.getClientId() + " " + clientProperties.getClientSecret() + " " + url);
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "refresh_token");
+        body.add("refresh_token", refreshToken);
+        body.add("client_id", clientProperties.getClientId());
+        body.add("client_secret", clientProperties.getClientSecret());
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        ResponseEntity<TokenDTO> response = restTemplate.postForEntity(TOKEN_URL, request, TokenDTO.class);
+
+        return response.getBody();
+    }
+
+    public TokenDTO login(LoginDTO data) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "password");
@@ -120,16 +140,22 @@ public class KeycloakService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
 
-        ResponseEntity<TokenDTO> response = restTemplate.postForEntity(
-                url,
-                request,
-                TokenDTO.class
-        );
+        ResponseEntity<TokenDTO> response = restTemplate.postForEntity(TOKEN_URL, request, TokenDTO.class);
 
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            return response.getBody();
-        }
+        return response.getBody();
+    }
 
-        throw new RuntimeException("Failed to login to Keycloak");
+    public void logout(String refreshToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("client_id", clientProperties.getClientId());
+        body.add("client_secret", clientProperties.getClientSecret());
+        body.add("refresh_token", refreshToken);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(body, headers);
+
+        restTemplate.postForEntity(LOGOUT_URL, request, Void.class);
     }
 }

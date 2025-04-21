@@ -9,6 +9,7 @@ import org.common.dto.Recruiter.RecruiterCreationDTO;
 import org.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.common.dto.response.ApiResponse;
 import org.example.authservice.dto.LoginDTO;
+import org.example.authservice.dto.RefreshTokenDTO;
 import org.example.authservice.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,5 +46,21 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(tokens, "Login successfully", HttpStatus.OK));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody RefreshTokenDTO request) {
+        authService.logout(request.getRefreshToken());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(null, "Logout successfully", HttpStatus.OK));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<TokenDTO>> refreshToken(@RequestBody RefreshTokenDTO request) {
+        TokenDTO tokens = authService.refreshToken(request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(tokens, "Refresh token successfully", HttpStatus.OK));
     }
 }
