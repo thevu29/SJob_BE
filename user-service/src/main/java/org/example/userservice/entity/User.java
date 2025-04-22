@@ -33,7 +33,7 @@ public class User {
 
     private LocalDateTime otpExpiresAt;
 
-    private boolean isOtpVerified;
+    private boolean otpVerified;
 
     @CreatedDate
     @Field("created_at")

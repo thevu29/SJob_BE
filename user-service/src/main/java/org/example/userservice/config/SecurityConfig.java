@@ -28,7 +28,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/api/users/verify-otp",
+                                "/api/users/update-password"
                         ).permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("SCOPE_INTERNAL")
                         .requestMatchers("/api/users/**").authenticated()

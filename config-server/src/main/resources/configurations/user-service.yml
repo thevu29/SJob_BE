@@ -24,3 +24,10 @@ server:
 
 gateway:
   url: ${gateway.url}
+
+keycloak:
+  server-url: http://localhost:9090
+  realm: sjob
+  client-id: admin-cli
+  username: admin
+  password: admin

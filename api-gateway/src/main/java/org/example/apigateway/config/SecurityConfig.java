@@ -23,7 +23,9 @@ public class SecurityConfig {
                                 "/v3/api-docs/**",
                                 "/*/v3/api-docs/**",
                                 "/*/v3/api-docs.yaml",
-                                "/api/auth/**"
+                                "/api/auth/**",
+                                "/api/users/verify-otp",
+                                "/api/users/update-password"
                         ).permitAll()
                         .anyExchange().authenticated()
                 )

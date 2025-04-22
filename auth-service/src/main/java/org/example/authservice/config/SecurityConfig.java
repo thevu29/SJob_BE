@@ -18,15 +18,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/auth/refresh-token",
-                                "/api/auth/logout"
-                        ).authenticated()
-                        .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api/auth/**"
                         ).permitAll()
+                        .requestMatchers(
+                                "/api/auth/refresh-token",
+                                "/api/auth/logout"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess
