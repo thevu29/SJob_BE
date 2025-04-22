@@ -15,7 +15,7 @@ public class AddOtpFieldsMigration {
         Update update = new Update()
                 .set("otp", null)
                 .set("otpExpiresAt", null)
-                .set("isOtpVerified", false);
+                .set("otpVerified", false);
 
         mongoTemplate.updateMulti(query, update, "users");
     }
@@ -26,7 +26,7 @@ public class AddOtpFieldsMigration {
         Update update = new Update()
                 .unset("otp")
                 .unset("otpExpiresAt")
-                .unset("isOtpVerified");
+                .unset("otpVerified");
 
         mongoTemplate.updateMulti(query, update, "users");
     }
