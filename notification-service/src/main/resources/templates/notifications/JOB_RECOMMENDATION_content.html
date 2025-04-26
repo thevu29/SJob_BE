@@ -1,0 +1,10 @@
+<p>Xin chào,</p>
+<p>Chúng tôi có một số cơ hội việc làm phù hợp với bạn:</p>
+<ul>
+    <th:block th:each="job : ${jobs}">
+        <li>
+            [[${job.title}]] tại [[${job.company}]] - <a th:href="[[${job.url}]]">Xem chi tiết</a>
+        </li>
+    </th:block>
+</ul>
+<p>Gửi lúc: [[${recommendationDate}]]</p>

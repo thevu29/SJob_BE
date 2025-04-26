@@ -3,6 +3,7 @@ package com.example.jobservice.client;
 
 import com.example.jobservice.config.FeignClientInterceptor;
 import org.common.dto.Recruiter.RecruiterDTO;
+import org.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.common.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,4 +20,7 @@ public interface RecruiterServiceClient {
 
     @PostMapping("/by-names")
     ApiResponse<List<RecruiterDTO>> getRecruiterByName(@RequestBody List<String> names);
+
+    @GetMapping("/{id}")
+    ApiResponse<RecruiterWithUserDTO> getRecruiterById(@PathVariable String id);
 }

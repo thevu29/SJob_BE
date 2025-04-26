@@ -1,0 +1,41 @@
+package com.example.notificationservice.controller;
+
+
+import com.example.notificationservice.dto.NotificationDTO;
+import com.example.notificationservice.service.NotificationService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.common.dto.Notification.NotificationChannel;
+import org.common.dto.response.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/notifications")
+@RequiredArgsConstructor
+public class NotificationController {
+    private final NotificationService notificationService;
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<NotificationDTO>>> getUserNotifications(
+            @RequestParam(value = "userId") String userId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "10") int size
+    ) {
+        Page<NotificationDTO> pages = notificationService.getUserNotifications(userId, page, size);
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách thông báo thành công"));
+    }
+
+    @PutMapping("/{id}/read")
+    public ResponseEntity<?> markAsRead(@PathVariable String id) {
+        notificationService.markAsRead(id);
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Cập nhật thông báo đã đọc thành công", HttpStatus.OK)
+        );
+    }
+
+}

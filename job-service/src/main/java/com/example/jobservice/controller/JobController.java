@@ -28,6 +28,14 @@ public class JobController {
         );
     }
 
+    @PostMapping
+    public ResponseEntity<?> testKafka() {
+        jobService.testKafak();
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Test Kafka thành công", HttpStatus.OK)
+        );
+    }
+
     @PostMapping("/recruiters/{recruiterId}")
     public ResponseEntity<ApiResponse<JobDTO>> createJob(@Valid @RequestBody CreateJobRequest createJobRequest, @PathVariable String recruiterId) {
         JobDTO job = jobService.createJob(createJobRequest, recruiterId);

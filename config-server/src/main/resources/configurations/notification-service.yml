@@ -1,0 +1,46 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9090/realms/sjob"
+          jwk-set-uri: "http://localhost:9090/realms/sjob/protocol/openid-connect/certs"
+  data:
+    mongodb:
+      uri: ${mongo.uri}
+      database: notification-service-db
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: notification-service
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: org.common.dto.Notification
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    listener:
+      ack-mode: manual
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+#springdoc:
+#  api-docs:
+#    path: /v3/api-docs
+
+server:
+  port: 8086
+
+gateway:
+  url: ${gateway.url}
+
+keycloak:
+  client:
+    client-id: notification-service
+    client-secret: ${keycloak.notification.client.secret}
+    token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token

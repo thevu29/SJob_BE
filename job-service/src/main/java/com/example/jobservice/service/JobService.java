@@ -1,6 +1,7 @@
 package com.example.jobservice.service;
 
 import com.example.jobservice.client.RecruiterServiceClient;
+import com.example.jobservice.client.UserServiceClient;
 import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.JobImportDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
@@ -16,10 +17,18 @@ import com.example.jobservice.repository.JobRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.Email.EmailMessageDTO;
+import org.common.dto.Notification.NotificationEvent;
+import org.common.dto.Notification.NotificationRequestDTO;
+import org.common.dto.Notification.NotificationType;
 import org.common.dto.Recruiter.RecruiterDTO;
+import org.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.common.dto.User.UserDTO;
 import org.common.dto.response.ApiResponse;
 import org.common.exception.FileUploadException;
 import org.common.exception.ResourceNotFoundException;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,9 +44,11 @@ import java.util.stream.Collectors;
 public class JobService {
     private final JobRepository jobRepository;
     private final RecruiterServiceClient recruiterServiceClient;
+    private final UserServiceClient userServiceClient;
     private final JobMapper jobMapper;
     private final JobFieldRepository jobFieldRepository;
     private final FieldDetailRepository fieldDetailRepository;
+    private final KafkaTemplate <String, NotificationRequestDTO> kafkaTemplate;
     ;
     private final CSVHelper csvHelper;
 
@@ -53,6 +64,22 @@ public class JobService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + jobId));
         return jobMapper.toDto(job);
+    }
+
+    public void testKafak() {
+        String userId = "67ffb4b8996bf14e1450c2d0";
+        String email = "huyhoang191072@gmail.com";
+        String title = "Thông báo hệ thống";
+        String content = "Đây là thông báo hệ thống";
+        NotificationRequestDTO notificationRequestDTO = NotificationEvent.systemAnnouncement(userId,email,title,content);
+        kafkaTemplate.send("notification-requests", notificationRequestDTO);
+
+//        EmailMessageDTO emailMessageDTO = EmailMessageDTO.builder()
+//                .to("hoangdaden2003@gmail.com")
+//                .subject("SMTP")
+//                .body("Content")
+//                .build();
+//        kafkaTemplate.send("send-email", emailMessageDTO);
     }
 
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
@@ -82,7 +109,6 @@ public class JobService {
 
                 jobFieldRepository.save(jobField);
             }
-
             return jobMapper.toDto(savedJob);
         } catch (Exception e) {
             throw new RuntimeException("Thất bại khi tạo mới việc làm", e);
@@ -242,6 +268,42 @@ public class JobService {
                 .experience(dto.getExperience())
                 .fieldDetails(fieldDetailIds)
                 .build();
+    }
+
+
+
+//    @Scheduled(cron = "0 0 0 * * *") // Runs daily at midnight
+    @Scheduled(cron = "0 10 17 * * *", zone = "Asia/Ho_Chi_Minh")
+    public void checkJobDeadlines() {
+        LocalDate thresholdDate = LocalDate.now().plusDays(3);
+
+        List<Job> expiringJobs = jobRepository.findByDeadlineAndStatus(
+                thresholdDate,
+                JobStatus.OPEN
+        );
+
+        expiringJobs.forEach(this::sendExpiryNotification);
+    }
+
+    private void sendExpiryNotification(Job job) {
+        // Fetch recruiter details
+        RecruiterWithUserDTO recruiter = recruiterServiceClient.getRecruiterById(job.getRecruiterId()).getData();
+        UserDTO user = userServiceClient.getUserById(recruiter.getUserId()).getData();
+
+        NotificationRequestDTO notification = NotificationEvent.jobExpiry(
+                user.getId(),
+                user.getEmail(),
+                job.getId(),
+                job.getName(),
+                job.getDeadline()
+        );
+
+        try {
+            kafkaTemplate.send("notification-requests", notification);
+            log.info("Sent expiry notification for job: {}", job.getId());
+        } catch (Exception e) {
+            log.error("Failed to send expiry notification for job: {}", job.getId(), e);
+        }
     }
 
 }

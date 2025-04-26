@@ -26,9 +26,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: job_service
-  #  cloud:
-  #    config:
-  #      enabled: false
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   servlet:
     multipart:
       enabled: true
@@ -48,6 +50,8 @@ gateway:
 service:
   recruiter:
     url: http://localhost:8083
+  user:
+    url: http://localhost:8081
 
 keycloak:
   client:

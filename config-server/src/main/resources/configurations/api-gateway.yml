@@ -101,6 +101,18 @@ spring:
           predicates:
             - Path=/api/field-details/**
 
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notifications/**
+        - id: notification-service-preferences
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notification-preferences/**
+        - id: notification-websocket
+          uri: lb:ws://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/ws-notifications/**
 springdoc:
   swagger-ui:
     urls:
