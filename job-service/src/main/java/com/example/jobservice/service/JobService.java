@@ -272,8 +272,7 @@ public class JobService {
 
 
 
-//    @Scheduled(cron = "0 0 0 * * *") // Runs daily at midnight
-    @Scheduled(cron = "0 10 17 * * *", zone = "Asia/Ho_Chi_Minh")
+    @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Ho_Chi_Minh") // Runs daily at 9AM every day
     public void checkJobDeadlines() {
         LocalDate thresholdDate = LocalDate.now().plusDays(3);
 

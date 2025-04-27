@@ -29,10 +29,10 @@ public class JobController {
     }
 
     @PostMapping
-    public ResponseEntity<?> testKafka() {
-        jobService.testKafak();
+    public ResponseEntity<?> test() {
+        jobService.checkJobDeadlines();
         return ResponseEntity.ok(
-                ApiResponse.success(null, "Test Kafka thành công", HttpStatus.OK)
+                ApiResponse.success(null, "Test thành công", HttpStatus.OK)
         );
     }
 
