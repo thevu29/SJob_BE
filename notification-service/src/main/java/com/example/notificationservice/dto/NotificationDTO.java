@@ -16,6 +16,7 @@ public class NotificationDTO {
     private NotificationType type;
     private String title;
     private String content;
+    private String url;
     private Set<NotificationChannel> channels;
     private boolean read;
     private LocalDateTime createdAt;

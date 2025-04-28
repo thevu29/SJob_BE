@@ -38,4 +38,12 @@ public class NotificationController {
         );
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteNotification(@PathVariable String id) {
+        notificationService.deleteNotification(id);
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Xóa thông báo thành công", HttpStatus.OK)
+        );
+    }
+
 }

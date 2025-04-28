@@ -1,4 +1,4 @@
-package com.example.notificationservice.dto.NotificationPreference;
+package org.common.dto.NotificationPreference;
 
 import lombok.Data;
 import org.common.dto.Notification.NotificationType;

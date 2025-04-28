@@ -1,7 +1,6 @@
 package com.example.recruiterservice.service;
 
-import com.example.recruiterservice.client.JobServiceClient;
-import com.example.recruiterservice.client.UserServiceClient;
+import com.example.recruiterservice.client.*;
 import com.example.recruiterservice.dto.FieldDTO;
 import com.example.recruiterservice.dto.RecruiterImportDTO;
 import com.example.recruiterservice.dto.request.CreateRecruiterRequest;
@@ -14,6 +13,7 @@ import com.example.recruiterservice.utils.helpers.CSVHelper;
 import com.example.recruiterservice.utils.helpers.FileHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
 import org.common.dto.Recruiter.RecruiterCreationDTO;
 import org.common.dto.Recruiter.RecruiterDTO;
 import org.common.dto.Recruiter.RecruiterWithUserDTO;
@@ -35,7 +35,8 @@ import java.util.stream.Collectors;
 public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
     private final UserServiceClient userServiceClient;
-    private final JobServiceClient jobServiceClient;
+    private final FieldServiceClient fieldServiceClient;
+    private final NotificationPreferenceServiceClient notificationPreferenceServiceClient;
     private final RecruiterMapper recruiterMapper;
     private final FileHelper fileHelper;
     private final CSVHelper csvHelper;
@@ -51,7 +52,7 @@ public class RecruiterService {
     }
 
     private FieldDTO getFieldById(String fieldId) {
-        ApiResponse<FieldDTO> response = jobServiceClient.getField(fieldId);
+        ApiResponse<FieldDTO> response = fieldServiceClient.getField(fieldId);
         return response.getData();
     }
 
@@ -205,6 +206,11 @@ public class RecruiterService {
             ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
             user = userResponse.getData();
 
+            NotificationPreferenceCreateDTO notificationPreferenceCreateDTO = NotificationPreferenceCreateDTO.builder()
+                    .userId(user.getId())
+                    .build();
+            notificationPreferenceServiceClient.createNotificationPreference(notificationPreferenceCreateDTO);
+
             Recruiter recruiter = recruiterMapper.toEntity(request);
             recruiter.setUserId(user.getId());
 
@@ -314,7 +320,7 @@ public class RecruiterService {
                     .collect(Collectors.toSet());
 
             // 2. Fetch all fields in one query
-            ApiResponse<List<FieldDTO>> fieldsResponse = jobServiceClient.getFieldsByNames(new ArrayList<>(uniqueFieldNames));
+            ApiResponse<List<FieldDTO>> fieldsResponse = fieldServiceClient.getFieldsByNames(new ArrayList<>(uniqueFieldNames));
             Map<String, String> fieldMap = fieldsResponse.getData().stream()
                     .collect(Collectors.toMap(FieldDTO::getName, FieldDTO::getId));
 

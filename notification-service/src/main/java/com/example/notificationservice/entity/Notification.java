@@ -33,6 +33,8 @@ public class Notification {
 
     private Set<NotificationChannel> channels;
 
+    private String url;
+
     @Field(name = "read")
     @Builder.Default
     private boolean read = false;

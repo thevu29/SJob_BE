@@ -12,17 +12,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.common.dto.Email.EmailMessageDTO;
 import org.common.dto.Notification.NotificationChannel;
 import org.common.dto.Notification.NotificationRequestDTO;
+import org.common.dto.Notification.NotificationType;
 import org.common.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,8 +45,10 @@ public class NotificationService {
             String content = notificationTemplateService.renderContent(request.getType(), request.getMetaData());
 
             Set<NotificationChannel> channels = determineEnabledChannels(preference, request);
+            String url = generateUrlFromType(request.getType(), request.getMetaData());
+
             Notification notification = notificationMapper.notificationRequestToEntity(
-                    request, title, content, channels);
+                    request, title, content, channels, url);
             Notification savedNotification = notificationRepository.save(notification);
 
             dispatchNotifications(savedNotification, request.getEmail());
@@ -90,6 +93,16 @@ public class NotificationService {
         }
     }
 
+    private String generateUrlFromType(NotificationType type, Map<String, Object> metaData) {
+        return switch (type) {
+            case JOB_INVITATION -> "/invitations/" + metaData.get("jobId");
+            case JOB_EXPIRY -> "/jobs/" + metaData.get("jobId");
+            case JOB_APPLICATION -> "/applications/" + metaData.get("applicationId");
+            case JOB_RECOMMENDATION -> "/jobs/" + metaData.get("jobId");
+            default -> "/";
+        };
+    }
+
 
     public Page<NotificationDTO> getUserNotifications(String userId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
@@ -106,6 +119,26 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    public void deleteNotification(String notificationId) {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông báo"));
+
+        notificationRepository.delete(notification);
+    }
+
+    @Scheduled(cron = "0 0 0 * * *") // Runs at midnight every day
+    public void deleteOldNotifications() {
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+
+        try {
+            List<Notification> oldNotifications = notificationRepository.findByCreatedAtBefore(thirtyDaysAgo);
+            notificationRepository.deleteAll(oldNotifications);
+
+            log.info("Deleted {} notifications older than 30 days", oldNotifications.size());
+        } catch (Exception e) {
+            log.error("Error deleting old notifications: ", e);
+        }
+    }
 
 
 }

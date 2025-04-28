@@ -34,6 +34,11 @@ gateway:
 service:
   user:
     url: http://localhost:8081
+  notification:
+    url: http://localhost:8086
+  job:
+    url: http://localhost:8084
+
 
 keycloak:
   client:
