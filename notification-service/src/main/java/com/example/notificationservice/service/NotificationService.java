@@ -95,7 +95,7 @@ public class NotificationService {
 
     private String generateUrlFromType(NotificationType type, Map<String, Object> metaData) {
         return switch (type) {
-            case JOB_INVITATION -> "/invitations/" + metaData.get("jobId");
+            case JOB_INVITATION -> "/invitations/" + metaData.get("invitationId");
             case JOB_EXPIRY -> "/jobs/" + metaData.get("jobId");
             case JOB_APPLICATION -> "/applications/" + metaData.get("applicationId");
             case JOB_RECOMMENDATION -> "/jobs/" + metaData.get("jobId");

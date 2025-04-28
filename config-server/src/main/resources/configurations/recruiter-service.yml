@@ -9,6 +9,11 @@ spring:
     mongodb:
       uri: ${mongo.uri}
       database: recruiter-service-db
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
   servlet:
     multipart:
       enabled: true
@@ -38,6 +43,8 @@ service:
     url: http://localhost:8086
   job:
     url: http://localhost:8084
+  jobSeeker:
+    url: http://localhost:8082
 
 
 keycloak:

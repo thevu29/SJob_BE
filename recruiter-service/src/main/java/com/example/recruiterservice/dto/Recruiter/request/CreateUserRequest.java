@@ -1,4 +1,4 @@
-package com.example.recruiterservice.dto.request;
+package com.example.recruiterservice.dto.Recruiter.request;
 
 import lombok.Builder;
 import lombok.Data;

@@ -1,9 +1,9 @@
 package com.example.recruiterservice.mapper;
 
-import com.example.recruiterservice.dto.FieldDTO;
-import com.example.recruiterservice.dto.request.CreateRecruiterRequest;
-import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
+import com.example.recruiterservice.dto.Recruiter.request.CreateRecruiterRequest;
+import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.entity.Recruiter;
+import org.common.dto.Field.FieldDTO;
 import org.common.dto.Recruiter.RecruiterCreationDTO;
 import org.common.dto.Recruiter.RecruiterDTO;
 import org.common.dto.Recruiter.RecruiterWithUserDTO;

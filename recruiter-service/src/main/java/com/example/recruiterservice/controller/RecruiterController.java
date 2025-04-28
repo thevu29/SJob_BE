@@ -1,6 +1,6 @@
 package com.example.recruiterservice.controller;
 
-import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
+import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.service.RecruiterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

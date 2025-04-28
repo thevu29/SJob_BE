@@ -1,7 +1,7 @@
 package com.example.recruiterservice.utils.helpers;
 
 
-import com.example.recruiterservice.dto.RecruiterImportDTO;
+import com.example.recruiterservice.dto.Recruiter.RecruiterImportDTO;
 import com.example.recruiterservice.exception.FileUploadException;
 import com.example.recruiterservice.utils.validations.ValidationUtils;
 import org.apache.commons.csv.CSVFormat;

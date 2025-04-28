@@ -104,31 +104,30 @@ public class NotificationEvent {
 //    }
 //
 //    // Job Invitation Events
-//    public static NotificationRequestDTO jobInvitation(
-//            String jobSeekerId,
-//            String jobId,
-//            String jobTitle,
-//            String companyName,
-//            String recruiterId,
-//            String recruiterName,
-//            String message) {
-//
-//        return NotificationRequestDTO.builder()
-//                .recipientId(jobSeekerId)
-//                .recipientType("JOB_SEEKER")
-//                .type(NotificationType.JOB_INVITATION)
-//                .data(Map.of(
-//                        "jobId", jobId,
-//                        "jobTitle", jobTitle,
-//                        "companyName", companyName,
-//                        "recruiterId", recruiterId,
-//                        "recruiterName", recruiterName,
-//                        "message", message,
-//                        "invitationDate", new Date().toString()
-//                ))
-//                .build();
-//    }
-//
+    public static NotificationRequestDTO jobInvitation(
+            String userId,
+            String email,
+            String invitationId,
+            String jobName,
+            String recruiterId,
+            String recruiterName,
+            String message) {
+
+        return NotificationRequestDTO.builder()
+                .userId(userId)
+                .email(email)
+                .type(NotificationType.JOB_INVITATION)
+                .metaData(Map.of(
+                        "invitationId", invitationId,
+                        "jobName", jobName,
+                        "recruiterId", recruiterId,
+                        "recruiterName", recruiterName,
+                        "message", message,
+                        "invitationDate", new Date().toString()
+                ))
+                .build();
+    }
+
     // Job Expiry Events
     public static NotificationRequestDTO jobExpiry(
             String userId,

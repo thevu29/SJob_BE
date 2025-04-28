@@ -1,10 +1,9 @@
 package com.example.recruiterservice.service;
 
 import com.example.recruiterservice.client.*;
-import com.example.recruiterservice.dto.FieldDTO;
-import com.example.recruiterservice.dto.RecruiterImportDTO;
-import com.example.recruiterservice.dto.request.CreateRecruiterRequest;
-import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
+import com.example.recruiterservice.dto.Recruiter.RecruiterImportDTO;
+import com.example.recruiterservice.dto.Recruiter.request.CreateRecruiterRequest;
+import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.entity.Recruiter;
 import com.example.recruiterservice.exception.FileUploadException;
 import com.example.recruiterservice.mapper.RecruiterMapper;
@@ -13,6 +12,7 @@ import com.example.recruiterservice.utils.helpers.CSVHelper;
 import com.example.recruiterservice.utils.helpers.FileHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.Field.FieldDTO;
 import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
 import org.common.dto.Recruiter.RecruiterCreationDTO;
 import org.common.dto.Recruiter.RecruiterDTO;

@@ -87,6 +87,10 @@ spring:
           uri: lb://RECRUITER-SERVICE
           predicates:
             - Path=/api/recruiters/**
+        - id: recruiter-service-invitations
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/api/invitations/**
 
         - id: job-service
           uri: lb://JOB-SERVICE
