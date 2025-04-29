@@ -1,12 +1,11 @@
-package com.example.recruiterservice.client;
+package org.example.userservice.client;
 
-import com.example.recruiterservice.config.FeignClientInterceptor;
 import jakarta.validation.Valid;
 import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
 import org.common.dto.NotificationPreference.NotificationPreferenceDTO;
 import org.common.dto.response.ApiResponse;
+import org.example.userservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 

@@ -1,10 +1,12 @@
 package org.example.userservice.service;
 
 import lombok.RequiredArgsConstructor;
+import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
 import org.common.dto.User.UserCreationDTO;
 import org.common.dto.User.UserDTO;
 import org.common.enums.UserRole;
 import org.common.exception.ResourceNotFoundException;
+import org.example.userservice.client.NotificationPreferenceServiceClient;
 import org.example.userservice.entity.User;
 import org.example.userservice.mapper.UserMapper;
 import org.example.userservice.repository.UserRepository;
@@ -23,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final NotificationPreferenceServiceClient notificationPreferenceServiceClient;
 
     private String escapeRegexSpecialChars(String input) {
         if (input == null) return "";
@@ -84,6 +87,11 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User savedUser = userRepository.save(user);
+
+        NotificationPreferenceCreateDTO notificationPreferenceCreateDTO = NotificationPreferenceCreateDTO.builder()
+                .userId(savedUser.getId())
+                .build();
+        notificationPreferenceServiceClient.createNotificationPreference(notificationPreferenceCreateDTO);
 
         return userMapper.toDto(savedUser);
     }

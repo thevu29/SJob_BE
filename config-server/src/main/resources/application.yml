@@ -44,6 +44,9 @@ spring:
             notification-service:
               client:
                 secret: ${keycloak.notification-service.client.secret}
+            user-service:
+              client:
+                secret: ${keycloak.user-service.client.secret}
           mail:
             username: ${mail.username}
             password: ${mail.password}

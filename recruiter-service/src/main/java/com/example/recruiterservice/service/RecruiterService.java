@@ -36,7 +36,6 @@ public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
     private final UserServiceClient userServiceClient;
     private final FieldServiceClient fieldServiceClient;
-    private final NotificationPreferenceServiceClient notificationPreferenceServiceClient;
     private final RecruiterMapper recruiterMapper;
     private final FileHelper fileHelper;
     private final CSVHelper csvHelper;
@@ -206,10 +205,6 @@ public class RecruiterService {
             ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
             user = userResponse.getData();
 
-            NotificationPreferenceCreateDTO notificationPreferenceCreateDTO = NotificationPreferenceCreateDTO.builder()
-                    .userId(user.getId())
-                    .build();
-            notificationPreferenceServiceClient.createNotificationPreference(notificationPreferenceCreateDTO);
 
             Recruiter recruiter = recruiterMapper.toEntity(request);
             recruiter.setUserId(user.getId());

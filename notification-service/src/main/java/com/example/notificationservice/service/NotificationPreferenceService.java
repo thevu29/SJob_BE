@@ -31,7 +31,7 @@ public class NotificationPreferenceService {
                 Arrays.stream(NotificationType.values())
                         .collect(Collectors.toMap(
                                 type -> type,
-                                type -> true
+                                type -> false
                         ))
         );
 
