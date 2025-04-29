@@ -19,44 +19,21 @@ public interface JobRepository extends JpaRepository<Job, String> {
 
     @Query(value = """
     SELECT j.* FROM job_service.jobs j
-    WHERE (CAST(:status AS VARCHAR) IS NULL OR CAST(j.status AS VARCHAR) = CAST(:status AS VARCHAR))
-    AND (
-        -- match by recruiterId (if provided)
-        (CAST(:recruiterId AS VARCHAR) IS NOT NULL AND j.recruiter_id = :recruiterId)
-
-        -- OR match by search query in specified fields
-        OR (
-            (CAST(:query AS VARCHAR) IS NOT NULL AND CAST(:query AS VARCHAR) <> '')
-            AND (
-                LOWER(j.name) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-                OR LOWER(j.description) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-                OR LOWER(j.requirement) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-                OR LOWER(j.benefit) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-            )
-        )
-    )
-    """,
-            countQuery = """
-        SELECT COUNT(*) FROM job_service.jobs j
-        WHERE (CAST(:status AS VARCHAR) IS NULL OR CAST(j.status AS VARCHAR) = CAST(:status AS VARCHAR))
-        AND (
-            (CAST(:recruiterId AS VARCHAR) IS NOT NULL AND j.recruiter_id = :recruiterId)
-            OR (
-                (CAST(:query AS VARCHAR) IS NOT NULL AND CAST(:query AS VARCHAR) <> '')
-                AND (
-                    LOWER(j.name) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-                    OR LOWER(j.description) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-                    OR LOWER(j.requirement) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-                    OR LOWER(j.benefit) LIKE LOWER(CONCAT('%', CAST(:query AS VARCHAR), '%'))
-                )
-            )
-        )
-        """,
-            nativeQuery = true
-    )
+    WHERE (:status IS NULL OR j.status::text ILIKE CONCAT('%', :status, '%'))
+      AND (:recruiterId IS NULL OR j.recruiter_id = :recruiterId)
+      AND (
+          :query IS NULL OR 
+          LOWER(j.name) LIKE LOWER(CONCAT('%', :query, '%')) OR
+          LOWER(j.description) LIKE LOWER(CONCAT('%', :query, '%')) OR
+          LOWER(j.requirement) LIKE LOWER(CONCAT('%', :query, '%')) OR
+          LOWER(j.benefit) LIKE LOWER(CONCAT('%', :query, '%')) OR
+          LOWER(j.experience) LIKE LOWER(CONCAT('%', :query, '%'))
+      )
+    ORDER BY j.id DESC
+    """, nativeQuery = true)
     Page<Job> findBySearchCriteria(
             @Param("query") String query,
-            @Param("status") JobStatus status,
+            @Param("status") String status,
             @Param("recruiterId") String recruiterId,
             Pageable pageable
     );

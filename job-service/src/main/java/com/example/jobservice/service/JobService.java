@@ -90,7 +90,7 @@ public class JobService {
 
         Page<Job> jobs = jobRepository.findBySearchCriteria(
                 query,
-                status,
+                status != null ? status.name() : null,
                 recruiterId,
                 pageable
         );
