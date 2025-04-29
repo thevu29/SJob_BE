@@ -3,10 +3,13 @@ package com.example.jobservice.controller;
 import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
+import com.example.jobservice.entity.JobStatus;
 import com.example.jobservice.service.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.common.dto.response.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +24,29 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping
+    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobs(
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "status", required = false) JobStatus status,
+            @RequestParam(value = "recruiterId", required = false) String recruiterId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
+    ) {
+        Page<JobDTO> pages = jobService.findPagedJobs(
+                query,
+                status,
+                recruiterId,
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách các việc làm thành công"));
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<JobDTO>>> getAllJobs() {
         List<JobDTO> jobDTOList = jobService.getJobs();
         return ResponseEntity.ok(

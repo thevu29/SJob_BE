@@ -21,4 +21,6 @@ public class RecruiterDTO {
     private String address;
 
     private int members;
+
+    private boolean status;
 }

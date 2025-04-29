@@ -20,5 +20,6 @@ public class UpdateRecruiterRequest {
 
     private int members;
 
+    private boolean status;
 
 }

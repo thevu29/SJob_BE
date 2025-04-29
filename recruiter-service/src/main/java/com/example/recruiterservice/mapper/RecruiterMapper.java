@@ -21,8 +21,10 @@ public interface RecruiterMapper {
 
     @Mapping(target = "fieldId", source = "fieldId")
     @Mapping(target = "image", ignore = true)
+    @Mapping(target = "status", constant = "false")
     Recruiter toEntity(CreateRecruiterRequest request);
 
+    @Mapping(target = "status", constant = "false")
     Recruiter toEntity(RecruiterCreationDTO request);
 
     @Mapping(target = "image", ignore = true)
@@ -37,6 +39,7 @@ public interface RecruiterMapper {
     @Mapping(target = "website", source = "recruiterDTO.website")
     @Mapping(target = "address", source = "recruiterDTO.address")
     @Mapping(target = "members", source = "recruiterDTO.members")
+    @Mapping(target = "status", source = "recruiterDTO.status")
     @Mapping(target = "email", source = "userDTO.email")
     @Mapping(target = "fieldName", ignore = true)
     @Mapping(target = "role", source = "userDTO.role")
@@ -54,6 +57,7 @@ public interface RecruiterMapper {
     @Mapping(target = "website", source = "recruiterDTO.website")
     @Mapping(target = "address", source = "recruiterDTO.address")
     @Mapping(target = "members", source = "recruiterDTO.members")
+    @Mapping(target = "status", source = "recruiterDTO.status")
     @Mapping(target = "email", source = "userDTO.email")
     @Mapping(target = "fieldName", source = "fieldDTO.name")
     @Mapping(target = "role", source = "userDTO.role")

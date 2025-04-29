@@ -28,6 +28,8 @@ public class RecruiterWithUserDTO {
 
     private int members;
 
+    private boolean status;
+
     private String email;
 
     private String fieldName;

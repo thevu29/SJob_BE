@@ -18,6 +18,7 @@ import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.common.dto.Email.EmailMessageDTO;
+import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.common.dto.Notification.NotificationEvent;
 import org.common.dto.Notification.NotificationRequestDTO;
 import org.common.dto.Notification.NotificationType;
@@ -27,6 +28,7 @@ import org.common.dto.User.UserDTO;
 import org.common.dto.response.ApiResponse;
 import org.common.exception.FileUploadException;
 import org.common.exception.ResourceNotFoundException;
+import org.springframework.data.domain.*;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -64,6 +66,44 @@ public class JobService {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + jobId));
         return jobMapper.toDto(job);
+    }
+
+    public Page<JobDTO> findPagedJobs(
+            String query,
+            JobStatus status,
+            String recruiterId,
+            int page,
+            int size,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        String columnName = switch (sortBy) {
+            case "name" -> "name";
+            case "salary" -> "salary";
+            case "deadline" -> "deadline";
+            case "date" -> "date";
+            default -> "id";
+        };
+
+        Sort sort = Sort.by(direction, columnName);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<Job> jobs = jobRepository.findBySearchCriteria(
+                query,
+                status,
+                recruiterId,
+                pageable
+        );
+
+        if (jobs.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
+        List<JobDTO> content = jobs.getContent().stream()
+                .map(jobMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(content, pageable, jobs.getTotalElements());
     }
 
     public void testKafak() {
