@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -38,7 +37,6 @@ public class JobService {
     private final JobMapper jobMapper;
     private final JobFieldRepository jobFieldRepository;
     private final FieldDetailRepository fieldDetailRepository;
-    ;
     private final CSVHelper csvHelper;
 
     public List<JobDTO> getJobs() {
@@ -243,5 +241,4 @@ public class JobService {
                 .fieldDetails(fieldDetailIds)
                 .build();
     }
-
 }

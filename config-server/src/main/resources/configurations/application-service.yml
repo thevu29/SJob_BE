@@ -1,0 +1,51 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      group-id: application-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9090/realms/sjob"
+          jwk-set-uri: "http://localhost:9090/realms/sjob/protocol/openid-connect/certs"
+  data:
+    mongodb:
+      uri: ${mongo.uri}
+      database: application-service-db
+
+mongock:
+  migration-scan-package: org.example.applicationservice.database.migration
+  track-ignored: false
+  enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+server:
+  port: 8086
+
+gateway:
+  url: ${gateway.url}
+
+service:
+  job-seeker:
+    url: http://localhost:8082
+  recruiter:
+    url: http://localhost:8083
+  job:
+    url: http://localhost:8084
+
+keycloak:
+  client:
+    client-id: application-service
+    client-secret: ${keycloak.application-service.client.secret}
+    token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token

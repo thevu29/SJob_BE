@@ -1,6 +1,12 @@
 spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://localhost:9090/realms/sjob"
+          jwk-set-uri: "http://localhost:9090/realms/sjob/protocol/openid-connect/certs"
   datasource:
-    url: jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:job-service-db}?currentSchema=job_service
+    url: jdbc:postgresql://${db.host:localhost}:${db.port:5432}/${db.database:job-service-db}
     username: ${db.user:postgres}
     password: ${db.password:123}
     driver-class-name: org.postgresql.Driver
@@ -8,9 +14,9 @@ spring:
     enabled: true
     schemas: job_service
     default-schema: job_service
+    baseline-version: 0
     locations: classpath:db/migration
     baseline-on-migrate: true
-    validate-on-migrate: true
     out-of-order: true
   jpa:
     hibernate:
@@ -20,22 +26,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: job_service
-  #  cloud:
-  #    config:
-  #      enabled: false
   servlet:
     multipart:
       enabled: true
       max-file-size: 5MB
       max-request-size: 5MB
+
 server:
   port: 8084
-
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://localhost:8761/eureka/
-#    register-with-eureka: true
-#    fetch-registry: true
-#  instance:
-#    prefer-ip-address: true

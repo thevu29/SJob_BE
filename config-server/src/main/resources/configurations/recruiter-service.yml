@@ -16,10 +16,10 @@ spring:
       max-request-size: 5MB
 
 aws:
-  access-user-key: ${aws.access.user.key}
-  secret-user-key: ${aws.secret.user.key}
+  access-key: ${aws.access-key}
+  secret-key: ${aws.secret-key}
   region: ${aws.region}
-  bucket-name: ${aws.bucket.name}
+  bucket-name: ${aws.bucket-name}
 
 server:
   port: 8083
