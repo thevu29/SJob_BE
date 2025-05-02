@@ -95,7 +95,7 @@ public class CSVHelper {
                 JobImportDTO dto = JobImportDTO.builder()
                         .recruiter(csvRecord.get("Recruiter"))
                         .fieldDetails(csvRecord.get("Field Detail"))
-                        .name(csvRecord.get("Name"))
+                        .name(csvRecord.get("Job Name"))
                         .description(csvRecord.get("Description"))
                         .salary(Double.parseDouble(csvRecord.get("Salary")))
                         .requirement(csvRecord.get("Requirement"))

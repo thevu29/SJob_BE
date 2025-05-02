@@ -68,7 +68,7 @@ public class RecruiterController {
                 .body(ApiResponse.success(recruiter, "Tạo nhà tuyển dụng thành công", HttpStatus.CREATED));
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> updateRecruiter(
             @PathVariable String id,
             @Valid @ModelAttribute UpdateRecruiterRequest request

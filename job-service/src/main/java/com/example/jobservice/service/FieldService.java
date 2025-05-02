@@ -70,6 +70,19 @@ public class FieldService {
             // Parse CSV to DTO
             List<FieldImportDTO> fieldDTOs = CSVHelper.csvToFieldImportDTOs(file.getInputStream());
 
+            // Check for duplicate field names
+            List<String> fieldNames = fieldDTOs.stream()
+                    .map(FieldImportDTO::getName)
+                    .collect(Collectors.toList());
+
+            List<Field> existingFields = fieldRepository.findByNameIn(fieldNames);
+            if (!existingFields.isEmpty()) {
+                String duplicateNames = existingFields.stream()
+                        .map(Field::getName)
+                        .collect(Collectors.joining(", "));
+                throw new RuntimeException("Các ngành nghề đã tồn tại: " + duplicateNames);
+            }
+
             // Convert to entities and save
             List<Field> saveFields = fieldDTOs.stream()
                     .map(fieldMapper::toEntity)

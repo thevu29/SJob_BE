@@ -38,5 +38,5 @@ public class RecruiterImportDTO {
     private String address;
 
     @Min(value = 1, message = "Số lượng nhân sự phải lớn hơn 0")
-    private int members;
+    private Integer members;
 }

@@ -18,8 +18,8 @@ public class UpdateRecruiterRequest {
 
     private String address;
 
-    private int members;
+    private Integer members;
 
-    private boolean status;
+    private Boolean status;
 
 }

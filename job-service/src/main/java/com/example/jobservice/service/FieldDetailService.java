@@ -77,6 +77,19 @@ public class FieldDetailService {
             // Parse CSV to DTO
             List<FieldDetailImportDTO> fieldDetailImportDTOS = CSVHelper.csvToFieldDetailImportDTOs(file.getInputStream());
 
+            // Check for duplicate field detail names
+            List<String> fieldDetailNames = fieldDetailImportDTOS.stream()
+                    .map(FieldDetailImportDTO::getFieldDetail)
+                    .collect(Collectors.toList());
+
+            List<FieldDetail> existingFieldDetails = fieldDetailRepository.findByNameIn(fieldDetailNames);
+            if (!existingFieldDetails.isEmpty()) {
+                String duplicateNames = existingFieldDetails.stream()
+                        .map(FieldDetail::getName)
+                        .collect(Collectors.joining(", "));
+                throw new FileUploadException("Các chi tiết ngành nghề đã tồn tại: " + duplicateNames);
+            }
+
             // 1. Extract unique field names
             Set<String> uniqueFieldNames = fieldDetailImportDTOS.stream()
                     .map(FieldDetailImportDTO::getField)

@@ -32,5 +32,5 @@ public class CreateRecruiterRequest {
 
     @NotNull(message = "Số lượng nhân sự không được để trống")
     @Positive(message = "Số lượng nhân sự phải lớn hơn 0")
-    private int members;
+    private Integer members;
 }

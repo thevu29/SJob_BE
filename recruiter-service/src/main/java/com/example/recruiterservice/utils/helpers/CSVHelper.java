@@ -58,7 +58,7 @@ public class CSVHelper {
                         .email(csvRecord.get("Email"))
                         .password(csvRecord.get("Password"))
                         .fieldName(csvRecord.get("Field Name"))
-                        .name(csvRecord.get("Name"))
+                        .name(csvRecord.get("Recruiter Name"))
                         .about(csvRecord.get("About"))
                         .image(csvRecord.get("Image"))
                         .website(csvRecord.get("Website"))
