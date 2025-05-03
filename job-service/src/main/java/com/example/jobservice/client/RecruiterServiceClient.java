@@ -1,8 +1,10 @@
 package com.example.jobservice.client;
 
 
-import com.example.jobservice.dto.Recruiter.RecruiterDTO;
-import com.example.jobservice.dto.response.ApiResponse;
+import com.example.jobservice.config.FeignClientInterceptor;
+import org.common.dto.Recruiter.RecruiterDTO;
+import org.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.common.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,11 +13,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "recruiter-service")
+@FeignClient(name = "recruiter-service", url = "${service.recruiter.url}", path = "/api/recruiters", configuration = FeignClientInterceptor.class)
 public interface RecruiterServiceClient {
-    @GetMapping("/api/recruiters/exists/{id}")
+    @GetMapping("/exists/{id}")
     boolean checkIfRecruiterExists(@PathVariable String id);
 
-    @PostMapping("/api/recruiters/by-names")
+    @PostMapping("/by-names")
     ApiResponse<List<RecruiterDTO>> getRecruiterByName(@RequestBody List<String> names);
+
+    @GetMapping("/{id}")
+    ApiResponse<RecruiterWithUserDTO> getRecruiterById(@PathVariable String id);
 }

@@ -1,16 +1,16 @@
 package com.example.jobservice.service;
 
-import com.example.jobservice.dto.Field.FieldDTO;
 import com.example.jobservice.dto.Field.FieldImportDTO;
 import com.example.jobservice.dto.Field.request.CreateFieldRequest;
 import com.example.jobservice.dto.Field.request.UpdateFieldRequest;
 import com.example.jobservice.entity.Field;
-import com.example.jobservice.exception.ResourceNotFoundException;
 import com.example.jobservice.mapper.FieldMapper;
 import com.example.jobservice.repository.FieldRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.Field.FieldDTO;
+import org.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,6 +69,19 @@ public class FieldService {
 
             // Parse CSV to DTO
             List<FieldImportDTO> fieldDTOs = CSVHelper.csvToFieldImportDTOs(file.getInputStream());
+
+            // Check for duplicate field names
+            List<String> fieldNames = fieldDTOs.stream()
+                    .map(FieldImportDTO::getName)
+                    .collect(Collectors.toList());
+
+            List<Field> existingFields = fieldRepository.findByNameIn(fieldNames);
+            if (!existingFields.isEmpty()) {
+                String duplicateNames = existingFields.stream()
+                        .map(Field::getName)
+                        .collect(Collectors.joining(", "));
+                throw new RuntimeException("Các ngành nghề đã tồn tại: " + duplicateNames);
+            }
 
             // Convert to entities and save
             List<Field> saveFields = fieldDTOs.stream()

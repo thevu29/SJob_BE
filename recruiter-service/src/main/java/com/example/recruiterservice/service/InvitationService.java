@@ -1,0 +1,67 @@
+package com.example.recruiterservice.service;
+
+import com.example.recruiterservice.client.JobSeekerServiceClient;
+import com.example.recruiterservice.client.JobServiceClient;
+import com.example.recruiterservice.dto.Invitation.InvitationDTO;
+import com.example.recruiterservice.dto.Invitation.request.CreateInvitationRequest;
+import com.example.recruiterservice.entity.Invitation.Invitation;
+import com.example.recruiterservice.entity.Invitation.InvitationStatus;
+import com.example.recruiterservice.mapper.InvitationMapper;
+import com.example.recruiterservice.repository.InvitationRepository;
+import lombok.RequiredArgsConstructor;
+import org.common.dto.Job.JobDTO;
+import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.common.dto.Notification.NotificationEvent;
+import org.common.dto.Notification.NotificationRequestDTO;
+import org.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class InvitationService {
+    private final InvitationRepository invitationRepository;
+    private final InvitationMapper invitationMapper;
+    private final RecruiterService recruiterService;
+    private final JobSeekerServiceClient jobSeekerServiceClient;
+    private final JobServiceClient jobServiceClient;
+    private final KafkaTemplate <String, NotificationRequestDTO> kafkaTemplate;
+
+    public InvitationDTO createInvitation(CreateInvitationRequest request) {
+        // Check for existing non-rejected invitation
+        boolean invitationExists = invitationRepository.existsByJobIdAndJobSeekerIdAndRecruiterIdAndStatusIn(
+                request.getJobId(),
+                request.getJobSeekerId(),
+                request.getRecruiterId(),
+                List.of(InvitationStatus.PENDING, InvitationStatus.ACCEPTED)
+        );
+
+        if (invitationExists) {
+            throw new IllegalStateException("Đã gửi lời mời ứng tuyển cho ứng viên này");
+        }
+
+        Invitation invitation = invitationMapper.toEntity(request);
+        Invitation savedInvitation = invitationRepository.save(invitation);
+
+        // Send notification
+        JobSeekerWithUserDTO jobSeeker = jobSeekerServiceClient.getJobSeekerById(request.getJobSeekerId()).getData();
+        String userId = jobSeeker.getUserId();
+        String email = jobSeeker.getEmail();
+
+        JobDTO jobDTO = jobServiceClient.getJob(request.getJobId()).getData();
+        String jobName = jobDTO.getName();
+
+        RecruiterWithUserDTO recruiter = recruiterService.getRecruiterById(request.getRecruiterId());
+        String recruiterName = recruiter.getName();
+
+        NotificationRequestDTO notificationRequestDTO = NotificationEvent.jobInvitation(userId, email, savedInvitation.getId(), jobName, request.getRecruiterId(), recruiterName, request.getMessage());
+        kafkaTemplate.send("notification-requests", notificationRequestDTO);
+
+        return invitationMapper.toDto(savedInvitation);
+    }
+
+
+}

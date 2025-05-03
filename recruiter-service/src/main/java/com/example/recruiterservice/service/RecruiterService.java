@@ -1,12 +1,10 @@
 package com.example.recruiterservice.service;
 
-import com.example.recruiterservice.client.JobServiceClient;
-import com.example.recruiterservice.client.UserServiceClient;
-import com.example.recruiterservice.dto.FieldDTO;
-import com.example.recruiterservice.dto.RecruiterDTO;
-import com.example.recruiterservice.dto.RecruiterImportDTO;
-import com.example.recruiterservice.dto.request.CreateRecruiterRequest;
-import com.example.recruiterservice.dto.request.UpdateRecruiterRequest;
+import com.example.recruiterservice.client.*;
+import com.example.recruiterservice.dto.Recruiter.RecruiterImportDTO;
+import com.example.recruiterservice.dto.Recruiter.request.CreateRecruiterRequest;
+import com.example.recruiterservice.dto.Recruiter.request.CreateUserRequest;
+import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.entity.Recruiter;
 import com.example.recruiterservice.exception.FileUploadException;
 import com.example.recruiterservice.mapper.RecruiterMapper;
@@ -15,11 +13,15 @@ import com.example.recruiterservice.utils.helpers.CSVHelper;
 import com.example.recruiterservice.utils.helpers.FileHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.Field.FieldDTO;
+import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
 import org.common.dto.Recruiter.RecruiterCreationDTO;
+import org.common.dto.Recruiter.RecruiterDTO;
 import org.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.common.dto.User.UserCreationDTO;
 import org.common.dto.User.UserDTO;
 import org.common.dto.response.ApiResponse;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,10 +36,15 @@ import java.util.stream.Collectors;
 public class RecruiterService {
     private final RecruiterRepository recruiterRepository;
     private final UserServiceClient userServiceClient;
-    private final JobServiceClient jobServiceClient;
+    private final FieldServiceClient fieldServiceClient;
     private final RecruiterMapper recruiterMapper;
     private final FileHelper fileHelper;
     private final CSVHelper csvHelper;
+
+    private String escapeRegexSpecialChars(String input) {
+        if (input == null) return "";
+        return input.replaceAll("[-\\[\\]{}()*+?.,\\\\^$|#\\s]", "\\\\$0");
+    }
 
     private UserDTO getUserById(String userId) {
         ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
@@ -45,7 +52,7 @@ public class RecruiterService {
     }
 
     private FieldDTO getFieldById(String fieldId) {
-        ApiResponse<FieldDTO> response = jobServiceClient.getField(fieldId);
+        ApiResponse<FieldDTO> response = fieldServiceClient.getField(fieldId);
         return response.getData();
     }
 
@@ -101,6 +108,77 @@ public class RecruiterService {
                 .collect(Collectors.toList());
     }
 
+    private List<String> fetchMatchingUserIds(String query, Boolean active, int page, int size, String sortBy, Sort.Direction direction) {
+        String sanitizedPattern = escapeRegexSpecialChars(query);
+
+        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
+                sanitizedPattern,
+                active,
+                "RECRUITER",
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
+            return usersResponse.getData().stream()
+                    .map(UserDTO::getId)
+                    .toList();
+        }
+
+        return Collections.emptyList();
+    }
+
+    public Page<RecruiterWithUserDTO> findPagedRecruiters(
+            String query,
+            Boolean active,
+            int page,
+            int size,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        String columnName = switch (sortBy) {
+            case "name" -> "name";
+            case "updatedAt" -> "updated_at";
+            case "createdAt" -> "created_at";
+            default -> "id";
+        };
+
+        Sort sort = Sort.by(direction, columnName);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        boolean isActiveFilter = active != null;
+
+        List<String> matchingUserIds = fetchMatchingUserIds(query, active, page, size, sortBy, direction);
+        System.out.println("jnk"+matchingUserIds);
+        if (matchingUserIds.isEmpty() && isActiveFilter) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
+
+        Page<Recruiter> recruiters = recruiterRepository.findBySearchCriteria(
+                query,
+                matchingUserIds.isEmpty() ? null : matchingUserIds,
+                pageable
+        );
+
+        if (recruiters.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        }
+
+        List<String> userIds = recruiters.getContent().stream()
+                .map(Recruiter::getUserId)
+                .distinct()
+                .toList();
+
+        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
+
+        List<RecruiterWithUserDTO> content = mapToRecruiterWithUserDTOs(recruiters.getContent(), userMap);
+
+        return new PageImpl<>(content, pageable, recruiters.getTotalElements());
+    }
+
     public List<RecruiterWithUserDTO> getAllRecruiters() {
         List<Recruiter> recruiters = recruiterRepository.findAll();
 
@@ -128,6 +206,7 @@ public class RecruiterService {
             ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
             user = userResponse.getData();
 
+
             Recruiter recruiter = recruiterMapper.toEntity(request);
             recruiter.setUserId(user.getId());
 
@@ -140,38 +219,38 @@ public class RecruiterService {
         }
     }
 
-//    public RecruiterWithUserDTO createRecruiter(CreateRecruiterRequest request) {
-//        UserDTO user = null;
-//        try {
-//            CreateUserRequest createUserRequest = CreateUserRequest.builder()
-//                    .email(request.getEmail())
-//                    .password(request.getPassword())
-//                    .role("RECRUITER")
-//                    .build();
-//            ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
-//            user = userResponse.getData();
-//
-//            Recruiter recruiter = recruiterMapper.toEntity(request);
-//            recruiter.setUserId(user.getId());
-//
-//            if (request.getImage() != null && !request.getImage().isEmpty()) {
-//                try {
-//                    String imageUrl = fileHelper.uploadFile(request.getImage());
-//                    recruiter.setImage(imageUrl);
-//                } catch (IOException e) {
-//                    throw new RuntimeException("Upload ảnh thất bại", e);
-//                }
-//            }
-//
-//            Recruiter savedRecruiter = recruiterRepository.save(recruiter);
-//            return recruiterMapper.toDto(recruiterMapper.toDto(savedRecruiter), user);
-//
-//
-//        } catch (Exception e) {
-//            handleUserRollback(user);
-//            throw new RuntimeException("Tạo nhà tuyển dụng thất bại", e);
-//        }
-//    }
+    public RecruiterWithUserDTO createRecruiterWithCSV(CreateRecruiterRequest request) {
+        UserDTO user = null;
+        try {
+            UserCreationDTO createUserRequest = UserCreationDTO.builder()
+                    .email(request.getEmail())
+                    .password(request.getPassword())
+                    .role("RECRUITER")
+                    .build();
+            ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
+            user = userResponse.getData();
+
+            Recruiter recruiter = recruiterMapper.toEntity(request);
+            recruiter.setUserId(user.getId());
+
+            if (request.getImage() != null && !request.getImage().isEmpty()) {
+                try {
+                    String imageUrl = fileHelper.uploadFile(request.getImage());
+                    recruiter.setImage(imageUrl);
+                } catch (IOException e) {
+                    throw new RuntimeException("Upload ảnh thất bại", e);
+                }
+            }
+
+            Recruiter savedRecruiter = recruiterRepository.save(recruiter);
+            return recruiterMapper.toDto(recruiterMapper.toDto(savedRecruiter), user);
+
+
+        } catch (Exception e) {
+            handleUserRollback(user);
+            throw new RuntimeException("Tạo nhà tuyển dụng thất bại", e);
+        }
+    }
 
     public void handleUserRollback(UserDTO user) {
         if (user != null && user.getId() != null) {
@@ -237,7 +316,7 @@ public class RecruiterService {
                     .collect(Collectors.toSet());
 
             // 2. Fetch all fields in one query
-            ApiResponse<List<FieldDTO>> fieldsResponse = jobServiceClient.getFieldsByNames(new ArrayList<>(uniqueFieldNames));
+            ApiResponse<List<FieldDTO>> fieldsResponse = fieldServiceClient.getFieldsByNames(new ArrayList<>(uniqueFieldNames));
             Map<String, String> fieldMap = fieldsResponse.getData().stream()
                     .collect(Collectors.toMap(FieldDTO::getName, FieldDTO::getId));
 
@@ -252,7 +331,7 @@ public class RecruiterService {
             // 4. Create recruiters using existing method
             for (RecruiterImportDTO dto : recruiterImportDTOS) {
                 CreateRecruiterRequest request = convertToCreateRequest(dto, fieldMap);
-//                createRecruiter(request);
+                createRecruiterWithCSV(request);
             }
         } catch (IOException e) {
             throw new FileUploadException("Nhập file thất bại: " + e.getMessage());

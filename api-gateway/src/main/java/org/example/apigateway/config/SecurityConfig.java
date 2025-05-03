@@ -27,7 +27,7 @@ public class SecurityConfig {
                                 "/api/users/verify-otp",
                                 "/api/users/update-password"
                         ).permitAll()
-                        .anyExchange().authenticated()
+                        .anyExchange().permitAll()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.
                         jwt(Customizer.withDefaults())

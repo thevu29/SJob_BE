@@ -33,7 +33,7 @@ public class SecurityConfig {
                                 "/api/users/update-password"
                         ).permitAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("SCOPE_INTERNAL")
-                        .requestMatchers("/api/users/**").authenticated()
+                        .requestMatchers("/api/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess

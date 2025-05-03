@@ -22,7 +22,10 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers("/api/recruiters/**").authenticated()
+                        .requestMatchers(
+                                "/api/recruiters/**",
+                                "/api/invitations/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess

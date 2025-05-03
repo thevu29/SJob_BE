@@ -1,19 +1,19 @@
 package com.example.jobservice.service;
 
-import com.example.jobservice.dto.FieldDetail.FieldDetailDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailImportDTO;
 import com.example.jobservice.dto.FieldDetail.request.CreateFieldDetailRequest;
 import com.example.jobservice.dto.FieldDetail.request.UpdateFieldDetailRequest;
 import com.example.jobservice.entity.Field;
 import com.example.jobservice.entity.FieldDetail;
-import com.example.jobservice.exception.FileUploadException;
-import com.example.jobservice.exception.ResourceNotFoundException;
 import com.example.jobservice.mapper.FieldDetailMapper;
 import com.example.jobservice.repository.FieldDetailRepository;
 import com.example.jobservice.repository.FieldRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.common.dto.FieldDetail.FieldDetailDTO;
+import org.common.exception.FileUploadException;
+import org.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -76,6 +76,19 @@ public class FieldDetailService {
 
             // Parse CSV to DTO
             List<FieldDetailImportDTO> fieldDetailImportDTOS = CSVHelper.csvToFieldDetailImportDTOs(file.getInputStream());
+
+            // Check for duplicate field detail names
+            List<String> fieldDetailNames = fieldDetailImportDTOS.stream()
+                    .map(FieldDetailImportDTO::getFieldDetail)
+                    .collect(Collectors.toList());
+
+            List<FieldDetail> existingFieldDetails = fieldDetailRepository.findByNameIn(fieldDetailNames);
+            if (!existingFieldDetails.isEmpty()) {
+                String duplicateNames = existingFieldDetails.stream()
+                        .map(FieldDetail::getName)
+                        .collect(Collectors.joining(", "));
+                throw new FileUploadException("Các chi tiết ngành nghề đã tồn tại: " + duplicateNames);
+            }
 
             // 1. Extract unique field names
             Set<String> uniqueFieldNames = fieldDetailImportDTOS.stream()

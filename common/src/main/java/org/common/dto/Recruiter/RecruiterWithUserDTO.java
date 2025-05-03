@@ -26,7 +26,9 @@ public class RecruiterWithUserDTO {
 
     private String address;
 
-    private int members;
+    private Integer members;
+
+    private Boolean status;
 
     private String email;
 

@@ -31,5 +31,9 @@ public class Recruiter {
 
     private String address;
 
-    private int members;
+    private Integer members;
+
+    @Field("status")
+    @Builder.Default
+    private Boolean status = false;
 }

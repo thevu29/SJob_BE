@@ -4,11 +4,11 @@ package com.example.jobservice.utils.helpers;
 import com.example.jobservice.dto.Field.FieldImportDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailImportDTO;
 import com.example.jobservice.dto.Job.JobImportDTO;
-import com.example.jobservice.exception.FileUploadException;
 import com.example.jobservice.utils.validations.ValidationUtils;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.common.exception.FileUploadException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -95,7 +95,7 @@ public class CSVHelper {
                 JobImportDTO dto = JobImportDTO.builder()
                         .recruiter(csvRecord.get("Recruiter"))
                         .fieldDetails(csvRecord.get("Field Detail"))
-                        .name(csvRecord.get("Name"))
+                        .name(csvRecord.get("Job Name"))
                         .description(csvRecord.get("Description"))
                         .salary(Double.parseDouble(csvRecord.get("Salary")))
                         .requirement(csvRecord.get("Requirement"))

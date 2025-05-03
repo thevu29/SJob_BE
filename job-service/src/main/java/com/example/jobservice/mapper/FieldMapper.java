@@ -1,10 +1,10 @@
 package com.example.jobservice.mapper;
 
-import com.example.jobservice.dto.Field.FieldDTO;
 import com.example.jobservice.dto.Field.FieldImportDTO;
 import com.example.jobservice.dto.Field.request.CreateFieldRequest;
 import com.example.jobservice.dto.Field.request.UpdateFieldRequest;
 import com.example.jobservice.entity.Field;
+import org.common.dto.Field.FieldDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

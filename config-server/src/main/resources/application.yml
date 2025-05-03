@@ -24,6 +24,8 @@ spring:
             access-key: ${aws.access-key}
             secret-key: ${aws.secret-key}
             bucket-name: ${aws.bucket-name}
+            access-user-key: ${aws.access-user-key}
+            secret-user-key: ${aws.secret-user-key}
           gateway:
             url: ${gateway.url}
           keycloak:
@@ -39,6 +41,15 @@ spring:
             recruiter-service:
               client:
                 secret: ${keycloak.recruiter-service.client.secret}
+            job-service:
+              client:
+                secret: ${keycloak.job-service.client.secret}
+            notification-service:
+              client:
+                secret: ${keycloak.notification-service.client.secret}
+            user-service:
+              client:
+                secret: ${keycloak.user-service.client.secret}
           mail:
             username: ${mail.username}
             password: ${mail.password}

@@ -26,7 +26,7 @@ public class EmailService {
 
     public void sendEmail(EmailMessageDTO request) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, "uft-8");
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
         helper.setTo(request.getTo());
         helper.setSubject(request.getSubject());

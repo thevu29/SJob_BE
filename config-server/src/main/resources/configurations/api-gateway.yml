@@ -40,6 +40,20 @@ spring:
           filters:
             - RewritePath=/auth-service(?<segment>/?.*), /${segment}
 
+        - id: job-service-api-docs
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/job-service/v3/api-docs/**
+          filters:
+            - RewritePath=/job-service(?<segment>/?.*), /${segment}
+
+        - id: recruiter-service-api-docs
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/recruiter-service/v3/api-docs/**
+          filters:
+            - RewritePath=/recruiter-service(?<segment>/?.*), /${segment}
+
         # API routes
         - id: application-service
           uri: lb://APPLICATION-SERVICE
@@ -85,12 +99,36 @@ spring:
           uri: lb://RECRUITER-SERVICE
           predicates:
             - Path=/api/recruiters/**
+        - id: recruiter-service-invitations
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/api/invitations/**
 
         - id: job-service
           uri: lb://JOB-SERVICE
           predicates:
             - Path=/api/jobs/**
+        - id: job-service-fields
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/fields/**
+        - id: job-service-field-details
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/field-details/**
 
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notifications/**
+        - id: notification-service-preferences
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notification-preferences/**
+        - id: notification-websocket
+          uri: lb:ws://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/ws-notifications/**
 springdoc:
   swagger-ui:
     urls:
@@ -100,6 +138,10 @@ springdoc:
         url: /job-seeker-service/v3/api-docs
       - name: Auth Service
         url: /auth-service/v3/api-docs
+      - name: Job Service
+        url: /job-service/v3/api-docs
+      - name: Recruiter Service
+        url: /recruiter-service/v3/api-docs
       - name: Application Service
         url: /application-service/v3/api-docs
     disable-swagger-default-url: true
