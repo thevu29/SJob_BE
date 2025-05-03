@@ -12,6 +12,13 @@ spring:
           enabled: true
       routes:
         # Swagger docs
+        - id: application-service-api-docs
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/application-service/v3/api-docs/**
+          filters:
+            - RewritePath=/application-service(?<segment>/?.*), /${segment}
+
         - id: user-service-api-docs
           uri: lb://USER-SERVICE
           predicates:
@@ -48,7 +55,12 @@ spring:
             - RewritePath=/recruiter-service(?<segment>/?.*), /${segment}
 
         # API routes
-        - id: user-service-api
+        - id: application-service
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/api/applications/**
+
+        - id: user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/api/users/**
@@ -130,6 +142,8 @@ springdoc:
         url: /job-service/v3/api-docs
       - name: Recruiter Service
         url: /recruiter-service/v3/api-docs
+      - name: Application Service
+        url: /application-service/v3/api-docs
     disable-swagger-default-url: true
     path: /swagger-ui.html
     api-docs:

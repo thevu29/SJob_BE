@@ -7,7 +7,13 @@ import org.common.dto.User.UserDTO;
 import org.common.enums.UserRole;
 import org.common.exception.ResourceNotFoundException;
 import org.example.userservice.client.NotificationPreferenceServiceClient;
+import org.common.dto.User.*;
+import org.common.enums.UserRole;
+import org.common.exception.ResourceNotFoundException;
+import org.example.userservice.dto.UserUpdatePasswordDTO;
+import org.example.userservice.dto.UserVerifyOtpDTO;
 import org.example.userservice.entity.User;
+import org.example.userservice.keycloak.KeycloakService;
 import org.example.userservice.mapper.UserMapper;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -17,15 +23,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
+    private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final NotificationPreferenceServiceClient notificationPreferenceServiceClient;
+    private final KeycloakService keycloakService;
 
     private String escapeRegexSpecialChars(String input) {
         if (input == null) return "";
@@ -94,6 +103,58 @@ public class UserService {
         notificationPreferenceServiceClient.createNotificationPreference(notificationPreferenceCreateDTO);
 
         return userMapper.toDto(savedUser);
+    }
+
+    public UserDTO updateUserOtp(UserUpdateOtpDTO request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!request.getOtp().isBlank()) {
+            user.setOtp(passwordEncoder.encode(request.getOtp()));
+        }
+        if (request.getOtpExpiresAt() != null) {
+            user.setOtpExpiresAt(request.getOtpExpiresAt());
+        }
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toDto(updatedUser);
+    }
+
+    public UserDTO verifyUserOtp(UserVerifyOtpDTO request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (
+                !passwordEncoder.matches(request.getOtp(), user.getOtp()) ||
+                user.getOtpExpiresAt() == null ||
+                user.getOtpExpiresAt().isBefore(LocalDateTime.now())
+        ) {
+            throw new IllegalArgumentException("Invalid OTP or OTP expired");
+        }
+
+        user.setOtpVerified(true);
+        user.setOtp(null);
+        user.setOtpExpiresAt(null);
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toDto(updatedUser);
+    }
+
+    public UserDTO updateUserPassword(UserUpdatePasswordDTO request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (!user.isOtpVerified()) {
+            throw new IllegalArgumentException("OTP is not verified");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setOtpVerified(false);
+
+        keycloakService.updateUserPassword(user.getEmail(), request.getPassword());
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toDto(updatedUser);
     }
 
     public UserDTO updateUserStatus(String id, boolean active) {

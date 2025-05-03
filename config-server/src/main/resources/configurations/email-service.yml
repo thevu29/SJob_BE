@@ -17,6 +17,10 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: org.common.dto.Email
-    listener:
-      ack-mode: manual
+        spring.json.trusted.packages: "*"
+
+aws:
+  access-key: ${aws.access-key}
+  secret-key: ${aws.secret-key}
+  region: ${aws.region}
+  bucket-name: ${aws.bucket-name}

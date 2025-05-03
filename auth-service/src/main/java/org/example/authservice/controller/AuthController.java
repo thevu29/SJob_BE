@@ -10,6 +10,7 @@ import org.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.common.dto.response.ApiResponse;
 import org.example.authservice.dto.LoginDTO;
 import org.example.authservice.dto.RefreshTokenDTO;
+import org.example.authservice.dto.SendOtpDTO;
 import org.example.authservice.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/job-seeker")
-    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> registerJobSeeker(@RequestBody JobSeekerCreationDTO request) {
+    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> registerJobSeeker(@Valid @RequestBody JobSeekerCreationDTO request) {
         JobSeekerWithUserDTO createdJobSeeker = authService.registerJobSeeker(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -33,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/recruiter")
-    public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> registerRecruiter(@RequestBody RecruiterCreationDTO request) {
+    public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> registerRecruiter(@Valid @RequestBody RecruiterCreationDTO request) {
         RecruiterWithUserDTO createdRecruiter = authService.registerRecruiter(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -49,7 +50,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody RefreshTokenDTO request) {
+    public ResponseEntity<ApiResponse<Void>> logout(@Valid @RequestBody RefreshTokenDTO request) {
         authService.logout(request.getRefreshToken());
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -57,10 +58,18 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<ApiResponse<TokenDTO>> refreshToken(@RequestBody RefreshTokenDTO request) {
+    public ResponseEntity<ApiResponse<TokenDTO>> refreshToken(@Valid @RequestBody RefreshTokenDTO request) {
         TokenDTO tokens = authService.refreshToken(request);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(tokens, "Refresh token successfully", HttpStatus.OK));
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<ApiResponse<String>> sendOtp(@Valid @RequestBody SendOtpDTO request) {
+        authService.sendOtp(request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(null, "OTP sent successfully", HttpStatus.OK));
     }
 }

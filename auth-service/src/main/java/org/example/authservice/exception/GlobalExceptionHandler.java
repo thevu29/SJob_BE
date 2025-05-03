@@ -1,8 +1,11 @@
 package org.example.authservice.exception;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.KafkaException;
+import org.apache.kafka.common.errors.SerializationException;
 import org.common.dto.response.ApiResponse;
 import org.common.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -13,6 +16,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -110,5 +114,45 @@ public class GlobalExceptionHandler {
         log.warn("Access denied: {}", ex.getMessage());
         ApiResponse<Object> response = ApiResponse.error("Access denied", HttpStatus.FORBIDDEN);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    public ResponseEntity<ApiResponse<Object>> handleJsonProcessingException(JsonProcessingException ex) {
+        log.error("JSON processing error: ", ex);
+        ApiResponse<Object> response = ApiResponse.error(
+                "Failed to process message: Invalid format",
+                HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(KafkaException.class)
+    public ResponseEntity<ApiResponse<Object>> handleKafkaException(KafkaException ex) {
+        log.error("Kafka processing error: ", ex);
+        ApiResponse<Object> response = ApiResponse.error(
+                "Message processing failed: " + ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
+    }
+
+    @ExceptionHandler(SerializationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleKafkaSerializationException(SerializationException ex) {
+        log.error("Kafka serialization error: ", ex);
+        ApiResponse<Object> response = ApiResponse.error(
+                "Failed to process message: Serialization error",
+                HttpStatus.BAD_REQUEST);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
+    public ResponseEntity<ApiResponse<Object>> handleUnauthorizedException(HttpClientErrorException.Unauthorized ex) {
+        log.warn("Unauthorized access attempt: {}", ex.getMessage());
+        ApiResponse<Object> response = ApiResponse.error("Invalid credentials", HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }

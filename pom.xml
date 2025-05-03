@@ -25,8 +25,10 @@
         <module>job-service</module>
         <module>auth-service</module>
         <module>email-service</module>
+        <module>application-service</module>
         <module>api-gateway</module>
         <module>notification-service</module>
+        <module>s3-service</module>
     </modules>
 
 </project>

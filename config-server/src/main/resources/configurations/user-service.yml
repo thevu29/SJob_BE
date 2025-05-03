@@ -34,3 +34,15 @@ keycloak:
     client-id: user-service
     client-secret: ${keycloak.user-service.client.secret}
     token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token
+
+keycloak:
+  server-url: http://localhost:9090
+  realm: sjob
+  client-id: admin-cli
+  username: admin
+  password: admin
+  client:
+    client-id: user-service
+    client-secret: ${keycloak.user-service.client.secret}
+    token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token
+

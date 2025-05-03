@@ -39,7 +39,6 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -51,7 +50,6 @@ public class JobService {
     private final JobFieldRepository jobFieldRepository;
     private final FieldDetailRepository fieldDetailRepository;
     private final KafkaTemplate <String, NotificationRequestDTO> kafkaTemplate;
-    ;
     private final CSVHelper csvHelper;
 
     public List<JobDTO> getJobs() {
@@ -310,8 +308,6 @@ public class JobService {
                 .build();
     }
 
-
-
     @Scheduled(cron = "0 0 9 * * *", zone = "Asia/Ho_Chi_Minh") // Runs daily at 9AM every day
     public void checkJobDeadlines() {
         LocalDate thresholdDate = LocalDate.now().plusDays(3);
@@ -344,5 +340,4 @@ public class JobService {
             log.error("Failed to send expiry notification for job: {}", job.getId(), e);
         }
     }
-
 }
