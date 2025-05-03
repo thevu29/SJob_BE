@@ -10,4 +10,5 @@ import org.springframework.stereotype.Component;
 public class KeycloakClientProperties {
     private String clientId;
     private String clientSecret;
+    private String tokenUri;
 }

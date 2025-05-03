@@ -17,11 +17,8 @@ import com.example.jobservice.repository.JobRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.common.dto.Email.EmailMessageDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.common.dto.Notification.NotificationEvent;
 import org.common.dto.Notification.NotificationRequestDTO;
-import org.common.dto.Notification.NotificationType;
 import org.common.dto.Recruiter.RecruiterDTO;
 import org.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.common.dto.User.UserDTO;
@@ -49,7 +46,7 @@ public class JobService {
     private final JobMapper jobMapper;
     private final JobFieldRepository jobFieldRepository;
     private final FieldDetailRepository fieldDetailRepository;
-    private final KafkaTemplate <String, NotificationRequestDTO> kafkaTemplate;
+    private final KafkaTemplate<String, NotificationRequestDTO> kafkaTemplate;
     private final CSVHelper csvHelper;
 
     public List<JobDTO> getJobs() {
@@ -104,22 +101,6 @@ public class JobService {
         return new PageImpl<>(content, pageable, jobs.getTotalElements());
     }
 
-    public void testKafak() {
-        String userId = "67ffb4b8996bf14e1450c2d0";
-        String email = "huyhoang191072@gmail.com";
-        String title = "Thông báo hệ thống";
-        String content = "Đây là thông báo hệ thống";
-        NotificationRequestDTO notificationRequestDTO = NotificationEvent.systemAnnouncement(userId,email,title,content);
-        kafkaTemplate.send("notification-requests", notificationRequestDTO);
-
-//        EmailMessageDTO emailMessageDTO = EmailMessageDTO.builder()
-//                .to("hoangdaden2003@gmail.com")
-//                .subject("SMTP")
-//                .body("Content")
-//                .build();
-//        kafkaTemplate.send("send-email", emailMessageDTO);
-    }
-
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
         try {
             if (!recruiterServiceClient.checkIfRecruiterExists(recruiterId)) {
@@ -130,7 +111,6 @@ public class JobService {
             job.setStatus(JobStatus.OPEN);
             job.setDate(LocalDate.now());
             job.setCloseWhenFull(false);
-            System.out.println("Job: " + job);
             Job savedJob = jobRepository.save(job);
 
             // Add job fields

@@ -26,13 +26,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: job_service
-
   kafka:
     bootstrap-servers: localhost:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
   servlet:
     multipart:
       enabled: true
@@ -60,7 +58,3 @@ keycloak:
     client-id: job-service
     client-secret: ${keycloak.job-service.client.secret}
     token-uri: http://localhost:9090/realms/sjob/protocol/openid-connect/token
-
-server:
-  port: 8084
-

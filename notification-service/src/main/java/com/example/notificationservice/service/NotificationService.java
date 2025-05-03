@@ -23,7 +23,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -96,13 +99,11 @@ public class NotificationService {
     private String generateUrlFromType(NotificationType type, Map<String, Object> metaData) {
         return switch (type) {
             case JOB_INVITATION -> "/invitations/" + metaData.get("invitationId");
-            case JOB_EXPIRY -> "/jobs/" + metaData.get("jobId");
+            case JOB_EXPIRY, JOB_RECOMMENDATION -> "/jobs/" + metaData.get("jobId");
             case JOB_APPLICATION -> "/applications/" + metaData.get("applicationId");
-            case JOB_RECOMMENDATION -> "/jobs/" + metaData.get("jobId");
             default -> "/";
         };
     }
-
 
     public Page<NotificationDTO> getUserNotifications(String userId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
@@ -139,6 +140,4 @@ public class NotificationService {
             log.error("Error deleting old notifications: ", e);
         }
     }
-
-
 }

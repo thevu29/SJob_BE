@@ -11,13 +11,13 @@ import java.util.Map;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class KeycloakService {
+    private final Keycloak keycloak;
     private final RestTemplate restTemplate;
     private final KeycloakProperties properties;
     private final KeycloakClientProperties clientProperties;
@@ -51,7 +51,6 @@ public class KeycloakService {
 
         if (!users.isEmpty()) {
             String userId = users.getFirst().getId();
-            System.out.println("userId: " + userId);
 
             CredentialRepresentation passwordCred = new CredentialRepresentation();
             passwordCred.setTemporary(false);

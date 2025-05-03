@@ -1,6 +1,5 @@
 package com.example.jobservice.controller;
 
-
 import com.example.jobservice.dto.Field.request.CreateFieldRequest;
 import com.example.jobservice.dto.Field.request.UpdateFieldRequest;
 import com.example.jobservice.service.FieldService;

@@ -3,7 +3,6 @@ package com.example.recruiterservice.service;
 import com.example.recruiterservice.client.*;
 import com.example.recruiterservice.dto.Recruiter.RecruiterImportDTO;
 import com.example.recruiterservice.dto.Recruiter.request.CreateRecruiterRequest;
-import com.example.recruiterservice.dto.Recruiter.request.CreateUserRequest;
 import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.entity.Recruiter;
 import com.example.recruiterservice.exception.FileUploadException;
@@ -14,7 +13,6 @@ import com.example.recruiterservice.utils.helpers.FileHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.common.dto.Field.FieldDTO;
-import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
 import org.common.dto.Recruiter.RecruiterCreationDTO;
 import org.common.dto.Recruiter.RecruiterDTO;
 import org.common.dto.Recruiter.RecruiterWithUserDTO;
@@ -97,7 +95,7 @@ public class RecruiterService {
         return recruiters.stream()
                 .filter(r -> r.getUserId() != null && userMap.containsKey(r.getUserId()))
                 .map(recruiter -> {
-                    FieldDTO field = null;
+                    FieldDTO field;
                     field = getFieldById(recruiter.getFieldId());
                     return recruiterMapper.toDtoWithField(
                             recruiterMapper.toDto(recruiter),
@@ -151,11 +149,9 @@ public class RecruiterService {
         boolean isActiveFilter = active != null;
 
         List<String> matchingUserIds = fetchMatchingUserIds(query, active, page, size, sortBy, direction);
-        System.out.println("jnk"+matchingUserIds);
         if (matchingUserIds.isEmpty() && isActiveFilter) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
-
 
         Page<Recruiter> recruiters = recruiterRepository.findBySearchCriteria(
                 query,
@@ -193,19 +189,22 @@ public class RecruiterService {
 
     }
 
+    private UserCreationDTO createUserRequest(String email, String password) {
+        return UserCreationDTO.builder()
+                .email(email)
+                .password(password)
+                .role("RECRUITER")
+                .build();
+    }
+
     public RecruiterWithUserDTO createRecruiter(RecruiterCreationDTO request) {
         UserDTO user = null;
 
         try {
-            UserCreationDTO createUserRequest = UserCreationDTO.builder()
-                    .email(request.getEmail())
-                    .password(request.getPassword())
-                    .role("RECRUITER")
-                    .build();
+            UserCreationDTO createUserRequest = createUserRequest(request.getEmail(), request.getPassword());
 
             ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
             user = userResponse.getData();
-
 
             Recruiter recruiter = recruiterMapper.toEntity(request);
             recruiter.setUserId(user.getId());
@@ -219,14 +218,11 @@ public class RecruiterService {
         }
     }
 
-    public RecruiterWithUserDTO createRecruiterWithCSV(CreateRecruiterRequest request) {
+    public void createRecruiterWithCSV(CreateRecruiterRequest request) {
         UserDTO user = null;
         try {
-            UserCreationDTO createUserRequest = UserCreationDTO.builder()
-                    .email(request.getEmail())
-                    .password(request.getPassword())
-                    .role("RECRUITER")
-                    .build();
+            UserCreationDTO createUserRequest = createUserRequest(request.getEmail(), request.getPassword());
+
             ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
             user = userResponse.getData();
 
@@ -242,10 +238,7 @@ public class RecruiterService {
                 }
             }
 
-            Recruiter savedRecruiter = recruiterRepository.save(recruiter);
-            return recruiterMapper.toDto(recruiterMapper.toDto(savedRecruiter), user);
-
-
+            recruiterRepository.save(recruiter);
         } catch (Exception e) {
             handleUserRollback(user);
             throw new RuntimeException("Tạo nhà tuyển dụng thất bại", e);
@@ -302,7 +295,6 @@ public class RecruiterService {
     }
 
     public void importFileCSV(MultipartFile file) {
-
         try {
             // Validate file
             csvHelper.validateCSVFile(file);

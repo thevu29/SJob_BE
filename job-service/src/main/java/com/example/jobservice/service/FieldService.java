@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -87,7 +86,7 @@ public class FieldService {
             List<Field> saveFields = fieldDTOs.stream()
                     .map(fieldMapper::toEntity)
                     .map(fieldRepository::save)
-                    .collect(Collectors.toList());
+                    .toList();
         } catch (IOException e) {
             throw new RuntimeException("Nhập file thất bại: " + e.getMessage());
         }

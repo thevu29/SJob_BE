@@ -22,7 +22,6 @@ public class NotificationPreferenceService {
     private final NotificationPreferenceMapper notificationPreferenceMapper;
 
     public NotificationPreferenceDTO createNotificationPreference(NotificationPreferenceCreateDTO createDTO) {
-
         // Create entity with default settings
         NotificationPreference preference = notificationPreferenceMapper.createDtoToEntity(createDTO);
 

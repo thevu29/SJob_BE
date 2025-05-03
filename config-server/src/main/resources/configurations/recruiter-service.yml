@@ -46,7 +46,6 @@ service:
   jobSeeker:
     url: http://localhost:8082
 
-
 keycloak:
   client:
     client-id: recruiter-service

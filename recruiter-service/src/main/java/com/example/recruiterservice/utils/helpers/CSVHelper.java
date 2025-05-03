@@ -1,6 +1,5 @@
 package com.example.recruiterservice.utils.helpers;
 
-
 import com.example.recruiterservice.dto.Recruiter.RecruiterImportDTO;
 import com.example.recruiterservice.exception.FileUploadException;
 import com.example.recruiterservice.utils.validations.ValidationUtils;
@@ -14,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,9 +42,8 @@ public class CSVHelper {
         }
     }
 
-
     public List<RecruiterImportDTO> csvToRecruiterImportDTOs(InputStream is) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader,
                      CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
 
@@ -53,7 +52,6 @@ public class CSVHelper {
 
             for (CSVRecord csvRecord : csvParser) {
                 rowNumber++; // Start from 2 as row 1 is header
-                System.out.println(csvRecord.get("Members"));
                 RecruiterImportDTO dto = RecruiterImportDTO.builder()
                         .email(csvRecord.get("Email"))
                         .password(csvRecord.get("Password"))
@@ -72,7 +70,6 @@ public class CSVHelper {
             }
 
             return recruiters;
-
         } catch (IOException e) {
             throw new FileUploadException("Không thể phân tích tệp CSV: " + e.getMessage());
         }
@@ -82,12 +79,9 @@ public class CSVHelper {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            System.out.println("NumberFormatException: " + e.getMessage());
             throw new FileUploadException(
                     String.format("Dòng %d: Số lượng nhân sự không hợp lệ", rowNumber)
             );
         }
     }
-
-
 }

@@ -8,8 +8,6 @@ import org.common.enums.UserRole;
 import org.common.exception.ResourceNotFoundException;
 import org.example.userservice.client.NotificationPreferenceServiceClient;
 import org.common.dto.User.*;
-import org.common.enums.UserRole;
-import org.common.exception.ResourceNotFoundException;
 import org.example.userservice.dto.UserUpdatePasswordDTO;
 import org.example.userservice.dto.UserVerifyOtpDTO;
 import org.example.userservice.entity.User;
@@ -32,9 +30,8 @@ public class UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserMapper userMapper;
-    private final NotificationPreferenceServiceClient notificationPreferenceServiceClient;
     private final KeycloakService keycloakService;
+    private final NotificationPreferenceServiceClient notificationPreferenceServiceClient;
 
     private String escapeRegexSpecialChars(String input) {
         if (input == null) return "";
@@ -100,6 +97,7 @@ public class UserService {
         NotificationPreferenceCreateDTO notificationPreferenceCreateDTO = NotificationPreferenceCreateDTO.builder()
                 .userId(savedUser.getId())
                 .build();
+
         notificationPreferenceServiceClient.createNotificationPreference(notificationPreferenceCreateDTO);
 
         return userMapper.toDto(savedUser);

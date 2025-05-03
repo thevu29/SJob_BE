@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,9 +48,9 @@ public class CSVHelper {
 
 
     public static List<FieldImportDTO> csvToFieldImportDTOs(InputStream is) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader,
-                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
 
             return csvParser.getRecords().stream()
                     .map(csvRecord -> FieldImportDTO.builder()
@@ -64,9 +65,9 @@ public class CSVHelper {
     }
 
     public static List<FieldDetailImportDTO> csvToFieldDetailImportDTOs(InputStream is) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader,
-                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+                     CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
 
             return csvParser.getRecords().stream()
                     .map(csvRecord -> FieldDetailImportDTO.builder()
@@ -81,7 +82,7 @@ public class CSVHelper {
     }
 
     public List<JobImportDTO> csvToJobImportDTOs(InputStream is) {
-        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
              CSVParser csvParser = new CSVParser(fileReader,
                      CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim())) {
 
@@ -89,8 +90,6 @@ public class CSVHelper {
             int rowNumber = 1;
 
             for (CSVRecord csvRecord : csvParser) {
-//                System.out.println("record" + csvRecord);
-//                System.out.println("des" + csvRecord.get("Description"));
                 rowNumber++;
                 JobImportDTO dto = JobImportDTO.builder()
                         .recruiter(csvRecord.get("Recruiter"))

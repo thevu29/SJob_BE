@@ -1,6 +1,5 @@
 package com.example.notificationservice.controller;
 
-import com.example.notificationservice.repository.NotificationPreferenceRepository;
 import com.example.notificationservice.service.NotificationPreferenceService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

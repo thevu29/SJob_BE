@@ -13,25 +13,23 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: notification-service
-      auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json.trusted.packages: org.common.dto.Notification
+        spring.json.trusted.packages: '*'
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-    listener:
-      ack-mode: manual
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
     mode: HTML
     encoding: UTF-8
     cache: false
-#springdoc:
-#  api-docs:
-#    path: /v3/api-docs
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
 
 server:
   port: 8086

@@ -31,7 +31,7 @@ springdoc:
     path: /v3/api-docs
 
 server:
-  port: 8086
+  port: 8087
 
 gateway:
   url: ${gateway.url}

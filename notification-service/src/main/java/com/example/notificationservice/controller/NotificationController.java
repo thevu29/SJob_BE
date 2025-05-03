@@ -1,11 +1,8 @@
 package com.example.notificationservice.controller;
 
-
 import com.example.notificationservice.dto.NotificationDTO;
 import com.example.notificationservice.service.NotificationService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Notification.NotificationChannel;
 import org.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -45,5 +42,4 @@ public class NotificationController {
                 ApiResponse.success(null, "Xóa thông báo thành công", HttpStatus.OK)
         );
     }
-
 }
