@@ -2,8 +2,8 @@ package org.example.applicationservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Application.ApplicationDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.Application.ApplicationDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.service.ApplicationService;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,8 @@
 package org.example.authservice.client;
 
-import org.common.dto.JobSeeker.JobSeekerCreationDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.authservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

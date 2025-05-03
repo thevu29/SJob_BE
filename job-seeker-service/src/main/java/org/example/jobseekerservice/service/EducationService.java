@@ -1,8 +1,8 @@
 package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.exception.ResourceNotFoundException;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.dto.Education.EducationCreationDTO;
 import org.example.jobseekerservice.dto.Education.EducationDTO;
 import org.example.jobseekerservice.dto.Education.EducationUpdateDTO;

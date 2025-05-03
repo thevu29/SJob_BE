@@ -2,9 +2,9 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.JobSeeker.JobSeekerCreationDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.service.JobSeekerService;
 import org.springframework.data.domain.Page;

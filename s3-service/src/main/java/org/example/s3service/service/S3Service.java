@@ -1,7 +1,7 @@
 package org.example.s3service.service;
 
 import lombok.RequiredArgsConstructor;
-import org.common.dto.S3.UploadFileDTO;
+import org.example.common.dto.S3.UploadFileDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.sync.RequestBody;

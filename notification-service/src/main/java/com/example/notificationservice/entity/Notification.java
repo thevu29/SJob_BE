@@ -1,15 +1,14 @@
 package com.example.notificationservice.entity;
 
 import lombok.*;
-import org.common.dto.Notification.NotificationChannel;
-import org.common.dto.Notification.NotificationType;
+import org.example.common.dto.Notification.NotificationChannel;
+import org.example.common.dto.Notification.NotificationType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.Set;
 
 @Document(collection = "notifications")

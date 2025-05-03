@@ -1,8 +1,8 @@
 package org.example.authservice.client;
 
-import org.common.dto.User.UserUpdateOtpDTO;
-import org.common.dto.User.UserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.User.UserUpdateOtpDTO;
+import org.example.common.dto.User.UserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.authservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PutMapping;

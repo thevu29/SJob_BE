@@ -2,9 +2,9 @@ package com.example.jobservice.client;
 
 
 import com.example.jobservice.config.FeignClientInterceptor;
-import org.common.dto.Recruiter.RecruiterDTO;
-import org.common.dto.Recruiter.RecruiterWithUserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.Recruiter.RecruiterDTO;
+import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

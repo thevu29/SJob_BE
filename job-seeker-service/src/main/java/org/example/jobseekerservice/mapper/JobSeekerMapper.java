@@ -1,8 +1,8 @@
 package org.example.jobseekerservice.mapper;
 
-import org.common.dto.JobSeeker.JobSeekerCreationDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.dto.User.UserDTO;
+import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.User.UserDTO;
 import org.example.jobseekerservice.dto.JobSeeker.JobSeekerDTO;
 import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.entity.JobSeeker;

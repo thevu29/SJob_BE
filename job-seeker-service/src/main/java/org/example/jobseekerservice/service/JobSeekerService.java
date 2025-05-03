@@ -2,12 +2,12 @@ package org.example.jobseekerservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.common.dto.JobSeeker.JobSeekerCreationDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.dto.User.UserCreationDTO;
-import org.common.dto.User.UserDTO;
-import org.common.dto.response.ApiResponse;
-import org.common.exception.ResourceNotFoundException;
+import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.User.UserCreationDTO;
+import org.example.common.dto.User.UserDTO;
+import org.example.common.dto.response.ApiResponse;
+import org.example.common.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.client.UserServiceClient;
 import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.entity.JobSeeker;

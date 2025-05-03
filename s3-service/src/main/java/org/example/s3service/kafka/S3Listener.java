@@ -1,8 +1,8 @@
 package org.example.s3service.kafka;
 
 import lombok.RequiredArgsConstructor;
-import org.common.dto.S3.FileUploadedDTO;
-import org.common.dto.S3.UploadFileDTO;
+import org.example.common.dto.S3.FileUploadedDTO;
+import org.example.common.dto.S3.UploadFileDTO;
 import org.example.s3service.service.S3Service;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;

@@ -9,16 +9,15 @@ import com.example.recruiterservice.entity.Invitation.InvitationStatus;
 import com.example.recruiterservice.mapper.InvitationMapper;
 import com.example.recruiterservice.repository.InvitationRepository;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Job.JobDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.dto.Notification.NotificationEvent;
-import org.common.dto.Notification.NotificationRequestDTO;
-import org.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.Job.JobDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.Notification.NotificationEvent;
+import org.example.common.dto.Notification.NotificationRequestDTO;
+import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

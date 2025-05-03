@@ -5,7 +5,7 @@ import com.example.recruiterservice.dto.Invitation.request.CreateInvitationReque
 import com.example.recruiterservice.service.InvitationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

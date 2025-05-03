@@ -7,7 +7,7 @@ import com.example.jobservice.entity.JobStatus;
 import com.example.jobservice.service.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;

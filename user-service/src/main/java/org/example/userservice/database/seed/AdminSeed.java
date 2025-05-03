@@ -2,7 +2,7 @@ package org.example.userservice.database.seed;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.common.enums.UserRole;
+import org.example.common.enums.UserRole;
 import org.example.userservice.entity.User;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;

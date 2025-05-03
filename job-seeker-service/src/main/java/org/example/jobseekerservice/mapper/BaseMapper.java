@@ -1,6 +1,6 @@
 package org.example.jobseekerservice.mapper;
 
-import org.common.exception.InvalidDateFormatException;
+import org.example.common.exception.InvalidDateFormatException;
 import org.example.jobseekerservice.entity.JobSeeker;
 import org.mapstruct.Named;
 

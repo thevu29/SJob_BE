@@ -1,7 +1,7 @@
 package org.example.userservice.entity;
 
 import lombok.*;
-import org.common.enums.UserRole;
+import org.example.common.enums.UserRole;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;

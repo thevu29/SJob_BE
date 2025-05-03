@@ -1,8 +1,8 @@
 package com.example.recruiterservice.client;
 
 import com.example.recruiterservice.config.FeignClientInterceptor;
-import org.common.dto.Field.FieldDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.Field.FieldDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

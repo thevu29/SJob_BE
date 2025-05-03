@@ -1,7 +1,7 @@
 package com.example.jobservice.mapper;
 
 import com.example.jobservice.entity.Field;
-import org.common.exception.InvalidDateFormatException;
+import org.example.common.exception.InvalidDateFormatException;
 import org.mapstruct.Named;
 
 import java.time.LocalDate;

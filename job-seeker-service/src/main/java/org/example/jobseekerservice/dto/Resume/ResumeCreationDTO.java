@@ -2,7 +2,7 @@ package org.example.jobseekerservice.dto.Resume;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.common.annotation.File.ValidFile;
+import org.example.common.annotation.File.ValidFile;
 import org.springframework.web.multipart.MultipartFile;
 
 @Data

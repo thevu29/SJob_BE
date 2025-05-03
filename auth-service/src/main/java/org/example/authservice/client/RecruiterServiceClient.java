@@ -1,8 +1,8 @@
 package org.example.authservice.client;
 
-import org.common.dto.Recruiter.RecruiterCreationDTO;
-import org.common.dto.Recruiter.RecruiterWithUserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.Recruiter.RecruiterCreationDTO;
+import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.authservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

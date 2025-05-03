@@ -9,8 +9,8 @@ import com.example.jobservice.repository.FieldRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.common.dto.Field.FieldDTO;
-import org.common.exception.ResourceNotFoundException;
+import org.example.common.dto.Field.FieldDTO;
+import org.example.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

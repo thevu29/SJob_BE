@@ -3,7 +3,7 @@ package com.example.jobservice.utils.validations;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.common.exception.FileUploadException;
+import org.example.common.exception.FileUploadException;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;

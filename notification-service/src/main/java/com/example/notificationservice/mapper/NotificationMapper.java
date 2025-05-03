@@ -2,8 +2,8 @@ package com.example.notificationservice.mapper;
 
 import com.example.notificationservice.dto.NotificationDTO;
 import com.example.notificationservice.entity.Notification;
-import org.common.dto.Notification.NotificationChannel;
-import org.common.dto.Notification.NotificationRequestDTO;
+import org.example.common.dto.Notification.NotificationChannel;
+import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;

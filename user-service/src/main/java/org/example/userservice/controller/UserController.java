@@ -2,8 +2,10 @@ package org.example.userservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.User.*;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.User.UserCreationDTO;
+import org.example.common.dto.User.UserDTO;
+import org.example.common.dto.User.UserUpdateOtpDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.userservice.dto.UserUpdatePasswordDTO;
 import org.example.userservice.dto.UserVerifyOtpDTO;
 import org.example.userservice.service.UserService;

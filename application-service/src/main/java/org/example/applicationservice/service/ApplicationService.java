@@ -1,16 +1,16 @@
 package org.example.applicationservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Application.ApplicationDTO;
-import org.common.dto.Email.EmailMessageDTO;
-import org.common.dto.Job.JobDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.dto.Recruiter.RecruiterWithUserDTO;
-import org.common.dto.Resume.ResumeDTO;
-import org.common.dto.S3.FileUploadedDTO;
-import org.common.dto.S3.UploadFileDTO;
-import org.common.dto.response.ApiResponse;
-import org.common.exception.ResourceNotFoundException;
+import org.example.common.dto.Application.ApplicationDTO;
+import org.example.common.dto.Email.EmailMessageDTO;
+import org.example.common.dto.Job.JobDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.Resume.ResumeDTO;
+import org.example.common.dto.S3.FileUploadedDTO;
+import org.example.common.dto.S3.UploadFileDTO;
+import org.example.common.dto.response.ApiResponse;
+import org.example.common.exception.ResourceNotFoundException;
 import org.example.applicationservice.client.JobSeekerServiceClient;
 import org.example.applicationservice.client.JobServiceClient;
 import org.example.applicationservice.client.RecruiterServiceClient;

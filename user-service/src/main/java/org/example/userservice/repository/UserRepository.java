@@ -1,6 +1,6 @@
 package org.example.userservice.repository;
 
-import org.common.enums.UserRole;
+import org.example.common.enums.UserRole;
 import org.example.userservice.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

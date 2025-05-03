@@ -1,13 +1,13 @@
 package org.example.userservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
-import org.common.dto.User.UserCreationDTO;
-import org.common.dto.User.UserDTO;
-import org.common.enums.UserRole;
-import org.common.exception.ResourceNotFoundException;
+import org.example.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
+import org.example.common.dto.User.UserCreationDTO;
+import org.example.common.dto.User.UserDTO;
+import org.example.common.dto.User.UserUpdateOtpDTO;
+import org.example.common.enums.UserRole;
+import org.example.common.exception.ResourceNotFoundException;
 import org.example.userservice.client.NotificationPreferenceServiceClient;
-import org.common.dto.User.*;
 import org.example.userservice.dto.UserUpdatePasswordDTO;
 import org.example.userservice.dto.UserVerifyOtpDTO;
 import org.example.userservice.entity.User;

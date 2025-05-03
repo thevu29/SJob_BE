@@ -1,8 +1,8 @@
 package org.example.jobseekerservice.client;
 
-import org.common.dto.User.UserCreationDTO;
-import org.common.dto.User.UserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.User.UserCreationDTO;
+import org.example.common.dto.User.UserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.jobseekerservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Sort;

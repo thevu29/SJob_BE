@@ -1,7 +1,7 @@
 package com.example.recruiterservice.exception;
 
 import lombok.extern.slf4j.Slf4j;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.response.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;

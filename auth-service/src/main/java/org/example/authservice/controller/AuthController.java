@@ -2,12 +2,12 @@ package org.example.authservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Auth.TokenDTO;
-import org.common.dto.JobSeeker.JobSeekerCreationDTO;
-import org.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.common.dto.Recruiter.RecruiterCreationDTO;
-import org.common.dto.Recruiter.RecruiterWithUserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.Auth.TokenDTO;
+import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.Recruiter.RecruiterCreationDTO;
+import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.authservice.dto.LoginDTO;
 import org.example.authservice.dto.RefreshTokenDTO;
 import org.example.authservice.dto.SendOtpDTO;

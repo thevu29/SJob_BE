@@ -1,9 +1,9 @@
 package org.example.userservice.client;
 
 import jakarta.validation.Valid;
-import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
-import org.common.dto.NotificationPreference.NotificationPreferenceDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
+import org.example.common.dto.NotificationPreference.NotificationPreferenceDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.userservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

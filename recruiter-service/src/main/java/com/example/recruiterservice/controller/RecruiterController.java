@@ -4,10 +4,10 @@ import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest
 import com.example.recruiterservice.service.RecruiterService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Recruiter.RecruiterCreationDTO;
-import org.common.dto.Recruiter.RecruiterDTO;
-import org.common.dto.Recruiter.RecruiterWithUserDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.Recruiter.RecruiterCreationDTO;
+import org.example.common.dto.Recruiter.RecruiterDTO;
+import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;

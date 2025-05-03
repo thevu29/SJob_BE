@@ -2,7 +2,7 @@ package org.example.emailservice.kafka;
 
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Email.EmailMessageDTO;
+import org.example.common.dto.Email.EmailMessageDTO;
 import org.example.emailservice.services.EmailService;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;

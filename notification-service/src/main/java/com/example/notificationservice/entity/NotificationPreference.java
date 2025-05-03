@@ -1,7 +1,7 @@
 package com.example.notificationservice.entity;
 
 import lombok.*;
-import org.common.dto.Notification.NotificationType;
+import org.example.common.dto.Notification.NotificationType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;

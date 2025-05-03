@@ -3,7 +3,7 @@ package com.example.notificationservice.controller;
 import com.example.notificationservice.dto.NotificationDTO;
 import com.example.notificationservice.service.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

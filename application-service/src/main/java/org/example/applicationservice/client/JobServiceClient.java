@@ -1,7 +1,7 @@
 package org.example.applicationservice.client;
 
-import org.common.dto.Job.JobDTO;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.Job.JobDTO;
+import org.example.common.dto.response.ApiResponse;
 import org.example.applicationservice.config.FeignClientInterceptor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

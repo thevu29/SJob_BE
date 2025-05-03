@@ -1,7 +1,7 @@
 package com.example.notificationservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Notification.NotificationType;
+import org.example.common.dto.Notification.NotificationType;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;

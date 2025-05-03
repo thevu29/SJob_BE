@@ -2,7 +2,7 @@ package org.example.jobseekerservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.response.ApiResponse;
+import org.example.common.dto.response.ApiResponse;
 import org.example.jobseekerservice.dto.Education.EducationCreationDTO;
 import org.example.jobseekerservice.dto.Education.EducationDTO;
 import org.example.jobseekerservice.dto.Education.EducationUpdateDTO;

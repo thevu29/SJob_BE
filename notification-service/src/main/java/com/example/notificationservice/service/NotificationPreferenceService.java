@@ -4,11 +4,11 @@ import com.example.notificationservice.entity.NotificationPreference;
 import com.example.notificationservice.mapper.NotificationPreferenceMapper;
 import com.example.notificationservice.repository.NotificationPreferenceRepository;
 import lombok.RequiredArgsConstructor;
-import org.common.dto.Notification.NotificationType;
-import org.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
-import org.common.dto.NotificationPreference.NotificationPreferenceDTO;
-import org.common.dto.NotificationPreference.NotificationPreferenceUpdateDTO;
-import org.common.exception.ResourceNotFoundException;
+import org.example.common.dto.Notification.NotificationType;
+import org.example.common.dto.NotificationPreference.NotificationPreferenceCreateDTO;
+import org.example.common.dto.NotificationPreference.NotificationPreferenceDTO;
+import org.example.common.dto.NotificationPreference.NotificationPreferenceUpdateDTO;
+import org.example.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
