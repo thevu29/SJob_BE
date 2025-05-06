@@ -2,7 +2,6 @@ package com.example.jobservice.service;
 
 import com.example.jobservice.client.RecruiterServiceClient;
 import com.example.jobservice.client.UserServiceClient;
-import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.JobImportDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
@@ -17,6 +16,7 @@ import com.example.jobservice.repository.JobRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.Notification.NotificationEvent;
 import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterDTO;

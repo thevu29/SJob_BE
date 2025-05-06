@@ -1,12 +1,12 @@
 package com.example.jobservice.controller;
 
-import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.JobStatus;
 import com.example.jobservice.service.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;

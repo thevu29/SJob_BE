@@ -26,9 +26,7 @@ public class Notification {
 
     private NotificationType type;
 
-    private String title;
-
-    private String content;
+    private String message;
 
     private Set<NotificationChannel> channels;
 

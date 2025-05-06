@@ -1,9 +1,9 @@
 package com.example.jobservice.mapper;
 
-import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.Job;
+import org.example.common.dto.Job.JobDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
