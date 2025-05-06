@@ -20,5 +20,5 @@ public class JobDTO {
     private String education;
     private String experience;
     private boolean closeWhenFull;
-    private boolean status;
+    private JobStatus status;
 }

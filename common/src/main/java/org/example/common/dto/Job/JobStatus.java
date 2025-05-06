@@ -1,4 +1,4 @@
-package com.example.jobservice.entity;
+package org.example.common.dto.Job;
 
 public enum JobStatus {
     OPEN,

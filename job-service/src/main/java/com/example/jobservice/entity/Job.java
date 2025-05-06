@@ -2,6 +2,7 @@ package com.example.jobservice.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.common.dto.Job.JobStatus;
 
 import java.time.LocalDate;
 import java.util.HashSet;

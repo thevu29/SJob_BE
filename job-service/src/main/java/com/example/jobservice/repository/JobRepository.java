@@ -1,7 +1,7 @@
 package com.example.jobservice.repository;
 
 import com.example.jobservice.entity.Job;
-import com.example.jobservice.entity.JobStatus;
+import org.example.common.dto.Job.JobStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
