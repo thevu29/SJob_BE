@@ -14,10 +14,16 @@ import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.common.dto.Notification.NotificationEvent;
 import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +66,44 @@ public class InvitationService {
         kafkaTemplate.send("notification-requests", notificationRequestDTO);
 
         return invitationMapper.toDto(savedInvitation);
+    }
+
+    public Page<InvitationDTO> findInvitations(
+            String query,
+            InvitationStatus status,
+            String recruiterId,
+            int page,
+            int size,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        String columnName = switch (sortBy) {
+            case "jobName" -> "job_name";
+            case "jobSeekerName" -> "job_seeker_name";
+            case "status" -> "status";
+            case "createdAt" -> "created_at";
+            default -> "id";
+        };
+
+        Sort sort = Sort.by(direction, columnName);
+        PageRequest pageRequest = PageRequest.of(page - 1, size, sort);
+
+        Page<Invitation> invitations = invitationRepository.findBySearchCriteria(
+                query != null ? query : "",
+                status != null ? status.name() : "",
+                recruiterId != null ? recruiterId : "",
+                pageRequest
+        );
+
+        if (invitations.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageRequest, 0);
+        }
+
+        List<InvitationDTO> content = invitations.getContent().stream()
+                .map(invitationMapper::toDto)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(content, pageRequest, invitations.getTotalElements());
     }
 
 

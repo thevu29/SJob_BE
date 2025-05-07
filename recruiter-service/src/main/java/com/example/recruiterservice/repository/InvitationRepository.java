@@ -3,6 +3,8 @@ package com.example.recruiterservice.repository;
 import com.example.recruiterservice.entity.Invitation.Invitation;
 
 import com.example.recruiterservice.entity.Invitation.InvitationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.Update;
@@ -28,4 +30,19 @@ public interface InvitationRepository extends MongoRepository<Invitation, String
     @Query("{ 'jobSeekerId': ?0 }")
     @Update("{ '$set': { 'jobSeekerName': ?1 } }")
     void updateJobSeekerNameByJobSeekerId(String id, String name);
+
+    @Query("{$and: [ " +
+            "  { $or: [ " +
+            "    { jobName: { $regex: ?0, $options: 'i' } }, " +
+            "    { jobSeekerName: { $regex: ?0, $options: 'i' } } " +
+            "  ]}, " +
+            "  { status: { $regex: ?1, $options: 'i' } }, " +
+            "  { recruiterId: { $regex: ?2, $options: 'i' } } " +
+            "]}")
+    Page<Invitation> findBySearchCriteria(
+            String query,
+            String status,
+            String recruiterId,
+            PageRequest pageRequest
+    );
 }
