@@ -8,6 +8,7 @@ import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.FieldDetail;
 import com.example.jobservice.entity.Job;
 import com.example.jobservice.entity.JobField;
+import com.example.jobservice.entity.JobType;
 import com.example.jobservice.mapper.JobMapper;
 import com.example.jobservice.repository.FieldDetailRepository;
 import com.example.jobservice.repository.JobFieldRepository;
@@ -66,6 +67,7 @@ public class JobService {
     public Page<JobDTO> findPagedJobs(
             String query,
             JobStatus status,
+            JobType type,
             String recruiterId,
             int page,
             int size,
@@ -86,6 +88,7 @@ public class JobService {
         Page<Job> jobs = jobRepository.findBySearchCriteria(
                 query,
                 status != null ? status.name() : null,
+                type != null ? type.name() : null,
                 recruiterId,
                 pageable
         );

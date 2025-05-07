@@ -1,5 +1,6 @@
 package com.example.jobservice.repository;
 
+import com.example.jobservice.entity.FieldDetail;
 import com.example.jobservice.entity.Job;
 import org.example.common.dto.Job.JobStatus;
 import org.springframework.data.domain.Page;
@@ -20,21 +21,27 @@ public interface JobRepository extends JpaRepository<Job, String> {
     @Query(value = """
             SELECT j.* FROM job_service.jobs j
             WHERE (:status IS NULL OR j.status::text ILIKE CONCAT('%', :status, '%'))
+              AND (:type IS NULL OR j.type::text ILIKE CONCAT('%', :type, '%'))
               AND (:recruiterId IS NULL OR j.recruiter_id = :recruiterId)
               AND (
                   :query IS NULL OR
                   LOWER(j.name) LIKE LOWER(CONCAT('%', :query, '%')) OR
-                  LOWER(j.description) LIKE LOWER(CONCAT('%', :query, '%')) OR
-                  LOWER(j.requirement) LIKE LOWER(CONCAT('%', :query, '%')) OR
-                  LOWER(j.benefit) LIKE LOWER(CONCAT('%', :query, '%')) OR
-                  LOWER(j.experience) LIKE LOWER(CONCAT('%', :query, '%'))
+                  LOWER(j.experience) LIKE LOWER(CONCAT('%', :query, '%')) OR
+                  LOWER(j.education) LIKE LOWER(CONCAT('%', :query, '%'))
               )
-            ORDER BY j.id DESC
             """, nativeQuery = true)
     Page<Job> findBySearchCriteria(
             @Param("query") String query,
             @Param("status") String status,
+            @Param("type") String type,
             @Param("recruiterId") String recruiterId,
             Pageable pageable
     );
+
+    @Query(value = """
+    SELECT fd.* FROM job_service.field_details fd
+    JOIN job_service.job_field jf ON fd.id = jf.field_detail_id
+    WHERE jf.job_id = :jobId
+    """, nativeQuery = true)
+    List<FieldDetail> findFieldDetailsByJobId(@Param("jobId") String jobId);
 }

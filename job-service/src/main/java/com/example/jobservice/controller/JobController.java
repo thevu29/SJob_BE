@@ -2,6 +2,7 @@ package com.example.jobservice.controller;
 
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
+import com.example.jobservice.entity.JobType;
 import com.example.jobservice.service.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class JobController {
     public ResponseEntity<ApiResponse<List<JobDTO>>> getJobs(
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "status", required = false) JobStatus status,
+            @RequestParam(value = "type", required = false) JobType type,
             @RequestParam(value = "recruiterId", required = false) String recruiterId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -36,6 +38,7 @@ public class JobController {
         Page<JobDTO> pages = jobService.findPagedJobs(
                 query,
                 status,
+                type,
                 recruiterId,
                 page,
                 size,
@@ -79,7 +82,7 @@ public class JobController {
         );
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<JobDTO>> updateJob(@Valid @RequestBody UpdateJobRequest updateJobRequest, @PathVariable String id) {
         JobDTO job = jobService.updateJob(updateJobRequest, id);
         return ResponseEntity.ok(
