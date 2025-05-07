@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.Job.JobStatus;
+import org.example.common.dto.Job.JobUpdateEvent;
 import org.example.common.dto.Notification.NotificationEvent;
 import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterDTO;
@@ -48,6 +49,7 @@ public class JobService {
     private final JobFieldRepository jobFieldRepository;
     private final FieldDetailRepository fieldDetailRepository;
     private final KafkaTemplate<String, NotificationRequestDTO> kafkaTemplate;
+    private final KafkaTemplate<String, JobUpdateEvent> jobUpdateKafkaTemplate;
     private final CSVHelper csvHelper;
 
     public List<JobDTO> getJobs() {
@@ -139,13 +141,19 @@ public class JobService {
     public JobDTO updateJob(UpdateJobRequest updateJobRequest, String jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + jobId));
-
+        String oldName = job.getName();
         jobMapper.updateJobFromRequest(updateJobRequest, job);
 
 
         // Update field details if provided
         if (updateJobRequest.getFieldDetails() != null) {
             updateJobFields(job, updateJobRequest.getFieldDetails());
+        }
+
+        // If name has changed, publish event
+        if (!oldName.equals(job.getName())) {
+            JobUpdateEvent event = new JobUpdateEvent(jobId, job.getName());
+            jobUpdateKafkaTemplate.send("job-update-events", event);
         }
 
         Job updatedJob = jobRepository.save(job);
