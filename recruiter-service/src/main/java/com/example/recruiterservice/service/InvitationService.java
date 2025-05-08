@@ -14,6 +14,7 @@ import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.common.dto.Notification.NotificationEvent;
 import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.exception.IllegalStateException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;

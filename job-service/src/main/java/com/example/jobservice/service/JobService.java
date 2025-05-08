@@ -105,6 +105,16 @@ public class JobService {
 
         return new PageImpl<>(content, pageable, jobs.getTotalElements());
     }
+    public List<JobDTO> getJobsByRecruiterId(String recruiterId) {
+        if (!recruiterServiceClient.checkIfRecruiterExists(recruiterId)) {
+            throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng với id:" + recruiterId);
+        }
+
+        List<Job> jobs = jobRepository.findByRecruiterId(recruiterId);
+        return jobs.stream()
+                .map(jobMapper::toDto)
+                .collect(Collectors.toList());
+    }
 
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
         try {

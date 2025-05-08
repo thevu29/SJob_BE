@@ -74,6 +74,14 @@ public class JobController {
 
     }
 
+    @GetMapping("/recruiters/{recruiterId}")
+    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobsByRecruiterId(@PathVariable String recruiterId) {
+        List<JobDTO> jobs = jobService.getJobsByRecruiterId(recruiterId);
+        return ResponseEntity.ok(
+                ApiResponse.success(jobs, "Lấy danh sách việc làm theo nhà tuyển dụng thành công", HttpStatus.OK)
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<JobDTO>> getJob(@PathVariable String id) {
         JobDTO job = jobService.getJob(id);

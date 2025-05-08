@@ -44,4 +44,6 @@ public interface JobRepository extends JpaRepository<Job, String> {
     WHERE jf.job_id = :jobId
     """, nativeQuery = true)
     List<FieldDetail> findFieldDetailsByJobId(@Param("jobId") String jobId);
+
+    List<Job> findByRecruiterId(String recruiterId);
 }
