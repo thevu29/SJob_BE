@@ -9,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 public class JobSeekerUpdateDTO {
     private String name;
 
+    private String field;
+
     @Pattern(regexp = "^[+]?[0-9]{10}$", message = "Phone number is invalid")
     private String phone;
 
