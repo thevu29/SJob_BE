@@ -39,6 +39,12 @@ public class NotificationService {
     private final NotificationPreferenceRepository preferenceRepository;
     private final NotificationTemplateService notificationTemplateService;
 
+    public List<NotificationDTO> getAllUserNotifications(String userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return notifications.stream()
+                .map(notificationMapper::toDTO)
+                .collect(java.util.stream.Collectors.toList());
+    }
 
     public void sendNotification(NotificationRequestDTO request) {
         NotificationPreference preference = preferenceRepository

@@ -27,6 +27,14 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách thông báo thành công"));
     }
 
+    @GetMapping("/{userId}/all")
+    public ResponseEntity<ApiResponse<List<NotificationDTO>>> getAllUserNotifications(
+            @PathVariable String userId
+    ) {
+        List<NotificationDTO> notifications = notificationService.getAllUserNotifications(userId);
+        return ResponseEntity.ok(ApiResponse.success(notifications, "Lấy tất cả thông báo thành công"));
+    }
+
     @PutMapping("/read/{id}")
     public ResponseEntity<?> markAsRead(@PathVariable String id) {
         notificationService.markAsRead(id);
