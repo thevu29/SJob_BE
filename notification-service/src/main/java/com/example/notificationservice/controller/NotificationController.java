@@ -27,7 +27,7 @@ public class NotificationController {
         return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách thông báo thành công"));
     }
 
-    @PutMapping("/{id}/read")
+    @PutMapping("/read/{id}")
     public ResponseEntity<?> markAsRead(@PathVariable String id) {
         notificationService.markAsRead(id);
         return ResponseEntity.ok(
