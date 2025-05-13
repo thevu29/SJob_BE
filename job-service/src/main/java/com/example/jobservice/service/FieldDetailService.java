@@ -8,6 +8,7 @@ import com.example.jobservice.entity.FieldDetail;
 import com.example.jobservice.mapper.FieldDetailMapper;
 import com.example.jobservice.repository.FieldDetailRepository;
 import com.example.jobservice.repository.FieldRepository;
+import com.example.jobservice.repository.JobRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class FieldDetailService {
     private final FieldDetailRepository fieldDetailRepository;
     private final FieldRepository fieldRepository;
+    private final JobRepository jobRepository;
     private final FieldDetailMapper fieldDetailMapper;
     private final CSVHelper csvHelper;
 
@@ -129,6 +131,18 @@ public class FieldDetailService {
 
     public List<FieldDetailDTO> getFieldDetailsByNames(List<String> names) {
         List<FieldDetail> fieldDetails = fieldDetailRepository.findByNameIn(names);
+        return fieldDetails.stream()
+                .map(fieldDetailMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<FieldDetailDTO> getFieldDetailsByJobId(String jobId) {
+        // Verify job exists first
+        if (!jobRepository.existsById(jobId)) {
+            throw new ResourceNotFoundException("Không tìm thấy việc làm với id: " + jobId);
+        }
+
+        List<FieldDetail> fieldDetails = jobRepository.findFieldDetailsByJobId(jobId);
         return fieldDetails.stream()
                 .map(fieldDetailMapper::toDto)
                 .collect(Collectors.toList());

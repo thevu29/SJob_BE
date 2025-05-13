@@ -13,6 +13,7 @@ public class JobSeekerWithUserDTO {
     private String id;
     private String userId;
     private String name;
+    private String field;
     private String phone;
     private String image;
     private boolean gender;

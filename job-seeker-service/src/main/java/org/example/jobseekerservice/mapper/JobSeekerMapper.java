@@ -26,6 +26,7 @@ public interface JobSeekerMapper {
     @Mapping(target = "id", source = "jobSeekerDTO.id")
     @Mapping(target = "userId", source = "jobSeekerDTO.userId")
     @Mapping(target = "name", source = "jobSeekerDTO.name")
+    @Mapping(target = "field", source = "jobSeekerDTO.field")
     @Mapping(target = "phone", source = "jobSeekerDTO.phone")
     @Mapping(target = "image", source = "jobSeekerDTO.image")
     @Mapping(target = "gender", source = "jobSeekerDTO.gender")

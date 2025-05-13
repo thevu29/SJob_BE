@@ -3,6 +3,7 @@ package org.example.jobseekerservice.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
+import org.example.common.dto.JobSeeker.JobSeekerUpdateEvent;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.common.dto.User.UserCreationDTO;
 import org.example.common.dto.User.UserDTO;
@@ -15,6 +16,7 @@ import org.example.jobseekerservice.mapper.JobSeekerMapper;
 import org.example.jobseekerservice.repository.JobSeekerRepository;
 import org.example.jobseekerservice.utils.helpers.FileHelper;
 import org.springframework.data.domain.*;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -33,6 +35,8 @@ public class JobSeekerService {
     private final UserServiceClient userServiceClient;
     private final JobSeekerMapper jobSeekerMapper;
     private final FileHelper fileHelper;
+    private final KafkaTemplate<String, JobSeekerUpdateEvent> jobSeekerUpdateKafkaTemplate;
+
 
     private String escapeRegexSpecialChars(String input) {
         if (input == null) return "";
@@ -208,7 +212,7 @@ public class JobSeekerService {
     public JobSeekerWithUserDTO updateJobSeeker(String id, JobSeekerUpdateDTO request) {
         JobSeeker jobSeeker = jobSeekerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
-
+        String oldName = jobSeeker.getName();
         UserDTO user = getUserById(jobSeeker.getUserId());
 
         if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
@@ -225,6 +229,13 @@ public class JobSeekerService {
         }
 
         jobSeekerMapper.toEntity(request, jobSeeker);
+
+        // If name has changed, publish event
+        if (!oldName.equals(jobSeeker.getName())) {
+            JobSeekerUpdateEvent event = new JobSeekerUpdateEvent(id, jobSeeker.getName());
+            jobSeekerUpdateKafkaTemplate.send("job-seeker-update-events", event);
+        }
+
         JobSeeker updatedJobSeeker = jobSeekerRepository.save(jobSeeker);
 
         return jobSeekerMapper.toDto(jobSeekerMapper.toDto(updatedJobSeeker), user);

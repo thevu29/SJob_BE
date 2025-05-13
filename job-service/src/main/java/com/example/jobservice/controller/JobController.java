@@ -1,12 +1,13 @@
 package com.example.jobservice.controller;
 
-import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
-import com.example.jobservice.entity.JobStatus;
+import com.example.jobservice.entity.JobType;
 import com.example.jobservice.service.JobService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.common.dto.Job.JobDTO;
+import org.example.common.dto.Job.JobStatus;
 import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -27,6 +28,7 @@ public class JobController {
     public ResponseEntity<ApiResponse<List<JobDTO>>> getJobs(
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "status", required = false) JobStatus status,
+            @RequestParam(value = "type", required = false) JobType type,
             @RequestParam(value = "recruiterId", required = false) String recruiterId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -36,6 +38,7 @@ public class JobController {
         Page<JobDTO> pages = jobService.findPagedJobs(
                 query,
                 status,
+                type,
                 recruiterId,
                 page,
                 size,
@@ -71,6 +74,14 @@ public class JobController {
 
     }
 
+    @GetMapping("/recruiters/{recruiterId}")
+    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobsByRecruiterId(@PathVariable String recruiterId) {
+        List<JobDTO> jobs = jobService.getJobsByRecruiterId(recruiterId);
+        return ResponseEntity.ok(
+                ApiResponse.success(jobs, "Lấy danh sách việc làm theo nhà tuyển dụng thành công", HttpStatus.OK)
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<JobDTO>> getJob(@PathVariable String id) {
         JobDTO job = jobService.getJob(id);
@@ -79,7 +90,7 @@ public class JobController {
         );
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<JobDTO>> updateJob(@Valid @RequestBody UpdateJobRequest updateJobRequest, @PathVariable String id) {
         JobDTO job = jobService.updateJob(updateJobRequest, id);
         return ResponseEntity.ok(

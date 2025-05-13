@@ -21,7 +21,6 @@ public interface NotificationMapper {
     @Mapping(target = "type", source = "request.type")
     @Mapping(target = "url", source = "url")
     @Mapping(target = "channels", source = "channels")
-    @Mapping(target = "title", source = "title")
-    @Mapping(target = "content", source = "content")
-    Notification notificationRequestToEntity(NotificationRequestDTO request, String title, String content, Set<NotificationChannel> channels, String url);
+    @Mapping(target = "message", source = "message")
+    Notification notificationRequestToEntity(NotificationRequestDTO request, String message, Set<NotificationChannel> channels, String url);
 }

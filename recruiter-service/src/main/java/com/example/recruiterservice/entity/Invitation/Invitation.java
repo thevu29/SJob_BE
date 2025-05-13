@@ -22,11 +22,17 @@ public class Invitation {
     @Field("job_id")
     private String jobId;
 
+    @Field("job_name")
+    private String jobName;
+
     @Field("recruiter_id")
     private String recruiterId;
 
     @Field("job_seeker_id")
     private String jobSeekerId;
+
+    @Field("job_seeker_name")
+    private String jobSeekerName;
 
     private String message;
 
