@@ -43,4 +43,7 @@ public interface RecruiterRepository extends MongoRepository<Recruiter, String> 
     }
 """)
     Page<Recruiter> findBySearchCriteria(String query, List<String> userIds, Pageable pageable);
+
+    List<Recruiter> findByIdIn(Collection<String> ids);
+
 }

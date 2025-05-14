@@ -350,4 +350,11 @@ public class RecruiterService {
                 .map(recruiterMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    public List<RecruiterDTO> getRecruitersIds(List<String> ids) {
+        List<Recruiter> recruiters = recruiterRepository.findByIdIn(ids);
+        return recruiters.stream()
+                .map(recruiterMapper::toDto)
+                .collect(Collectors.toList());
+    }
 }

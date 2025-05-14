@@ -23,4 +23,8 @@ public interface RecruiterServiceClient {
 
     @GetMapping("/{id}")
     ApiResponse<RecruiterWithUserDTO> getRecruiterById(@PathVariable String id);
+
+    @PostMapping("/ids")
+    ApiResponse<List<RecruiterDTO>> getRecruiterByIds(@RequestBody List<String> ids);
+
 }

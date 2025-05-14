@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.Job.JobStatus;
 import org.example.common.dto.Job.JobUpdateEvent;
+import org.example.common.dto.Job.JobWithRecruiterDTO;
 import org.example.common.dto.Notification.NotificationEvent;
 import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterDTO;
@@ -52,12 +53,27 @@ public class JobService {
     private final KafkaTemplate<String, JobUpdateEvent> jobUpdateKafkaTemplate;
     private final CSVHelper csvHelper;
 
-    public List<JobDTO> getJobs() {
+    public List<JobWithRecruiterDTO> getJobs() {
         List<Job> jobs = jobRepository.findAll();
 
+        // Get all recruiter IDs
+        List<String> recruiterIds = jobs.stream()
+                .map(Job::getRecruiterId)
+                .distinct()
+                .toList();
+
+        // Fetch all recruiters in one call
+        Map<String, RecruiterDTO> recruiterMap = recruiterServiceClient.getRecruiterByIds(recruiterIds)
+                .getData().stream()
+                .collect(Collectors.toMap(RecruiterDTO::getId, recruiter -> recruiter));
+
         return jobs.stream()
-                .map(jobMapper::toDto)
-                .collect(Collectors.toList());
+                .map(job -> {
+                    JobDTO jobDTO = jobMapper.toDto(job);
+                    RecruiterDTO recruiter = recruiterMap.get(job.getRecruiterId());
+                    return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
+                })
+                .toList();
     }
 
     public JobDTO getJob(String jobId) {
@@ -66,7 +82,7 @@ public class JobService {
         return jobMapper.toDto(job);
     }
 
-    public Page<JobDTO> findPagedJobs(
+    public Page<JobWithRecruiterDTO> findPagedJobs(
             String query,
             JobStatus status,
             JobType type,
@@ -99,10 +115,24 @@ public class JobService {
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
 
-        List<JobDTO> content = jobs.getContent().stream()
-                .map(jobMapper::toDto)
-                .collect(Collectors.toList());
+        // Get all recruiter IDs
+        List<String> recruiterIds = jobs.getContent().stream()
+                .map(Job::getRecruiterId)
+                .distinct()
+                .toList();
 
+        // Fetch all recruiters in one call
+        Map<String, RecruiterDTO> recruiterMap = recruiterServiceClient.getRecruiterByIds(recruiterIds)
+                .getData().stream()
+                .collect(Collectors.toMap(RecruiterDTO::getId, recruiter -> recruiter));
+
+        List<JobWithRecruiterDTO> content = jobs.getContent().stream()
+                .map(job -> {
+                    JobDTO jobDTO = jobMapper.toDto(job);
+                    RecruiterDTO recruiter = recruiterMap.get(job.getRecruiterId());
+                    return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
+                })
+                .toList();
         return new PageImpl<>(content, pageable, jobs.getTotalElements());
     }
     public List<JobDTO> getJobsByRecruiterId(String recruiterId) {

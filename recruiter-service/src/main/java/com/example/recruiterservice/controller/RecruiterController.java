@@ -107,4 +107,12 @@ public class RecruiterController {
                 ApiResponse.success(recruiters, "Lấy danh sách nhà tuyển dụng theo tên thành công", HttpStatus.OK)
         );
     }
+
+    @PostMapping("/ids")
+    public ResponseEntity<ApiResponse<List<RecruiterDTO>>> getRecruitersByIds(@RequestBody List<String> ids) {
+        List<RecruiterDTO> recruiters = recruiterService.getRecruitersIds(ids);
+        return ResponseEntity.ok(
+                ApiResponse.success(recruiters, "Lấy danh sách nhà tuyển dụng theo id thành công", HttpStatus.OK)
+        );
+    }
 }
