@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.Map;
 
 public class NotificationEvent {
-
 //    // Job Application Events
 //    public static NotificationRequestDTO newJobApplication(
 //            String userId,
@@ -69,8 +68,8 @@ public class NotificationEvent {
             String userId,
             String email,
             String title,
-            String message) {
-
+            String message
+    ) {
         return NotificationRequestDTO.builder()
                 .userId(userId)
                 .email(email)
@@ -83,7 +82,7 @@ public class NotificationEvent {
                 .build();
     }
 
-//    // Profile View Events
+    //    // Profile View Events
 //    public static NotificationRequestDTO profileView(
 //            String jobSeekerId,
 //            String viewerId,
@@ -102,8 +101,8 @@ public class NotificationEvent {
 //                ))
 //                .build();
 //    }
-//
-//    // Job Invitation Events
+
+    // Job Invitation Events
     public static NotificationRequestDTO jobInvitation(
             String userId,
             String email,
@@ -111,8 +110,8 @@ public class NotificationEvent {
             String jobName,
             String recruiterId,
             String recruiterName,
-            String message) {
-
+            String message
+    ) {
         return NotificationRequestDTO.builder()
                 .userId(userId)
                 .email(email)
@@ -134,8 +133,8 @@ public class NotificationEvent {
             String email,
             String jobId,
             String jobName,
-            LocalDate jobDeadline) {
-
+            LocalDate jobDeadline
+    ) {
         return NotificationRequestDTO.builder()
                 .userId(userId)
                 .email(email)
@@ -147,7 +146,29 @@ public class NotificationEvent {
                 ))
                 .build();
     }
-//
+
+    public static NotificationRequestDTO jobApplication(
+            String userId,
+            String email,
+            String jobId,
+            String jobTitle,
+            String companyName,
+            String applicationId
+    ) {
+        return NotificationRequestDTO.builder()
+                .userId(userId)
+                .email(email)
+                .type(NotificationType.JOB_APPLICATION)
+                .metaData(Map.of(
+                        "jobId", jobId,
+                        "jobTitle", jobTitle,
+                        "companyName", companyName,
+                        "applicationId", applicationId,
+                        "applicationTime", new Date().toString()
+                ))
+                .build();
+    }
+
 //    // Account Verification Events
 //    public static NotificationRequestDTO accountVerification(
 //            String userId,

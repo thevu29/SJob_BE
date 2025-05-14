@@ -61,6 +61,4 @@ public class InvitationService {
 
         return invitationMapper.toDto(savedInvitation);
     }
-
-
 }

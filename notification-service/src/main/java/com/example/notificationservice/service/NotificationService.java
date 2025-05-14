@@ -39,10 +39,9 @@ public class NotificationService {
     private final NotificationPreferenceRepository preferenceRepository;
     private final NotificationTemplateService notificationTemplateService;
 
-
     public void sendNotification(NotificationRequestDTO request) {
-        NotificationPreference preference = preferenceRepository
-                .findByUserId(request.getUserId());
+        NotificationPreference preference = preferenceRepository.findByUserId(request.getUserId());
+
         try {
             String title = notificationTemplateService.renderTitle(request.getType(), request.getMetaData());
             String content = notificationTemplateService.renderContent(request.getType(), request.getMetaData());
@@ -50,12 +49,11 @@ public class NotificationService {
             Set<NotificationChannel> channels = determineEnabledChannels(preference, request);
             String url = generateUrlFromType(request.getType(), request.getMetaData());
 
-            Notification notification = notificationMapper.notificationRequestToEntity(
-                    request, title, content, channels, url);
+            Notification notification = notificationMapper.notificationRequestToEntity(request, title, content, channels, url);
+
             Notification savedNotification = notificationRepository.save(notification);
 
             dispatchNotifications(savedNotification, request.getEmail());
-
         } catch (Exception e) {
             log.error("Error sending notification: ", e);
             throw new RuntimeException("Failed to send notification", e);
@@ -81,6 +79,7 @@ public class NotificationService {
                         .subject(notification.getTitle())
                         .body(notification.getContent())
                         .build();
+
                 kafkaTemplate.send("send-email", emailMessage);
             }
 

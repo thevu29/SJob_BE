@@ -12,35 +12,24 @@ import java.util.List;
 public interface RecruiterRepository extends MongoRepository<Recruiter, String> {
     List<Recruiter> findByNameIn(Collection<String> recruiterNames);
 
-    @Query("""
-    {
-        $or: [
-            { $and: [
-                { $expr: { $eq: ["", ?0] }},
-                { $or: [
-                    { $expr: { $eq: [?1, null] }},
-                    { $expr: { $in: ["$user_id", { $ifNull: [?1, []] }] }}
-                ]}
-            ]}
-            ,
-            { $and: [
-                { $expr: { $ne: ["", ?0] }},
-                { $expr: { $ne: [?1, null] }},
-                { $expr: { $in: ["$user_id", { $ifNull: [?1, []] }] }}
-            ]},
-            { $and: [
-                { $expr: { $ne: ["", ?0] }},
-                { $expr: { $eq: [?1, null] }},
-                { $or: [
-                    { name: { $regex: ?0, $options: 'i' }},
-                    { address: { $regex: ?0, $options: 'i' }},
-                    { website: { $regex: ?0, $options: 'i' }},
-                    { members: { $eq: { $convert: { input: ?0, to: "int", onError: -1 } } }},
-                    { about: { $regex: ?0, $options: 'i' }},
-                ]},
-            ]}
-        ]
-    }
-""")
+    @Query(value = """
+            {
+              $or: [
+                { user_id: { $in: ?1 } },
+                {
+                  $and: [
+                    { ?0: { $ne: null } },
+                    { ?0: { $ne: "" } },
+                    {
+                      $or: [
+                        { name: { $regex: ?0, $options: "i" } },
+                        { address: { $regex: ?0, $options: "i" } }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+            """)
     Page<Recruiter> findBySearchCriteria(String query, List<String> userIds, Pageable pageable);
 }

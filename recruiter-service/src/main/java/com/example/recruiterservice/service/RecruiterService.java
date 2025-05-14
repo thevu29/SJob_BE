@@ -149,6 +149,7 @@ public class RecruiterService {
         boolean isActiveFilter = active != null;
 
         List<String> matchingUserIds = fetchMatchingUserIds(query, active, page, size, sortBy, direction);
+
         if (matchingUserIds.isEmpty() && isActiveFilter) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
