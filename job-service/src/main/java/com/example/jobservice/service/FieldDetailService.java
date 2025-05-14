@@ -1,5 +1,6 @@
 package com.example.jobservice.service;
 
+import com.example.jobservice.dto.FieldDetail.FieldDetailCountDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailImportDTO;
 import com.example.jobservice.dto.FieldDetail.request.CreateFieldDetailRequest;
 import com.example.jobservice.dto.FieldDetail.request.UpdateFieldDetailRequest;
@@ -146,5 +147,9 @@ public class FieldDetailService {
         return fieldDetails.stream()
                 .map(fieldDetailMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    public List<FieldDetailCountDTO> getFieldDetailsWithCount() {
+        return fieldDetailRepository.findAllWithJobCount();
     }
 }

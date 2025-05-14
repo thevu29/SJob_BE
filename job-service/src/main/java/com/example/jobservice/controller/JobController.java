@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.Job.JobStatus;
+import org.example.common.dto.Job.JobWithRecruiterDTO;
 import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -25,7 +26,7 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobs(
+    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getJobs(
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "status", required = false) JobStatus status,
             @RequestParam(value = "type", required = false) JobType type,
@@ -35,7 +36,7 @@ public class JobController {
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {
-        Page<JobDTO> pages = jobService.findPagedJobs(
+        Page<JobWithRecruiterDTO> pages = jobService.findPagedJobs(
                 query,
                 status,
                 type,
@@ -50,8 +51,8 @@ public class JobController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<JobDTO>>> getAllJobs() {
-        List<JobDTO> jobDTOList = jobService.getJobs();
+    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getAllJobs() {
+        List<JobWithRecruiterDTO> jobDTOList = jobService.getJobs();
         return ResponseEntity.ok(
                 ApiResponse.success(jobDTOList, "Lấy danh sách các việc làm thành công", HttpStatus.OK)
         );

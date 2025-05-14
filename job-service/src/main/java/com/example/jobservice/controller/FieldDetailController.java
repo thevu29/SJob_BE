@@ -1,5 +1,6 @@
 package com.example.jobservice.controller;
 
+import com.example.jobservice.dto.FieldDetail.FieldDetailCountDTO;
 import com.example.jobservice.dto.FieldDetail.request.CreateFieldDetailRequest;
 import com.example.jobservice.dto.FieldDetail.request.UpdateFieldDetailRequest;
 import com.example.jobservice.service.FieldDetailService;
@@ -81,6 +82,14 @@ public class FieldDetailController {
         List<FieldDetailDTO> fieldDetails = fieldDetailService.getFieldDetailsByJobId(jobId);
         return ResponseEntity.ok(
                 ApiResponse.success(fieldDetails, "Lấy danh sách chi tiết ngành nghề theo việc làm thành công", HttpStatus.OK)
+        );
+    }
+
+    @GetMapping("/counts")
+    public ResponseEntity<ApiResponse<List<FieldDetailCountDTO>>> getFieldDetailsWithCount() {
+        List<FieldDetailCountDTO> fieldDetails = fieldDetailService.getFieldDetailsWithCount();
+        return ResponseEntity.ok(
+                ApiResponse.success(fieldDetails, "Lấy danh sách chi tiết ngành nghề với số lượng việc làm thành công", HttpStatus.OK)
         );
     }
 
