@@ -39,21 +39,28 @@ public class NotificationService {
     private final NotificationPreferenceRepository preferenceRepository;
     private final NotificationTemplateService notificationTemplateService;
 
+    public List<NotificationDTO> getAllUserNotifications(String userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return notifications.stream()
+                .map(notificationMapper::toDTO)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     public void sendNotification(NotificationRequestDTO request) {
         NotificationPreference preference = preferenceRepository.findByUserId(request.getUserId());
 
         try {
-            String title = notificationTemplateService.renderTitle(request.getType(), request.getMetaData());
-            String content = notificationTemplateService.renderContent(request.getType(), request.getMetaData());
+            String message = notificationTemplateService.renderTitle(request.getType(), request.getMetaData());
 
             Set<NotificationChannel> channels = determineEnabledChannels(preference, request);
             String url = generateUrlFromType(request.getType(), request.getMetaData());
 
-            Notification notification = notificationMapper.notificationRequestToEntity(request, title, content, channels, url);
+            Notification notification = notificationMapper.notificationRequestToEntity(
+                    request, message, channels, url);
 
             Notification savedNotification = notificationRepository.save(notification);
 
-            dispatchNotifications(savedNotification, request.getEmail());
+            dispatchNotifications(savedNotification, request);
         } catch (Exception e) {
             log.error("Error sending notification: ", e);
             throw new RuntimeException("Failed to send notification", e);
@@ -71,13 +78,15 @@ public class NotificationService {
         return channels;
     }
 
-    private void dispatchNotifications(Notification notification, String email) {
+    private void dispatchNotifications(Notification notification, NotificationRequestDTO request) {
         try {
             if (notification.getChannels().contains(NotificationChannel.EMAIL)) {
+                String title = notificationTemplateService.renderTitle(request.getType(), request.getMetaData());
+                String content = notificationTemplateService.renderContent(request.getType(), request.getMetaData());
                 EmailMessageDTO emailMessage = EmailMessageDTO.builder()
-                        .to(email)
-                        .subject(notification.getTitle())
-                        .body(notification.getContent())
+                        .to(request.getEmail())
+                        .subject(title)
+                        .body(content)
                         .build();
 
                 kafkaTemplate.send("send-email", emailMessage);

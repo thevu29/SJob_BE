@@ -14,4 +14,6 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     Page<Notification> findByUserId(String userId, Pageable pageable);
 
     List<Notification> findByCreatedAtBefore(LocalDateTime date);
+
+    List<Notification> findByUserIdOrderByCreatedAtDesc(String userId);
 }

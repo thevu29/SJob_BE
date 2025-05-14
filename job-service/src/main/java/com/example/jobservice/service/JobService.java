@@ -2,14 +2,13 @@ package com.example.jobservice.service;
 
 import com.example.jobservice.client.RecruiterServiceClient;
 import com.example.jobservice.client.UserServiceClient;
-import com.example.jobservice.dto.Job.JobDTO;
 import com.example.jobservice.dto.Job.JobImportDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.FieldDetail;
 import com.example.jobservice.entity.Job;
 import com.example.jobservice.entity.JobField;
-import com.example.jobservice.entity.JobStatus;
+import com.example.jobservice.entity.JobType;
 import com.example.jobservice.mapper.JobMapper;
 import com.example.jobservice.repository.FieldDetailRepository;
 import com.example.jobservice.repository.JobFieldRepository;
@@ -17,6 +16,9 @@ import com.example.jobservice.repository.JobRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.common.dto.Job.JobDTO;
+import org.example.common.dto.Job.JobStatus;
+import org.example.common.dto.Job.JobUpdateEvent;
 import org.example.common.dto.Notification.NotificationEvent;
 import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterDTO;
@@ -47,6 +49,7 @@ public class JobService {
     private final JobFieldRepository jobFieldRepository;
     private final FieldDetailRepository fieldDetailRepository;
     private final KafkaTemplate<String, NotificationRequestDTO> kafkaTemplate;
+    private final KafkaTemplate<String, JobUpdateEvent> jobUpdateKafkaTemplate;
     private final CSVHelper csvHelper;
 
     public List<JobDTO> getJobs() {
@@ -66,6 +69,7 @@ public class JobService {
     public Page<JobDTO> findPagedJobs(
             String query,
             JobStatus status,
+            JobType type,
             String recruiterId,
             int page,
             int size,
@@ -86,6 +90,7 @@ public class JobService {
         Page<Job> jobs = jobRepository.findBySearchCriteria(
                 query,
                 status != null ? status.name() : null,
+                type != null ? type.name() : null,
                 recruiterId,
                 pageable
         );
@@ -99,6 +104,16 @@ public class JobService {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(content, pageable, jobs.getTotalElements());
+    }
+    public List<JobDTO> getJobsByRecruiterId(String recruiterId) {
+        if (!recruiterServiceClient.checkIfRecruiterExists(recruiterId)) {
+            throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng với id:" + recruiterId);
+        }
+
+        List<Job> jobs = jobRepository.findByRecruiterId(recruiterId);
+        return jobs.stream()
+                .map(jobMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
@@ -136,13 +151,19 @@ public class JobService {
     public JobDTO updateJob(UpdateJobRequest updateJobRequest, String jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + jobId));
-
+        String oldName = job.getName();
         jobMapper.updateJobFromRequest(updateJobRequest, job);
 
 
         // Update field details if provided
         if (updateJobRequest.getFieldDetails() != null) {
             updateJobFields(job, updateJobRequest.getFieldDetails());
+        }
+
+        // If name has changed, publish event
+        if (!oldName.equals(job.getName())) {
+            JobUpdateEvent event = new JobUpdateEvent(jobId, job.getName());
+            jobUpdateKafkaTemplate.send("job-update-events", event);
         }
 
         Job updatedJob = jobRepository.save(job);

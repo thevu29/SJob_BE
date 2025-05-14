@@ -14,8 +14,7 @@ public class NotificationDTO {
     private String id;
     private String userId;
     private NotificationType type;
-    private String title;
-    private String content;
+    private String message;
     private String url;
     private Set<NotificationChannel> channels;
     private boolean read;

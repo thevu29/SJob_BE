@@ -29,7 +29,7 @@ public class SecurityConfig {
                                 "/api/experiences/**",
                                 "/api/certifications/**",
                                 "/api/skills/**"
-                        ).authenticated()
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess

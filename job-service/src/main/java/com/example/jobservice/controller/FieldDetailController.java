@@ -76,4 +76,12 @@ public class FieldDetailController {
         );
     }
 
+    @GetMapping("/jobs/{jobId}")
+    public ResponseEntity<ApiResponse<List<FieldDetailDTO>>> getFieldDetailsByJobId(@PathVariable String jobId) {
+        List<FieldDetailDTO> fieldDetails = fieldDetailService.getFieldDetailsByJobId(jobId);
+        return ResponseEntity.ok(
+                ApiResponse.success(fieldDetails, "Lấy danh sách chi tiết ngành nghề theo việc làm thành công", HttpStatus.OK)
+        );
+    }
+
 }

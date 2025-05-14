@@ -8,6 +8,7 @@ public class JobSeekerDTO {
     private String userId;
     private String name;
     private String phone;
+    private String field;
     private String image;
     private boolean gender;
     private String about;

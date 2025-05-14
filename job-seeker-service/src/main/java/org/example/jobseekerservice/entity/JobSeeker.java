@@ -39,6 +39,8 @@ public class JobSeeker {
 
     private String phone;
 
+    private String field;
+
     private String image;
 
     private boolean gender;
