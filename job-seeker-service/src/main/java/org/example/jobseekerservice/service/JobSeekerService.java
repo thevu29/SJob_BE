@@ -37,12 +37,6 @@ public class JobSeekerService {
     private final FileHelper fileHelper;
     private final KafkaTemplate<String, JobSeekerUpdateEvent> jobSeekerUpdateKafkaTemplate;
 
-
-    private String escapeRegexSpecialChars(String input) {
-        if (input == null) return "";
-        return input.replaceAll("[-\\[\\]{}()*+?.,\\\\^$|#\\s]", "\\\\$0");
-    }
-
     private UserDTO getUserById(String userId) {
         ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
         return response.getData();
@@ -80,14 +74,12 @@ public class JobSeekerService {
                 .toList();
     }
 
-    private List<String> fetchMatchingUserIds(String query, Boolean active, int page, int size, String sortBy, Sort.Direction direction) {
-        String sanitizedPattern = escapeRegexSpecialChars(query);
-
+    private List<String> fetchMatchingUserIds(String query, Boolean active, int size, String sortBy, Sort.Direction direction) {
         ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
-                sanitizedPattern,
+                query,
                 active,
                 "JOB_SEEKER",
-                page,
+                1,
                 size,
                 sortBy,
                 direction
@@ -122,15 +114,16 @@ public class JobSeekerService {
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         boolean isActiveFilter = active != null;
+        String sanitizedQuery = query == null ? "" : query;
 
-        List<String> matchingUserIds = fetchMatchingUserIds(query, active, page, size, sortBy, direction);
+        List<String> matchingUserIds = fetchMatchingUserIds(sanitizedQuery, active, size, sortBy, direction);
 
         if (matchingUserIds.isEmpty() && isActiveFilter) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
 
         Page<JobSeeker> jobSeekers = jobSeekerRepository.findBySearchCriteria(
-                query,
+                sanitizedQuery,
                 matchingUserIds,
                 seeking,
                 pageable
@@ -212,6 +205,7 @@ public class JobSeekerService {
     public JobSeekerWithUserDTO updateJobSeeker(String id, JobSeekerUpdateDTO request) {
         JobSeeker jobSeeker = jobSeekerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
+
         String oldName = jobSeeker.getName();
         UserDTO user = getUserById(jobSeeker.getUserId());
 
@@ -230,7 +224,6 @@ public class JobSeekerService {
 
         jobSeekerMapper.toEntity(request, jobSeeker);
 
-        // If name has changed, publish event
         if (!oldName.equals(jobSeeker.getName())) {
             JobSeekerUpdateEvent event = new JobSeekerUpdateEvent(id, jobSeeker.getName());
             jobSeekerUpdateKafkaTemplate.send("job-seeker-update-events", event);

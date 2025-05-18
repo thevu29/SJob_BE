@@ -55,6 +55,14 @@ spring:
             - RewritePath=/recruiter-service(?<segment>/?.*), /${segment}
 
         # API routes
+        - id: application-service-viewed-jobs
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/api/viewed-jobs/**
+        - id: application-service-saved-jobs
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/api/saved-jobs/**
         - id: application-service
           uri: lb://APPLICATION-SERVICE
           predicates:

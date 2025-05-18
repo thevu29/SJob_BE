@@ -59,10 +59,14 @@ public class UserService {
 
         boolean filterByStatus = active != null;
         boolean isActive = Boolean.TRUE.equals(active);
-
         UserRole userRole = UserRole.valueOf(role);
+        Page<User> userPage;
 
-        Page<User> userPage = userRepository.findPagedUsers(sanitizedQuery, isActive, filterByStatus, userRole, pageable);
+        if (filterByStatus) {
+            userPage = userRepository.findByEmailAndActive(sanitizedQuery, isActive, userRole, pageable);
+        } else {
+            userPage = userRepository.findByEmail(sanitizedQuery, userRole, pageable);
+        }
 
         return userPage.map(userMapper::toDto);
     }
@@ -124,8 +128,8 @@ public class UserService {
 
         if (
                 !passwordEncoder.matches(request.getOtp(), user.getOtp()) ||
-                user.getOtpExpiresAt() == null ||
-                user.getOtpExpiresAt().isBefore(LocalDateTime.now())
+                        user.getOtpExpiresAt() == null ||
+                        user.getOtpExpiresAt().isBefore(LocalDateTime.now())
         ) {
             throw new IllegalArgumentException("Invalid OTP or OTP expired");
         }

@@ -15,24 +15,13 @@ public interface RecruiterRepository extends MongoRepository<Recruiter, String> 
     @Query(value = """
             {
               $or: [
-                { user_id: { $in: ?1 } },
-                {
-                  $and: [
-                    { ?0: { $ne: null } },
-                    { ?0: { $ne: "" } },
-                    {
-                      $or: [
-                        { name: { $regex: ?0, $options: "i" } },
-                        { address: { $regex: ?0, $options: "i" } }
-                      ]
-                    }
-                  ]
-                }
+                { name: { $regex: ?0, $options: "i" } },
+                { address: { $regex: ?0, $options: "i" } },
+                { user_id: { $in: ?1 } }
               ]
             }
             """)
     Page<Recruiter> findBySearchCriteria(String query, List<String> userIds, Pageable pageable);
 
     List<Recruiter> findByIdIn(Collection<String> ids);
-
 }

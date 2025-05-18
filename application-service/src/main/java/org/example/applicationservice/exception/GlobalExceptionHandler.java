@@ -1,5 +1,8 @@
 package org.example.applicationservice.exception;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.dto.response.ApiResponse;
 import org.example.common.exception.ResourceNotFoundException;
@@ -94,5 +97,31 @@ public class GlobalExceptionHandler {
         log.warn("Access denied: {}", ex.getMessage());
         ApiResponse<Object> response = ApiResponse.error("Access denied", HttpStatus.FORBIDDEN);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ApiResponse<Object>> handleFeignStatusException(FeignException ex) {
+        log.error("Feign exception: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.resolve(ex.status());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        String message = "Internal server error";
+        try {
+            String responseBody = ex.contentUTF8();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = mapper.readTree(responseBody);
+
+            if (json.has("message")) {
+                message = json.get("message").asText();
+            }
+        } catch (Exception parseEx) {
+            log.warn("Cannot parse message: {}", parseEx.getMessage());
+        }
+
+        ApiResponse<Object> response = ApiResponse.error(message, status);
+        return ResponseEntity.status(status).body(response);
     }
 }

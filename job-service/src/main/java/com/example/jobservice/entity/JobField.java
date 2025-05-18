@@ -16,11 +16,13 @@ public class JobField {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "job_id", nullable = false)
+    @ToString.Exclude
     private Job job;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "field_detail_id", nullable = false)
+    @ToString.Exclude
     private FieldDetail fieldDetail;
 }

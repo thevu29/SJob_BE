@@ -61,7 +61,6 @@ public class Job {
     @Column(nullable = false, name = "close_when_full")
     private boolean closeWhenFull;
 
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -70,5 +69,4 @@ public class Job {
     @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<JobField> jobFields = new HashSet<>();
-
 }

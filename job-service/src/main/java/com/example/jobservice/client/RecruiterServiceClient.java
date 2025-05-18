@@ -6,10 +6,8 @@ import org.example.common.dto.Recruiter.RecruiterDTO;
 import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.example.common.dto.response.ApiResponse;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.data.domain.Sort;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,4 +25,13 @@ public interface RecruiterServiceClient {
     @PostMapping("/ids")
     ApiResponse<List<RecruiterDTO>> getRecruiterByIds(@RequestBody List<String> ids);
 
+    @GetMapping
+    ApiResponse<List<RecruiterWithUserDTO>> getRecruiters(
+            @RequestParam(value = "query", defaultValue = "") String query,
+            @RequestParam(value = "active", required = false) Boolean active,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
+    );
 }

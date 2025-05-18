@@ -53,6 +53,44 @@ public class JobService {
     private final KafkaTemplate<String, JobUpdateEvent> jobUpdateKafkaTemplate;
     private final CSVHelper csvHelper;
 
+    private String getColumnName(String sortBy) {
+        switch (sortBy) {
+            case "name" -> {
+                return "name";
+            }
+            case "salary" -> {
+                return "salary";
+            }
+            case "deadline" -> {
+                return "deadline";
+            }
+            default -> {
+                return "date";
+            }
+        }
+    }
+
+    private List<String> findRecruiterIds(String query, int size, String sortBy, Sort.Direction direction) {
+        int recruiterPageSize = size * 2;
+
+        ApiResponse<List<RecruiterWithUserDTO>> recruiterResponse = recruiterServiceClient.getRecruiters(
+                query,
+                true,
+                1,
+                recruiterPageSize,
+                sortBy,
+                direction
+        );
+
+        if (recruiterResponse == null || recruiterResponse.getData() == null || recruiterResponse.getData().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return recruiterResponse.getData().stream()
+                .map(RecruiterWithUserDTO::getId)
+                .toList();
+    }
+
     public List<JobWithRecruiterDTO> getJobs() {
         List<Job> jobs = jobRepository.findAll();
 
@@ -82,68 +120,73 @@ public class JobService {
         return jobMapper.toDto(job);
     }
 
-    public Page<JobWithRecruiterDTO> findPagedJobs(
+    public List<JobDTO> getJobsByIds(List<String> ids) {
+        List<Job> jobs = jobRepository.findAllById(ids);
+        return jobs.stream().map(jobMapper::toDto).toList();
+    }
+
+    public Page<JobDTO> findPaginatedJobs(
             String query,
-            JobStatus status,
             JobType type,
+            JobStatus status,
             String recruiterId,
+            List<String> fieldDetailIds,
             int page,
             int size,
             String sortBy,
             Sort.Direction direction
     ) {
-        String columnName = switch (sortBy) {
-            case "name" -> "name";
-            case "salary" -> "salary";
-            case "deadline" -> "deadline";
-            case "date" -> "date";
-            default -> "id";
-        };
-
+        String columnName = getColumnName(sortBy);
         Sort sort = Sort.by(direction, columnName);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Job> jobs = jobRepository.findBySearchCriteria(
+        String jobStatus = status != null ? status.name() : null;
+        String jobType = type != null ? type.name() : null;
+
+        List<String> sanitizedFieldDetailIds = (fieldDetailIds == null || fieldDetailIds.isEmpty())
+                ? Collections.emptyList()
+                : fieldDetailIds;
+
+        Page<Job> byJobName = jobRepository.findPaginatedJobs(
                 query,
-                status != null ? status.name() : null,
-                type != null ? type.name() : null,
+                Collections.emptyList(),
+                jobType,
+                jobStatus,
                 recruiterId,
+                sanitizedFieldDetailIds,
                 pageable
         );
 
-        if (jobs.isEmpty()) {
-            return new PageImpl<>(new ArrayList<>(), pageable, 0);
+        List<Job> results = new ArrayList<>(byJobName.getContent());
+        int remaining = size - results.size();
+
+        if (remaining > 0 && query != null && !query.trim().isEmpty()) {
+            List<String> recruiterIds = findRecruiterIds(query, size, sortBy, direction);
+
+            if (!recruiterIds.isEmpty() && (recruiterId == null || recruiterId.isBlank())) {
+                Page<Job> byRecruiter = jobRepository.findPaginatedJobs(
+                        null,
+                        recruiterIds,
+                        jobType,
+                        jobStatus,
+                        recruiterId,
+                        fieldDetailIds,
+                        PageRequest.of(page, remaining, sort)
+                );
+
+                Set<String> existingIds = results.stream()
+                        .map(Job::getId)
+                        .collect(Collectors.toSet());
+
+                byRecruiter.getContent().stream()
+                        .filter(job -> !existingIds.contains(job.getId()))
+                        .forEach(results::add);
+            }
         }
 
-        // Get all recruiter IDs
-        List<String> recruiterIds = jobs.getContent().stream()
-                .map(Job::getRecruiterId)
-                .distinct()
-                .toList();
+        List<JobDTO> content = results.stream().map(jobMapper::toDto).toList();
 
-        // Fetch all recruiters in one call
-        Map<String, RecruiterDTO> recruiterMap = recruiterServiceClient.getRecruiterByIds(recruiterIds)
-                .getData().stream()
-                .collect(Collectors.toMap(RecruiterDTO::getId, recruiter -> recruiter));
-
-        List<JobWithRecruiterDTO> content = jobs.getContent().stream()
-                .map(job -> {
-                    JobDTO jobDTO = jobMapper.toDto(job);
-                    RecruiterDTO recruiter = recruiterMap.get(job.getRecruiterId());
-                    return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
-                })
-                .toList();
-        return new PageImpl<>(content, pageable, jobs.getTotalElements());
-    }
-    public List<JobDTO> getJobsByRecruiterId(String recruiterId) {
-        if (!recruiterServiceClient.checkIfRecruiterExists(recruiterId)) {
-            throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng với id:" + recruiterId);
-        }
-
-        List<Job> jobs = jobRepository.findByRecruiterId(recruiterId);
-        return jobs.stream()
-                .map(jobMapper::toDto)
-                .collect(Collectors.toList());
+        return new PageImpl<>(content, pageable, results.size());
     }
 
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
@@ -151,6 +194,7 @@ public class JobService {
             if (!recruiterServiceClient.checkIfRecruiterExists(recruiterId)) {
                 throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng với id:" + recruiterId);
             }
+
             Job job = jobMapper.toEntity(createJobRequest);
             job.setRecruiterId(recruiterId);
             job.setStatus(JobStatus.OPEN);
@@ -172,6 +216,7 @@ public class JobService {
 
                 jobFieldRepository.save(jobField);
             }
+
             return jobMapper.toDto(savedJob);
         } catch (Exception e) {
             throw new RuntimeException("Thất bại khi tạo mới việc làm", e);
@@ -284,7 +329,6 @@ public class JobService {
             throw new FileUploadException("Nhập file thất bại: " + e.getMessage());
         }
     }
-
 
     private Map<String, String> validateRecruiters(Set<String> recruiterNames) {
         ApiResponse<List<RecruiterDTO>> response = recruiterServiceClient.getRecruiterByName(new ArrayList<>(recruiterNames));

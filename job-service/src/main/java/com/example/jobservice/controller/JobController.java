@@ -26,21 +26,23 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getJobs(
+    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobs(
             @RequestParam(value = "query", required = false) String query,
-            @RequestParam(value = "status", required = false) JobStatus status,
             @RequestParam(value = "type", required = false) JobType type,
+            @RequestParam(value = "status", required = false) JobStatus status,
             @RequestParam(value = "recruiterId", required = false) String recruiterId,
+            @RequestParam(value = "fieldDetailIds", required = false) List<String> fieldDetailIds,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {
-        Page<JobWithRecruiterDTO> pages = jobService.findPagedJobs(
+        Page<JobDTO> pages = jobService.findPaginatedJobs(
                 query,
-                status,
                 type,
+                status,
                 recruiterId,
+                fieldDetailIds,
                 page,
                 size,
                 sortBy,
@@ -58,11 +60,11 @@ public class JobController {
         );
     }
 
-    @PostMapping
-    public ResponseEntity<?> test() {
-        jobService.checkJobDeadlines();
+    @GetMapping("/ids")
+    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobsByIds(@RequestParam List<String> ids) {
+        List<JobDTO> jobs = jobService.getJobsByIds(ids);
         return ResponseEntity.ok(
-                ApiResponse.success(null, "Test thành công", HttpStatus.OK)
+                ApiResponse.success(jobs, "Lấy danh sách việc làm thành công", HttpStatus.OK)
         );
     }
 
@@ -73,14 +75,6 @@ public class JobController {
                 status(HttpStatus.CREATED)
                 .body(ApiResponse.success(job, "Tạo việc làm thành công", HttpStatus.CREATED));
 
-    }
-
-    @GetMapping("/recruiters/{recruiterId}")
-    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobsByRecruiterId(@PathVariable String recruiterId) {
-        List<JobDTO> jobs = jobService.getJobsByRecruiterId(recruiterId);
-        return ResponseEntity.ok(
-                ApiResponse.success(jobs, "Lấy danh sách việc làm theo nhà tuyển dụng thành công", HttpStatus.OK)
-        );
     }
 
     @GetMapping("/{id}")

@@ -1,6 +1,7 @@
 package com.example.recruiterservice.service;
 
-import com.example.recruiterservice.client.*;
+import com.example.recruiterservice.client.FieldServiceClient;
+import com.example.recruiterservice.client.UserServiceClient;
 import com.example.recruiterservice.dto.Recruiter.RecruiterImportDTO;
 import com.example.recruiterservice.dto.Recruiter.request.CreateRecruiterRequest;
 import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
@@ -39,9 +40,26 @@ public class RecruiterService {
     private final FileHelper fileHelper;
     private final CSVHelper csvHelper;
 
-    private String escapeRegexSpecialChars(String input) {
-        if (input == null) return "";
-        return input.replaceAll("[-\\[\\]{}()*+?.,\\\\^$|#\\s]", "\\\\$0");
+    private CreateRecruiterRequest convertToCreateRequest(RecruiterImportDTO dto, Map<String, String> fieldMap) {
+        return CreateRecruiterRequest.builder()
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .fieldId(fieldMap.get(dto.getFieldName()))
+                .name(dto.getName())
+                .about(dto.getAbout())
+//                .image(dto.getImage())
+                .website(dto.getWebsite())
+                .address(dto.getAddress())
+                .members(dto.getMembers())
+                .build();
+    }
+
+    private UserCreationDTO createUserRequest(String email, String password) {
+        return UserCreationDTO.builder()
+                .email(email)
+                .password(password)
+                .role("RECRUITER")
+                .build();
     }
 
     private UserDTO getUserById(String userId) {
@@ -52,20 +70,6 @@ public class RecruiterService {
     private FieldDTO getFieldById(String fieldId) {
         ApiResponse<FieldDTO> response = fieldServiceClient.getField(fieldId);
         return response.getData();
-    }
-
-    public RecruiterWithUserDTO getRecruiterById(String id) {
-        Recruiter recruiter = recruiterRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà tuyển dụng"));
-
-        UserDTO user = getUserById(recruiter.getUserId());
-        FieldDTO field = getFieldById(recruiter.getFieldId());
-
-        return recruiterMapper.toDtoWithField(
-                recruiterMapper.toDto(recruiter),
-                user,
-                field
-        );
     }
 
     private Map<String, UserDTO> fetchAndMapUsers(List<String> userIds) {
@@ -95,8 +99,8 @@ public class RecruiterService {
         return recruiters.stream()
                 .filter(r -> r.getUserId() != null && userMap.containsKey(r.getUserId()))
                 .map(recruiter -> {
-                    FieldDTO field;
-                    field = getFieldById(recruiter.getFieldId());
+                    FieldDTO field = getFieldById(recruiter.getFieldId());
+
                     return recruiterMapper.toDtoWithField(
                             recruiterMapper.toDto(recruiter),
                             userMap.get(recruiter.getUserId()),
@@ -106,26 +110,44 @@ public class RecruiterService {
                 .collect(Collectors.toList());
     }
 
-    private List<String> fetchMatchingUserIds(String query, Boolean active, int page, int size, String sortBy, Sort.Direction direction) {
-        String sanitizedPattern = escapeRegexSpecialChars(query);
+    private List<String> fetchMatchingUserIds(String query, Boolean active, int size, String sortBy, Sort.Direction direction) {
+        System.out.println("query: " + query);
 
         ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
-                sanitizedPattern,
+                query,
                 active,
                 "RECRUITER",
-                page,
+                1,
                 size,
                 sortBy,
                 direction
         );
 
+        System.out.println("user response: " + usersResponse);
+
         if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
+            System.out.println("user response data: " + usersResponse.getData().size());
+
             return usersResponse.getData().stream()
                     .map(UserDTO::getId)
                     .toList();
         }
 
         return Collections.emptyList();
+    }
+
+    private Page<RecruiterWithUserDTO> buildRecruiterWithUserPage(Page<Recruiter> recruiters, Pageable pageable) {
+        List<String> userIds = recruiters.getContent().stream()
+                .map(Recruiter::getUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
+
+        List<RecruiterWithUserDTO> content = mapToRecruiterWithUserDTOs(recruiters.getContent(), userMap);
+
+        return new PageImpl<>(content, pageable, recruiters.getTotalElements());
     }
 
     public Page<RecruiterWithUserDTO> findPagedRecruiters(
@@ -147,16 +169,24 @@ public class RecruiterService {
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         boolean isActiveFilter = active != null;
+        String sanitizedQuery = query == null ? "" : query;
 
-        List<String> matchingUserIds = fetchMatchingUserIds(query, active, page, size, sortBy, direction);
+        List<String> matchingUserIds = fetchMatchingUserIds(sanitizedQuery, active, size, sortBy, direction);
 
         if (matchingUserIds.isEmpty() && isActiveFilter) {
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
 
+        boolean isQueryBlank = sanitizedQuery.isBlank();
+
+        if (isQueryBlank && matchingUserIds.isEmpty()) {
+            Page<Recruiter> allRecruiters = recruiterRepository.findAll(pageable);
+            return buildRecruiterWithUserPage(allRecruiters, pageable);
+        }
+
         Page<Recruiter> recruiters = recruiterRepository.findBySearchCriteria(
-                query,
-                matchingUserIds.isEmpty() ? null : matchingUserIds,
+                sanitizedQuery,
+                matchingUserIds.isEmpty() ? Collections.emptyList() : matchingUserIds,
                 pageable
         );
 
@@ -164,16 +194,7 @@ public class RecruiterService {
             return new PageImpl<>(new ArrayList<>(), pageable, 0);
         }
 
-        List<String> userIds = recruiters.getContent().stream()
-                .map(Recruiter::getUserId)
-                .distinct()
-                .toList();
-
-        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
-
-        List<RecruiterWithUserDTO> content = mapToRecruiterWithUserDTOs(recruiters.getContent(), userMap);
-
-        return new PageImpl<>(content, pageable, recruiters.getTotalElements());
+        return buildRecruiterWithUserPage(recruiters, pageable);
     }
 
     public List<RecruiterWithUserDTO> getAllRecruiters() {
@@ -187,15 +208,20 @@ public class RecruiterService {
         Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
 
         return mapToRecruiterWithUserDTOs(recruiters, userMap);
-
     }
 
-    private UserCreationDTO createUserRequest(String email, String password) {
-        return UserCreationDTO.builder()
-                .email(email)
-                .password(password)
-                .role("RECRUITER")
-                .build();
+    public RecruiterWithUserDTO getRecruiterById(String id) {
+        Recruiter recruiter = recruiterRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà tuyển dụng"));
+
+        UserDTO user = getUserById(recruiter.getUserId());
+        FieldDTO field = getFieldById(recruiter.getFieldId());
+
+        return recruiterMapper.toDtoWithField(
+                recruiterMapper.toDto(recruiter),
+                user,
+                field
+        );
     }
 
     public RecruiterWithUserDTO createRecruiter(RecruiterCreationDTO request) {
@@ -329,20 +355,6 @@ public class RecruiterService {
         } catch (IOException e) {
             throw new FileUploadException("Nhập file thất bại: " + e.getMessage());
         }
-    }
-
-    private CreateRecruiterRequest convertToCreateRequest(RecruiterImportDTO dto, Map<String, String> fieldMap) {
-        return CreateRecruiterRequest.builder()
-                .email(dto.getEmail())
-                .password(dto.getPassword())
-                .fieldId(fieldMap.get(dto.getFieldName()))
-                .name(dto.getName())
-                .about(dto.getAbout())
-//                .image(dto.getImage())
-                .website(dto.getWebsite())
-                .address(dto.getAddress())
-                .members(dto.getMembers())
-                .build();
     }
 
     public List<RecruiterDTO> getRecruitersByNames(List<String> names) {
