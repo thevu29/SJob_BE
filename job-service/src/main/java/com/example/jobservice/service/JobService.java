@@ -61,6 +61,9 @@ public class JobService {
             case "salary" -> {
                 return "salary";
             }
+            case "experience" -> {
+                return "experience";
+            }
             case "deadline" -> {
                 return "deadline";
             }
@@ -89,6 +92,42 @@ public class JobService {
         return recruiterResponse.getData().stream()
                 .map(RecruiterWithUserDTO::getId)
                 .toList();
+    }
+
+    private static class Range {
+        Integer min;
+        Integer max;
+
+        Range(Integer min, Integer max) {
+            this.min = min;
+            this.max = max;
+        }
+    }
+
+    private Range parseRange(String value) {
+        try {
+            if (value == null || value.isBlank()) return null;
+
+            value = value.trim();
+            int i = Integer.parseInt(value.substring(2).trim());
+
+            if (value.startsWith(">=")) {
+                return new Range(i, null);
+            } else if (value.startsWith("<=")) {
+                return new Range(null, i);
+            } else if (value.startsWith("=")) {
+                int exact = Integer.parseInt(value.substring(1).trim());
+                return new Range(exact, exact);
+            } else if (value.contains("-")) {
+                String[] parts = value.split("-");
+                int min = Integer.parseInt(parts[0].trim());
+                int max = Integer.parseInt(parts[1].trim());
+                return new Range(min, max);
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return null;
     }
 
     public List<JobWithRecruiterDTO> getJobs() {
@@ -129,6 +168,8 @@ public class JobService {
             String query,
             JobType type,
             JobStatus status,
+            String salary,
+            String experience,
             String recruiterId,
             List<String> fieldDetailIds,
             int page,
@@ -143,6 +184,15 @@ public class JobService {
         String jobStatus = status != null ? status.name() : null;
         String jobType = type != null ? type.name() : null;
 
+        Range salaryRange = parseRange(salary);
+        Range experienceRange = parseRange(experience);
+
+        Float minSalary = salaryRange != null && salaryRange.min != null ? salaryRange.min.floatValue() : null;
+        Float maxSalary = salaryRange != null && salaryRange.max != null ? salaryRange.max.floatValue() : null;
+
+        Integer minExp = experienceRange != null ? experienceRange.min : null;
+        Integer maxExp = experienceRange != null ? experienceRange.max : null;
+
         List<String> sanitizedFieldDetailIds = (fieldDetailIds == null || fieldDetailIds.isEmpty())
                 ? Collections.emptyList()
                 : fieldDetailIds;
@@ -152,10 +202,16 @@ public class JobService {
                 Collections.emptyList(),
                 jobType,
                 jobStatus,
+                minSalary,
+                maxSalary,
+                minExp,
+                maxExp,
                 recruiterId,
                 sanitizedFieldDetailIds,
                 pageable
         );
+
+        long totalElements = byJobName.getTotalElements();
 
         List<Job> results = new ArrayList<>(byJobName.getContent());
         int remaining = size - results.size();
@@ -169,10 +225,16 @@ public class JobService {
                         recruiterIds,
                         jobType,
                         jobStatus,
+                        minSalary,
+                        maxSalary,
+                        minExp,
+                        maxExp,
                         recruiterId,
                         fieldDetailIds,
                         PageRequest.of(page, remaining, sort)
                 );
+
+                totalElements += byRecruiter.getTotalElements();
 
                 Set<String> existingIds = results.stream()
                         .map(Job::getId)
@@ -186,7 +248,7 @@ public class JobService {
 
         List<JobDTO> content = results.stream().map(jobMapper::toDto).toList();
 
-        return new PageImpl<>(content, pageable, results.size());
+        return new PageImpl<>(content, pageable, totalElements);
     }
 
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
