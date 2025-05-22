@@ -27,7 +27,11 @@ public class SecurityConfig {
                                 "/api/users/verify-otp",
                                 "/api/users/update-password"
                         ).permitAll()
-                        .requestMatchers("/api/applications/**").authenticated()
+                        .requestMatchers(
+                                "/api/applications/**",
+                                "/api/viewed-jobs/**",
+                                "/api/saved-jobs/**"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess
