@@ -1,6 +1,5 @@
 package com.example.jobservice.client;
 
-
 import com.example.jobservice.config.FeignClientInterceptor;
 import org.example.common.dto.Recruiter.RecruiterDTO;
 import org.example.common.dto.Recruiter.RecruiterWithUserDTO;

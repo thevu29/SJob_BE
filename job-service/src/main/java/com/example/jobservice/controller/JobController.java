@@ -26,7 +26,7 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JobDTO>>> getJobs(
+    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getJobs(
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "type", required = false) JobType type,
             @RequestParam(value = "status", required = false) JobStatus status,
@@ -39,7 +39,7 @@ public class JobController {
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {
-        Page<JobDTO> pages = jobService.findPaginatedJobs(
+        Page<JobWithRecruiterDTO> pages = jobService.findPaginatedJobs(
                 query,
                 type,
                 status,

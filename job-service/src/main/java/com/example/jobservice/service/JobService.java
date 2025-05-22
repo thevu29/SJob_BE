@@ -164,7 +164,7 @@ public class JobService {
         return jobs.stream().map(jobMapper::toDto).toList();
     }
 
-    public Page<JobDTO> findPaginatedJobs(
+    public Page<JobWithRecruiterDTO> findPaginatedJobs(
             String query,
             JobType type,
             JobStatus status,
@@ -246,7 +246,21 @@ public class JobService {
             }
         }
 
-        List<JobDTO> content = results.stream().map(jobMapper::toDto).toList();
+        List<String> recruiterIds = results.stream()
+                .map(Job::getRecruiterId)
+                .distinct()
+                .toList();
+
+        Map<String, RecruiterDTO> recruiterMap = recruiterServiceClient.getRecruiterByIds(recruiterIds)
+                .getData().stream()
+                .collect(Collectors.toMap(RecruiterDTO::getId, recruiter -> recruiter));
+
+        List<JobWithRecruiterDTO> content = results.stream()
+                .map(job -> {
+                    JobDTO jobDTO = jobMapper.toDto(job);
+                    RecruiterDTO recruiter = recruiterMap.get(job.getRecruiterId());
+                    return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
+                }).toList();
 
         return new PageImpl<>(content, pageable, totalElements);
     }

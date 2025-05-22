@@ -4,16 +4,12 @@ import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.Job;
 import org.example.common.dto.Job.JobDTO;
-import org.example.common.dto.Job.JobStatus;
 import org.example.common.dto.Job.JobWithRecruiterDTO;
 import org.example.common.dto.Recruiter.RecruiterDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
-
-import java.time.LocalDate;
-
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface JobMapper {
