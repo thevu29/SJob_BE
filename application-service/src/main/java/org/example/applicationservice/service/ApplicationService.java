@@ -1,18 +1,6 @@
 package org.example.applicationservice.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.common.dto.Application.ApplicationDTO;
-import org.example.common.dto.Email.EmailMessageDTO;
-import org.example.common.dto.Job.JobDTO;
-import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
-import org.example.common.dto.Notification.NotificationEvent;
-import org.example.common.dto.Notification.NotificationRequestDTO;
-import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
-import org.example.common.dto.Resume.ResumeDTO;
-import org.example.common.dto.S3.FileUploadedDTO;
-import org.example.common.dto.S3.UploadFileDTO;
-import org.example.common.dto.response.ApiResponse;
-import org.example.common.exception.ResourceNotFoundException;
 import org.example.applicationservice.client.JobSeekerServiceClient;
 import org.example.applicationservice.client.JobServiceClient;
 import org.example.applicationservice.client.RecruiterServiceClient;
@@ -21,11 +9,25 @@ import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.entity.Application;
 import org.example.applicationservice.mapper.ApplicationMapper;
 import org.example.applicationservice.repository.ApplicationRepository;
+import org.example.common.dto.Application.ApplicationDTO;
+import org.example.common.dto.Email.EmailMessageDTO;
+import org.example.common.dto.Job.JobDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.Resume.ResumeDTO;
+import org.example.common.dto.S3.FileUploadedDTO;
+import org.example.common.dto.S3.UploadFileDTO;
+import org.example.common.dto.response.ApiResponse;
+import org.example.common.exception.ResourceNotFoundException;
+import org.springframework.data.domain.*;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -95,33 +97,6 @@ public class ApplicationService {
         kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
     }
 
-    private void sendNotification(
-            String userId,
-            String email,
-            String jobId,
-            String jobTitle,
-            String companyName,
-            String applicationId,
-            JobSeekerWithUserDTO jobSeeker,
-            RecruiterWithUserDTO recruiter,
-            JobDTO job
-    ) {
-        try {
-            NotificationRequestDTO notification = NotificationEvent.jobApplication(
-                    userId,
-                    email,
-                    jobId,
-                    jobTitle,
-                    companyName,
-                    applicationId
-            );
-
-            kafkaTemplate.send("notification-requests", notification).get();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to send notification", e);
-        }
-    }
-
     private void updateApplicationResume(String id, String resumeUrl) {
         Application application = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
@@ -185,15 +160,44 @@ public class ApplicationService {
                 .body("Chúc mừng bạn đã ứng tuyển thành công cho vị trí " + jobResponse.getData().getName())
                 .fileUrl(event.getFileUrl())
                 .build();
-        
+
         EmailMessageDTO recruiterEmailMessage = EmailMessageDTO.builder()
                 .to(recruiterResponse.getData().getEmail())
                 .subject("Ứng viên mới ứng tuyển")
                 .body("Có một ứng viên mới đã ứng tuyển cho vị trí " + jobResponse.getData().getName() + "<br>Nội dung ứng tuyển: " + application.getMessage())
                 .fileUrl(event.getFileUrl())
                 .build();
-    
+
         kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
         kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+    }
+
+    public Page<ApplicationDTO> getPaginatedJobSeekerApplications(
+            String jobSeekerId,
+            int page,
+            int size,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        Sort sort = Sort.by(direction, sortBy);
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<Application> applicationPage = applicationRepository.findAllByJobSeekerId(jobSeekerId, pageable);
+
+        List<ApplicationDTO> content = new ArrayList<>();
+
+        applicationPage.forEach(application -> {
+            ApplicationDTO applicationDTO = applicationMapper.toDTO(application);
+
+            ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(application.getJobId());
+
+            if (jobResponse.getData() != null) {
+                applicationDTO.setJob(jobResponse.getData());
+            }
+
+            content.add(applicationDTO);
+        });
+
+        return new PageImpl<>(content, pageable, applicationPage.getTotalElements());
     }
 }

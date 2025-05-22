@@ -2,17 +2,18 @@ package org.example.applicationservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.common.dto.Application.ApplicationDTO;
-import org.example.common.dto.response.ApiResponse;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.service.ApplicationService;
+import org.example.common.dto.Application.ApplicationDTO;
+import org.example.common.dto.response.ApiResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -26,5 +27,24 @@ public class ApplicationController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(application, "Ứng tuyển thành công", HttpStatus.CREATED));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ApplicationDTO>>> getPaginatedJobSeekerApplications(
+            @RequestParam(value = "jobSeekerId", required = false) String jobSeekerId,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
+    ) {
+        Page<ApplicationDTO> pages = applicationService.getPaginatedJobSeekerApplications(
+                jobSeekerId,
+                page,
+                size,
+                sortBy,
+                direction
+        );
+
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách các công việc đã ừng tuyển thành công"));
     }
 }
