@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface JobRepository extends JpaRepository<Job, String> {
+public interface JobRepository extends JpaRepository<Job, String>, QuerydslPredicateExecutor<Job> {
     @Query("SELECT j FROM Job j WHERE j.deadline = :thresholdDate AND j.status = :status")
     List<Job> findByDeadlineAndStatus(LocalDate thresholdDate, JobStatus status);
 
@@ -25,7 +26,7 @@ public interface JobRepository extends JpaRepository<Job, String> {
                     LEFT JOIN job_service.job_field jf ON j.id = jf.job_id
                     LEFT JOIN job_service.field_details fd ON jf.field_detail_id = fd.id
                     WHERE (:query IS NULL OR LOWER(j.name) LIKE LOWER(CONCAT('%', :query, '%')))
-                        AND (:recruiterIds IS NULL OR j.recruiter_id IN (:recruiterIds))
+                        OR (:recruiterIds IS NULL OR j.recruiter_id IN (:recruiterIds))
                         AND (:type IS NULL OR j.type = :type)
                         AND (:status IS NULL OR j.status = :status)
                         AND (:recruiterId IS NULL OR j.recruiter_id = :recruiterId)
@@ -33,36 +34,31 @@ public interface JobRepository extends JpaRepository<Job, String> {
                         AND (:minSalary IS NULL OR j.salary >= :minSalary)
                         AND (:maxSalary IS NULL OR j.salary <= :maxSalary)
                         AND (
-                            :minExp IS NULL AND :maxExp IS NULL OR
-                            EXISTS (
-                                SELECT 1
-                                WHERE (
-                                    -- Range case ('3-5')
-                                    (
-                                        POSITION('-' IN j.experience) > 0 AND
-                                        (:minExp IS NULL OR CAST(split_part(j.experience, '-', 1) AS INT) >= :minExp) AND
-                                        (:maxExp IS NULL OR CAST(split_part(j.experience, '-', 2) AS INT) <= :maxExp) AND
-                                        CAST(split_part(j.experience, '-', 1) AS INT) <= :maxExp AND
-                                        CAST(split_part(j.experience, '-', 2) AS INT) >= :minExp
-                                    ) OR
-                                    -- Greater than or equal case ('>=3')
-                                    (
-                                        j.experience LIKE '>=%' AND
-                                        (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp) AND
-                                        (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp)
-                                    ) OR
-                                    -- Less than or equal case ('<=1')
-                                    (
-                                        j.experience LIKE '<=%' AND
-                                        (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp) AND
-                                        (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp)
-                                    ) OR
-                                    -- Exact case ('=2')
-                                    (
-                                        j.experience LIKE '=%' AND
-                                        (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 2) AS INT) <= :maxExp) AND
-                                        (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 2) AS INT) >= :minExp)
-                                    )
+                            (:minExp IS NULL AND :maxExp IS NULL) OR
+                            (
+                                -- Range case (e.g., "3-5")
+                                (
+                                    POSITION('-' IN j.experience) > 0 AND
+                                    (:minExp IS NULL OR CAST(split_part(j.experience, '-', 1) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(split_part(j.experience, '-', 2) AS INT) <= :maxExp)
+                                ) OR
+                                -- Greater than or equal case (e.g., ">=5")
+                                (
+                                    j.experience LIKE '>=%' AND
+                                    (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp)
+                                ) OR
+                                -- Less than or equal case (e.g., "<=1")
+                                (
+                                    j.experience LIKE '<=%' AND
+                                    (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp)
+                                ) OR
+                                -- Exact case (e.g., "=2")
+                                (
+                                    j.experience LIKE '=%' AND
+                                    (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 2) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 2) AS INT) <= :maxExp)
                                 )
                             )
                         )
@@ -74,7 +70,7 @@ public interface JobRepository extends JpaRepository<Job, String> {
                     LEFT JOIN job_service.job_field jf ON j.id = jf.job_id
                     LEFT JOIN job_service.field_details fd ON jf.field_detail_id = fd.id
                     WHERE (:query IS NULL OR LOWER(j.name) LIKE LOWER(CONCAT('%', :query, '%')))
-                        AND (:recruiterIds IS NULL OR j.recruiter_id IN (:recruiterIds))
+                        OR (:recruiterIds IS NULL OR j.recruiter_id IN (:recruiterIds))
                         AND (:type IS NULL OR j.type = :type)
                         AND (:status IS NULL OR j.status = :status)
                         AND (:recruiterId IS NULL OR j.recruiter_id = :recruiterId)
@@ -82,35 +78,31 @@ public interface JobRepository extends JpaRepository<Job, String> {
                         AND (:minSalary IS NULL OR j.salary >= :minSalary)
                         AND (:maxSalary IS NULL OR j.salary <= :maxSalary)
                         AND (
-                            :minExp IS NULL AND :maxExp IS NULL OR
-                            EXISTS (
-                                SELECT 1
-                                WHERE (
-                                    -- Range case ('3-5')
-                                    (
-                                        POSITION('-' IN j.experience) > 0 AND
-                                        (:minExp IS NULL OR CAST(split_part(j.experience, '-', 1) AS INT) <= :minExp) AND
-                                        (:maxExp IS NULL OR CAST(split_part(j.experience, '-', 1) AS INT) <= :maxExp) AND
-                                        (:minExp IS NULL OR CAST(split_part(j.experience, '-', 2) AS INT) >= :minExp)
-                                    ) OR
-                                    -- Greater than or equal case ('>=3')
-                                    (
-                                        j.experience LIKE '>=%' AND
-                                        (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp) AND
-                                        (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp)
-                                    ) OR
-                                    -- Less than or equal case ('<=1')
-                                    (
-                                        j.experience LIKE '<=%' AND
-                                        (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp) AND
-                                        (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp)
-                                    ) OR
-                                    -- Exact case ('=2')
-                                    (
-                                        j.experience LIKE '=%' AND
-                                        (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 2) AS INT) <= :maxExp) AND
-                                        (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 2) AS INT) >= :minExp)
-                                    )
+                            (:minExp IS NULL AND :maxExp IS NULL) OR
+                            (
+                                -- Range case (e.g., "3-5")
+                                (
+                                    POSITION('-' IN j.experience) > 0 AND
+                                    (:minExp IS NULL OR CAST(split_part(j.experience, '-', 1) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(split_part(j.experience, '-', 2) AS INT) <= :maxExp)
+                                ) OR
+                                -- Greater than or equal case (e.g., ">=5")
+                                (
+                                    j.experience LIKE '>=%' AND
+                                    (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp)
+                                ) OR
+                                -- Less than or equal case (e.g., "<=1")
+                                (
+                                    j.experience LIKE '<=%' AND
+                                    (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp)
+                                ) OR
+                                -- Exact case (e.g., "=2")
+                                (
+                                    j.experience LIKE '=%' AND
+                                    (:minExp IS NULL OR CAST(SUBSTRING(j.experience FROM 2) AS INT) >= :minExp) AND
+                                    (:maxExp IS NULL OR CAST(SUBSTRING(j.experience FROM 3) AS INT) <= :maxExp)
                                 )
                             )
                         )

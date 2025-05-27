@@ -1,6 +1,5 @@
 package com.example.jobservice.dto.Job.request;
 
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
@@ -14,8 +13,7 @@ public class UpdateJobRequest {
 
     private String description;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Salary must be greater than or equal to 0")
-    private Double salary;
+    private String salary;
 
     private String requirement;
 

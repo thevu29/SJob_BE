@@ -15,9 +15,8 @@ public class CreateJobRequest {
     @NotBlank(message = "Mô tả không được để trống")
     private String description;
 
-    @NotNull(message = "Lương không được để trống")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Lương phải lớn hơn hoặc bằng 0")
-    private Double salary;
+    @NotBlank(message = "Lương không được để trống")
+    private String salary;
 
     @NotBlank(message = "Yêu cầu không được để trống")
     private String requirement;

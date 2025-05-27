@@ -1,10 +1,12 @@
 package com.example.jobservice.dto.Job;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
-
 
 @Data
 @Getter
@@ -27,8 +29,7 @@ public class JobImportDTO {
     private String description;
 
     @NotNull(message = "Lương không được để trống")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Lương phải lớn hơn hoặc bằng 0")
-    private Double salary;
+    private String salary;
 
     @NotBlank(message = "Yêu cầu không được để trống")
     private String requirement;
@@ -52,6 +53,4 @@ public class JobImportDTO {
 
     @NotBlank(message = "Kinh nghiệm không được để trống")
     private String experience;
-
-
 }

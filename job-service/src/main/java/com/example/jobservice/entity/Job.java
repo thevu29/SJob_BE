@@ -31,7 +31,7 @@ public class Job {
     private String description;
 
     @Column(nullable = false)
-    private Double salary;
+    private String salary;
 
     @Column(nullable = false)
     private String requirement;

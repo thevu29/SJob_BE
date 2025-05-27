@@ -1,6 +1,5 @@
 package com.example.jobservice.utils.helpers;
 
-
 import com.example.jobservice.dto.Field.FieldImportDTO;
 import com.example.jobservice.dto.FieldDetail.FieldDetailImportDTO;
 import com.example.jobservice.dto.Job.JobImportDTO;
@@ -45,7 +44,6 @@ public class CSVHelper {
             throw new FileUploadException("Chỉ cho phép upload file CSV!");
         }
     }
-
 
     public static List<FieldImportDTO> csvToFieldImportDTOs(InputStream is) {
         try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
@@ -96,7 +94,7 @@ public class CSVHelper {
                         .fieldDetails(csvRecord.get("Field Detail"))
                         .name(csvRecord.get("Job Name"))
                         .description(csvRecord.get("Description"))
-                        .salary(Double.parseDouble(csvRecord.get("Salary")))
+                        .salary(csvRecord.get("Salary"))
                         .requirement(csvRecord.get("Requirement"))
                         .benefit(csvRecord.get("Benefit"))
                         .deadline(LocalDate.parse(csvRecord.get("Deadline")))
@@ -116,6 +114,4 @@ public class CSVHelper {
             throw new FileUploadException("Không thể phân tích tệp CSV: " + e.getMessage());
         }
     }
-
-
 }

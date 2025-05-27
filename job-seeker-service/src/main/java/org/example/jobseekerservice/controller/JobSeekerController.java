@@ -28,7 +28,7 @@ public class JobSeekerController {
             @RequestParam(value = "seeking", required = false) Boolean seeking,
             @RequestParam(value = "active", required = false) Boolean active,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "limit", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {

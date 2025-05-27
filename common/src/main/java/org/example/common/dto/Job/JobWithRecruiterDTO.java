@@ -12,7 +12,7 @@ public class JobWithRecruiterDTO {
     private String recruiterImage;
     private String name;
     private String description;
-    private Double salary;
+    private String salary;
     private String requirement;
     private String benefit;
     private LocalDate deadline;

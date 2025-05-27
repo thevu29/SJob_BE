@@ -26,7 +26,7 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getJobs(
+    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getPaginatedJobs(
             @RequestParam(value = "query", required = false) String query,
             @RequestParam(value = "type", required = false) JobType type,
             @RequestParam(value = "status", required = false) JobStatus status,
@@ -35,11 +35,11 @@ public class JobController {
             @RequestParam(value = "recruiterId", required = false) String recruiterId,
             @RequestParam(value = "fieldDetailIds", required = false) List<String> fieldDetailIds,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
+            @RequestParam(value = "limit", defaultValue = "10") int size,
+            @RequestParam(value = "sortBy", defaultValue = "date") String sortBy,
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {
-        Page<JobWithRecruiterDTO> pages = jobService.findPaginatedJobs(
+        Page<JobWithRecruiterDTO> pages = jobService.getPaginatedJobs(
                 query,
                 type,
                 status,
@@ -54,14 +54,6 @@ public class JobController {
         );
 
         return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách các việc làm thành công"));
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getAllJobs() {
-        List<JobWithRecruiterDTO> jobDTOList = jobService.getJobs();
-        return ResponseEntity.ok(
-                ApiResponse.success(jobDTOList, "Lấy danh sách các việc làm thành công", HttpStatus.OK)
-        );
     }
 
     @GetMapping("/ids")
@@ -82,8 +74,8 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<JobDTO>> getJob(@PathVariable String id) {
-        JobDTO job = jobService.getJob(id);
+    public ResponseEntity<ApiResponse<JobDTO>> getJobById(@PathVariable String id) {
+        JobDTO job = jobService.getJobById(id);
         return ResponseEntity.ok(
                 ApiResponse.success(job, "Lấy chi tiết việc làm thành công", HttpStatus.OK)
         );

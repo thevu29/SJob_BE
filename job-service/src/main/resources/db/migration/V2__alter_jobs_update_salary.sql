@@ -1,0 +1,2 @@
+ALTER TABLE job_service.jobs
+ALTER COLUMN salary TYPE VARCHAR;

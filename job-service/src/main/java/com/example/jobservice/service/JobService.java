@@ -5,15 +5,19 @@ import com.example.jobservice.client.UserServiceClient;
 import com.example.jobservice.dto.Job.JobImportDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
-import com.example.jobservice.entity.FieldDetail;
-import com.example.jobservice.entity.Job;
-import com.example.jobservice.entity.JobField;
-import com.example.jobservice.entity.JobType;
+import com.example.jobservice.entity.*;
+import com.example.jobservice.entity.QJob;
+import com.example.jobservice.entity.QJobField;
 import com.example.jobservice.mapper.JobMapper;
 import com.example.jobservice.repository.FieldDetailRepository;
 import com.example.jobservice.repository.JobFieldRepository;
 import com.example.jobservice.repository.JobRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
+import com.example.jobservice.utils.helpers.RangeFilter;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.dto.Job.JobDTO;
@@ -43,6 +47,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class JobService {
+    private final JPAQueryFactory queryFactory;
     private final JobRepository jobRepository;
     private final RecruiterServiceClient recruiterServiceClient;
     private final UserServiceClient userServiceClient;
@@ -53,118 +58,307 @@ public class JobService {
     private final KafkaTemplate<String, JobUpdateEvent> jobUpdateKafkaTemplate;
     private final CSVHelper csvHelper;
 
-    private String getColumnName(String sortBy) {
-        switch (sortBy) {
-            case "name" -> {
-                return "name";
-            }
-            case "salary" -> {
-                return "salary";
-            }
-            case "experience" -> {
-                return "experience";
-            }
-            case "deadline" -> {
-                return "deadline";
-            }
-            default -> {
-                return "date";
-            }
-        }
-    }
-
-    private List<String> findRecruiterIds(String query, int size, String sortBy, Sort.Direction direction) {
-        int recruiterPageSize = size * 2;
-
-        ApiResponse<List<RecruiterWithUserDTO>> recruiterResponse = recruiterServiceClient.getRecruiters(
-                query,
-                true,
-                1,
-                recruiterPageSize,
-                sortBy,
-                direction
-        );
-
-        if (recruiterResponse == null || recruiterResponse.getData() == null || recruiterResponse.getData().isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return recruiterResponse.getData().stream()
-                .map(RecruiterWithUserDTO::getId)
-                .toList();
-    }
-
-    private static class Range {
-        Integer min;
-        Integer max;
-
-        Range(Integer min, Integer max) {
-            this.min = min;
-            this.max = max;
-        }
-    }
-
-    private Range parseRange(String value) {
-        try {
-            if (value == null || value.isBlank()) return null;
-
-            value = value.trim();
-            int i = Integer.parseInt(value.substring(2).trim());
-
-            if (value.startsWith(">=")) {
-                return new Range(i, null);
-            } else if (value.startsWith("<=")) {
-                return new Range(null, i);
-            } else if (value.startsWith("=")) {
-                int exact = Integer.parseInt(value.substring(1).trim());
-                return new Range(exact, exact);
-            } else if (value.contains("-")) {
-                String[] parts = value.split("-");
-                int min = Integer.parseInt(parts[0].trim());
-                int max = Integer.parseInt(parts[1].trim());
-                return new Range(min, max);
-            }
-        } catch (Exception e) {
-            return null;
-        }
-        return null;
-    }
-
-    public List<JobWithRecruiterDTO> getJobs() {
-        List<Job> jobs = jobRepository.findAll();
-
-        // Get all recruiter IDs
-        List<String> recruiterIds = jobs.stream()
-                .map(Job::getRecruiterId)
-                .distinct()
-                .toList();
-
-        // Fetch all recruiters in one call
-        Map<String, RecruiterDTO> recruiterMap = recruiterServiceClient.getRecruiterByIds(recruiterIds)
-                .getData().stream()
-                .collect(Collectors.toMap(RecruiterDTO::getId, recruiter -> recruiter));
-
+    private List<JobWithRecruiterDTO> convertToJobWithRecruiterDTO(List<Job> jobs, Map<String, RecruiterDTO> recruiterMap) {
         return jobs.stream()
                 .map(job -> {
                     JobDTO jobDTO = jobMapper.toDto(job);
                     RecruiterDTO recruiter = recruiterMap.get(job.getRecruiterId());
                     return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
-    public JobDTO getJob(String jobId) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + jobId));
-        return jobMapper.toDto(job);
+    private Page<JobWithRecruiterDTO> convertJobsToDTO(List<Job> jobs, Pageable pageable, long totalElements) {
+        if (jobs.isEmpty()) {
+            return new PageImpl<>(new ArrayList<>(), pageable, totalElements);
+        }
+
+        List<String> recruiterIds = jobs.stream()
+                .map(Job::getRecruiterId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<String, RecruiterDTO> recruiterMap = getRecruiterMap(recruiterIds);
+
+        List<JobWithRecruiterDTO> jobWithRecruiterDTOs = convertToJobWithRecruiterDTO(jobs, recruiterMap);
+
+        return new PageImpl<>(jobWithRecruiterDTOs, pageable, totalElements);
     }
 
-    public List<JobDTO> getJobsByIds(List<String> ids) {
-        List<Job> jobs = jobRepository.findAllById(ids);
-        return jobs.stream().map(jobMapper::toDto).toList();
+    private Map<String, RecruiterDTO> getRecruiterMap(List<String> recruiterIds) {
+        try {
+            if (recruiterIds == null || recruiterIds.isEmpty()) {
+                return Map.of();
+            }
+
+            ApiResponse<List<RecruiterDTO>> response = recruiterServiceClient.getRecruiterByIds(recruiterIds);
+
+            if (response != null && response.getData() != null) {
+                return response.getData().stream().collect(
+                        Collectors.toMap(RecruiterDTO::getId, recruiter -> recruiter)
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching recruiter names: " + e.getMessage());
+        }
+
+        return Map.of();
     }
 
-    public Page<JobWithRecruiterDTO> findPaginatedJobs(
+    private void applyCommonFilters(
+            BooleanBuilder predicate,
+            QJob job,
+            QJobField jobField,
+            JobType type,
+            JobStatus status,
+            String recruiterId,
+            List<String> fieldDetailIds
+    ) {
+        if (type != null) {
+            predicate.and(job.type.eq(type));
+        }
+
+        if (status != null) {
+            predicate.and(job.status.eq(status));
+        }
+
+        if (recruiterId != null && !recruiterId.trim().isEmpty()) {
+            predicate.and(job.recruiterId.eq(recruiterId));
+        }
+
+        if (fieldDetailIds != null && !fieldDetailIds.isEmpty()) {
+            predicate.and(jobField.fieldDetail.id.in(fieldDetailIds));
+        }
+    }
+
+    private OrderSpecifier<?> getOrderSpecifier(String sortBy, Sort.Direction direction) {
+        PathBuilder<Job> pathBuilder = new PathBuilder<>(Job.class, "job");
+
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            sortBy = "date";
+        }
+
+        com.querydsl.core.types.Order order = direction == Sort.Direction.ASC ?
+                com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC;
+
+        return new OrderSpecifier<>(order, pathBuilder.getString(sortBy));
+    }
+
+    private List<Job> findJobsByNameQuery(
+            String query,
+            JobType type,
+            JobStatus status,
+            String salary,
+            String experience,
+            String recruiterId,
+            List<String> fieldDetailIds,
+            int size,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        QJob job = QJob.job;
+        QJobField jobField = QJobField.jobField;
+
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        predicate.and(job.name.containsIgnoreCase(query));
+
+        applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
+
+        List<Job> allJobs = queryFactory.selectFrom(job)
+                .distinct()
+                .leftJoin(job.jobFields, jobField)
+                .where(predicate)
+                .orderBy(getOrderSpecifier(sortBy, direction))
+                .fetch();
+
+        return allJobs.stream()
+                .filter(j -> RangeFilter.matchesFilter(j.getSalary(), salary))
+                .filter(j -> RangeFilter.matchesFilter(j.getExperience(), experience))
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    private long countJobsByNameQuery(
+            String query,
+            JobType type,
+            JobStatus status,
+            String salary,
+            String experience,
+            String recruiterId,
+            List<String> fieldDetailIds
+    ) {
+        QJob job = QJob.job;
+        QJobField jobField = QJobField.jobField;
+
+        BooleanBuilder predicate = new BooleanBuilder();
+        predicate.and(job.name.containsIgnoreCase(query));
+        applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
+
+        List<Job> allJobs = queryFactory.selectFrom(job)
+                .distinct()
+                .leftJoin(job.jobFields, jobField)
+                .where(predicate)
+                .fetch();
+
+        return allJobs.stream()
+                .filter(j -> RangeFilter.matchesFilter(j.getSalary(), salary))
+                .filter(j -> RangeFilter.matchesFilter(j.getExperience(), experience))
+                .count();
+    }
+
+    private List<Job> findJobsByRecruiterNameQuery(
+            String query,
+            JobType type,
+            JobStatus status,
+            String salary,
+            String experience,
+            String recruiterId,
+            List<String> fieldDetailIds,
+            int size,
+            String sortBy,
+            Sort.Direction direction,
+            List<Job> excludeJobs
+    ) {
+        QJob job = QJob.job;
+
+        List<String> allRecruiterIds = queryFactory.select(job.recruiterId)
+                .from(job)
+                .distinct()
+                .fetch();
+
+        Map<String, RecruiterDTO> recruiterMaps = getRecruiterMap(allRecruiterIds);
+
+        Set<String> matchingRecruiterIds = recruiterMaps.entrySet().stream()
+                .filter(entry -> entry.getValue().getName().toLowerCase().contains(query.toLowerCase()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        if (matchingRecruiterIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Set<String> excludeJobIds = excludeJobs.stream()
+                .map(Job::getId)
+                .collect(Collectors.toSet());
+
+        QJobField jobField = QJobField.jobField;
+        BooleanBuilder predicate = new BooleanBuilder();
+
+        predicate.and(job.recruiterId.in(matchingRecruiterIds));
+
+        if (!excludeJobIds.isEmpty()) {
+            predicate.and(job.id.notIn(excludeJobIds));
+        }
+
+        applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
+
+        List<Job> allJobs = queryFactory.selectFrom(job)
+                .distinct()
+                .leftJoin(job.jobFields, jobField)
+                .where(predicate)
+                .orderBy(getOrderSpecifier(sortBy, direction))
+                .fetch();
+
+        return allJobs.stream()
+                .filter(j -> RangeFilter.matchesFilter(j.getSalary(), salary))
+                .filter(j -> RangeFilter.matchesFilter(j.getExperience(), experience))
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    private long countJobsByRecruiterNameQuery(
+            String query,
+            JobType type,
+            JobStatus status,
+            String salary,
+            String experience,
+            String recruiterId,
+            List<String> fieldDetailIds,
+            List<Job> excludeJobs
+    ) {
+        QJob job = QJob.job;
+
+        List<String> allRecruiterIds = queryFactory.select(job.recruiterId)
+                .from(job)
+                .distinct()
+                .fetch();
+
+        Map<String, RecruiterDTO> recruiterMaps = getRecruiterMap(allRecruiterIds);
+
+        Set<String> matchingRecruiterIds = recruiterMaps.entrySet().stream()
+                .filter(entry -> entry.getValue().getName().toLowerCase().contains(query.toLowerCase()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        if (matchingRecruiterIds.isEmpty()) {
+            return 0;
+        }
+
+        Set<String> excludeJobIds = excludeJobs.stream()
+                .map(Job::getId)
+                .collect(Collectors.toSet());
+
+        QJobField jobField = QJobField.jobField;
+        BooleanBuilder predicate = new BooleanBuilder();
+        predicate.and(job.recruiterId.in(matchingRecruiterIds));
+
+        if (!excludeJobIds.isEmpty()) {
+            predicate.and(job.id.notIn(excludeJobIds));
+        }
+
+        applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
+
+        List<Job> allJobs = queryFactory.selectFrom(job)
+                .distinct()
+                .leftJoin(job.jobFields, jobField)
+                .where(predicate)
+                .fetch();
+
+        return allJobs.stream()
+                .filter(j -> RangeFilter.matchesFilter(j.getSalary(), salary))
+                .filter(j -> RangeFilter.matchesFilter(j.getExperience(), experience))
+                .count();
+    }
+
+    private Page<JobWithRecruiterDTO> getJobsWithStandardFiltering(
+            JobType type,
+            JobStatus status,
+            String salary,
+            String experience,
+            String recruiterId,
+            List<String> fieldDetailIds,
+            Pageable pageable,
+            String sortBy,
+            Sort.Direction direction
+    ) {
+        QJob job = QJob.job;
+        QJobField jobField = QJobField.jobField;
+
+        BooleanBuilder predicate = new BooleanBuilder();
+        applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
+
+        List<Job> allJobs = queryFactory.selectFrom(job)
+                .distinct()
+                .leftJoin(job.jobFields, jobField)
+                .where(predicate)
+                .orderBy(getOrderSpecifier(sortBy, direction))
+                .fetch();
+
+        List<Job> filteredJobs = allJobs.stream()
+                .filter(j -> RangeFilter.matchesFilter(j.getSalary(), salary))
+                .filter(j -> RangeFilter.matchesFilter(j.getExperience(), experience))
+                .collect(Collectors.toList());
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filteredJobs.size());
+
+        List<Job> pageContent = start >= filteredJobs.size() ? new ArrayList<>() : filteredJobs.subList(start, end);
+
+        return convertJobsToDTO(pageContent, pageable, filteredJobs.size());
+    }
+
+    public Page<JobWithRecruiterDTO> getPaginatedJobs(
             String query,
             JobType type,
             JobStatus status,
@@ -177,92 +371,56 @@ public class JobService {
             String sortBy,
             Sort.Direction direction
     ) {
-        String columnName = getColumnName(sortBy);
-        Sort sort = Sort.by(direction, columnName);
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Pageable pageable = PageRequest.of(page - 1, size);
 
-        String jobStatus = status != null ? status.name() : null;
-        String jobType = type != null ? type.name() : null;
-
-        Range salaryRange = parseRange(salary);
-        Range experienceRange = parseRange(experience);
-
-        Float minSalary = salaryRange != null && salaryRange.min != null ? salaryRange.min.floatValue() : null;
-        Float maxSalary = salaryRange != null && salaryRange.max != null ? salaryRange.max.floatValue() : null;
-
-        Integer minExp = experienceRange != null ? experienceRange.min : null;
-        Integer maxExp = experienceRange != null ? experienceRange.max : null;
-
-        List<String> sanitizedFieldDetailIds = (fieldDetailIds == null || fieldDetailIds.isEmpty())
-                ? Collections.emptyList()
-                : fieldDetailIds;
-
-        Page<Job> byJobName = jobRepository.findPaginatedJobs(
-                query,
-                Collections.emptyList(),
-                jobType,
-                jobStatus,
-                minSalary,
-                maxSalary,
-                minExp,
-                maxExp,
-                recruiterId,
-                sanitizedFieldDetailIds,
-                pageable
-        );
-
-        long totalElements = byJobName.getTotalElements();
-
-        List<Job> results = new ArrayList<>(byJobName.getContent());
-        int remaining = size - results.size();
-
-        if (remaining > 0 && query != null && !query.trim().isEmpty()) {
-            List<String> recruiterIds = findRecruiterIds(query, size, sortBy, direction);
-
-            if (!recruiterIds.isEmpty() && (recruiterId == null || recruiterId.isBlank())) {
-                Page<Job> byRecruiter = jobRepository.findPaginatedJobs(
-                        null,
-                        recruiterIds,
-                        jobType,
-                        jobStatus,
-                        minSalary,
-                        maxSalary,
-                        minExp,
-                        maxExp,
-                        recruiterId,
-                        fieldDetailIds,
-                        PageRequest.of(page, remaining, sort)
-                );
-
-                totalElements += byRecruiter.getTotalElements();
-
-                Set<String> existingIds = results.stream()
-                        .map(Job::getId)
-                        .collect(Collectors.toSet());
-
-                byRecruiter.getContent().stream()
-                        .filter(job -> !existingIds.contains(job.getId()))
-                        .forEach(results::add);
-            }
+        if (query == null || query.trim().isEmpty()) {
+            return getJobsWithStandardFiltering(type, status, salary, experience, recruiterId, fieldDetailIds, pageable, sortBy, direction);
         }
 
-        List<String> recruiterIds = results.stream()
-                .map(Job::getRecruiterId)
-                .distinct()
-                .toList();
+        List<Job> jobsByName = findJobsByNameQuery(query, type, status, salary, experience, recruiterId, fieldDetailIds, size, sortBy, direction);
 
-        Map<String, RecruiterDTO> recruiterMap = recruiterServiceClient.getRecruiterByIds(recruiterIds)
-                .getData().stream()
-                .collect(Collectors.toMap(RecruiterDTO::getId, recruiter -> recruiter));
+        if (jobsByName.size() >= size) {
+            List<Job> limitedJobs = jobsByName.subList(0, size);
+            long totalCount = countJobsByNameQuery(query, type, status, salary, experience, recruiterId, fieldDetailIds);
 
-        List<JobWithRecruiterDTO> content = results.stream()
-                .map(job -> {
-                    JobDTO jobDTO = jobMapper.toDto(job);
-                    RecruiterDTO recruiter = recruiterMap.get(job.getRecruiterId());
-                    return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
-                }).toList();
+            return convertJobsToDTO(limitedJobs, pageable, totalCount);
+        }
 
-        return new PageImpl<>(content, pageable, totalElements);
+        int remainingSize = size - jobsByName.size();
+        List<Job> jobsByRecruiterName = findJobsByRecruiterNameQuery(
+                query,
+                type,
+                status,
+                salary,
+                experience,
+                recruiterId,
+                fieldDetailIds,
+                remainingSize,
+                sortBy,
+                direction,
+                jobsByName
+        );
+
+        List<Job> combinedJobs = new ArrayList<>(jobsByName);
+        combinedJobs.addAll(jobsByRecruiterName);
+
+        long totalJobsByName = countJobsByNameQuery(query, type, status, salary, experience, recruiterId, fieldDetailIds);
+        long totalJobsByRecruiter = countJobsByRecruiterNameQuery(query, type, status, salary, experience, recruiterId, fieldDetailIds, jobsByName);
+        long totalCount = totalJobsByName + totalJobsByRecruiter;
+
+        return convertJobsToDTO(combinedJobs, pageable, totalCount);
+    }
+
+    public JobDTO getJobById(String id) {
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + id));
+
+        return jobMapper.toDto(job);
+    }
+
+    public List<JobDTO> getJobsByIds(List<String> ids) {
+        List<Job> jobs = jobRepository.findAllById(ids);
+        return jobs.stream().map(jobMapper::toDto).toList();
     }
 
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
