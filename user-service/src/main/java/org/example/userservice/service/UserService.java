@@ -83,14 +83,21 @@ public class UserService {
 
     public UserDTO getUserById(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+
+        return userMapper.toDto(user);
+    }
+
+    public UserDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
 
         return userMapper.toDto(user);
     }
 
     public UserDTO createUser(UserCreationDTO request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new IllegalArgumentException("Email is already in use");
+            throw new IllegalArgumentException("Email đã được sử dụng");
         }
 
         User user = userMapper.toEntity(request);
@@ -109,7 +116,7 @@ public class UserService {
 
     public UserDTO updateUserOtp(UserUpdateOtpDTO request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
 
         if (!request.getOtp().isBlank()) {
             user.setOtp(passwordEncoder.encode(request.getOtp()));
@@ -124,14 +131,13 @@ public class UserService {
 
     public UserDTO verifyUserOtp(UserVerifyOtpDTO request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
 
-        if (
-                !passwordEncoder.matches(request.getOtp(), user.getOtp()) ||
-                        user.getOtpExpiresAt() == null ||
-                        user.getOtpExpiresAt().isBefore(LocalDateTime.now())
+        if (!passwordEncoder.matches(request.getOtp(), user.getOtp()) ||
+                user.getOtpExpiresAt() == null ||
+                user.getOtpExpiresAt().isBefore(LocalDateTime.now())
         ) {
-            throw new IllegalArgumentException("Invalid OTP or OTP expired");
+            throw new IllegalArgumentException("OTP không hợp lệ hoặc đã hết hạn");
         }
 
         user.setOtpVerified(true);
@@ -144,10 +150,14 @@ public class UserService {
 
     public UserDTO updateUserPassword(UserUpdatePasswordDTO request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+
+        if (user.getGoogleId() != null) {
+            throw new IllegalArgumentException("Tài khoản này được đăng nhập bằng Google, không thể cập nhật mật khẩu");
+        }
 
         if (!user.isOtpVerified()) {
-            throw new IllegalArgumentException("OTP is not verified");
+            throw new IllegalArgumentException("Vui lòng xác minh OTP trước khi cập nhật mật khẩu");
         }
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -161,7 +171,7 @@ public class UserService {
 
     public UserDTO updateUserStatus(String id, boolean active) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
 
         user.setActive(active);
         User updatedUser = userRepository.save(user);
@@ -171,10 +181,10 @@ public class UserService {
 
     public void deleteUser(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
 
         if (user.getRole() == UserRole.ADMIN) {
-            throw new IllegalArgumentException("Cannot delete admin user");
+            throw new IllegalArgumentException("Không thể xoá tài khoản ADMIN");
         }
 
         userRepository.delete(user);

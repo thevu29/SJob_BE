@@ -92,6 +92,22 @@ public class RecruiterController {
         return recruiterService.checkIfRecruiterExists(id);
     }
 
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> getRecruiterByUserId(@PathVariable String userId) {
+        RecruiterWithUserDTO recruiter = recruiterService.getRecruiterByUserId(userId);
+        return ResponseEntity.ok(
+                ApiResponse.success(recruiter, "Lấy thông tin nhà tuyển dụng thành công", HttpStatus.OK)
+        );
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ApiResponse<RecruiterWithUserDTO>> getRecruiterByEmail(@PathVariable String email) {
+        RecruiterWithUserDTO recruiter = recruiterService.getRecruiterByEmail(email);
+        return ResponseEntity.ok(
+                ApiResponse.success(recruiter, "Lấy thông tin nhà tuyển dụng theo email thành công", HttpStatus.OK)
+        );
+    }
+
     @PostMapping("/import")
     public ResponseEntity<ApiResponse<?>> importFile(@RequestParam("file") MultipartFile file) {
         recruiterService.importFileCSV(file);

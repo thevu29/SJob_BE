@@ -2,6 +2,7 @@ package com.example.jobservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -22,11 +23,16 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers(
+                        .requestMatchers(HttpMethod.GET,
                                 "/api/jobs/**",
                                 "/api/fields/**",
                                 "/api/field-details/**"
                         ).permitAll()
+                        .requestMatchers(
+                                "/api/jobs/**",
+                                "/api/fields/**",
+                                "/api/field-details/**"
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess

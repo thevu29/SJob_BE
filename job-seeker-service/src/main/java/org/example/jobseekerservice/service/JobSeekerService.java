@@ -166,6 +166,29 @@ public class JobSeekerService {
         return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
     }
 
+    public JobSeekerWithUserDTO getJobSeekerByUserId(String userId) {
+        JobSeeker jobSeeker = jobSeekerRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy job seeker"));
+
+        UserDTO user = getUserById(jobSeeker.getUserId());
+
+        return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
+    }
+
+    public JobSeekerWithUserDTO getJobSeekerByEmail(String email) {
+        ApiResponse<UserDTO> userResponse = userServiceClient.getUserByEmail(email);
+        UserDTO user = userResponse.getData();
+
+        if (user == null) {
+            throw new ResourceNotFoundException("Không tìm thấy user");
+        }
+
+        JobSeeker jobSeeker = jobSeekerRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy job seeker"));
+
+        return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
+    }
+
     public JobSeekerWithUserDTO createJobSeeker(JobSeekerCreationDTO request) {
         UserDTO user = null;
 

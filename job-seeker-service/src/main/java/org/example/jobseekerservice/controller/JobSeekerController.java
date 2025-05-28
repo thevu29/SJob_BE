@@ -42,14 +42,14 @@ public class JobSeekerController {
                 direction
         );
 
-        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Job Seekers fetched successfully"));
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách job seeker thành công"));
     }
 
     @GetMapping("all")
     public ResponseEntity<ApiResponse<List<JobSeekerWithUserDTO>>> getAllJobSeekers() {
         List<JobSeekerWithUserDTO> jobSeekers = jobSeekerService.getAllJobSeekers();
         return ResponseEntity.ok(
-                ApiResponse.success(jobSeekers, "Job Seekers fetched successfully", HttpStatus.OK)
+                ApiResponse.success(jobSeekers, "Lấy danh sách job seeker thành công", HttpStatus.OK)
         );
     }
 
@@ -57,7 +57,15 @@ public class JobSeekerController {
     public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> getJobSeekerById(@PathVariable String id) {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.getJobSeekerById(id);
         return ResponseEntity.ok(
-                ApiResponse.success(jobSeeker, "Job Seeker fetched successfully", HttpStatus.OK)
+                ApiResponse.success(jobSeeker, "Lấy thông tin job seeker thành công", HttpStatus.OK)
+        );
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> getJobSeekerByEmail(@PathVariable String email) {
+        JobSeekerWithUserDTO jobSeeker = jobSeekerService.getJobSeekerByEmail(email);
+        return ResponseEntity.ok(
+                ApiResponse.success(jobSeeker, "Lấy thông tin job seeker thành công", HttpStatus.OK)
         );
     }
 
@@ -66,7 +74,7 @@ public class JobSeekerController {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.createJobSeeker(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(jobSeeker, "Job Seeker created successfully", HttpStatus.CREATED));
+                .body(ApiResponse.success(jobSeeker, "Tạo job seeker thành công", HttpStatus.CREATED));
     }
 
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -76,7 +84,7 @@ public class JobSeekerController {
     ) {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.updateJobSeeker(id, request);
         return ResponseEntity.ok(
-                ApiResponse.success(jobSeeker, "Job Seeker updated successfully", HttpStatus.OK)
+                ApiResponse.success(jobSeeker, "Update job seeker thành công", HttpStatus.OK)
         );
     }
 
@@ -84,7 +92,7 @@ public class JobSeekerController {
     public ResponseEntity<ApiResponse<?>> deleteJobSeeker(@PathVariable String id) {
         jobSeekerService.deleteJobSeeker(id);
         return ResponseEntity.ok(
-                ApiResponse.success(null, "Job Seeker deleted successfully", HttpStatus.OK)
+                ApiResponse.success(null, "Xoá job seeker thành công", HttpStatus.OK)
         );
     }
 }

@@ -2,7 +2,6 @@ package org.example.userservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,8 +31,7 @@ public class SecurityConfig {
                                 "/api/users/verify-otp",
                                 "/api/users/update-password"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAuthority("SCOPE_INTERNAL")
-                        .requestMatchers("/api/users/**").permitAll()
+                        .requestMatchers("/api/users/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess

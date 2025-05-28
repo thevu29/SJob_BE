@@ -1,7 +1,10 @@
 package org.example.authservice.controller;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.authservice.utils.JwtUtil;
 import org.example.common.dto.Auth.TokenDTO;
 import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
@@ -12,18 +15,48 @@ import org.example.authservice.dto.LoginDTO;
 import org.example.authservice.dto.RefreshTokenDTO;
 import org.example.authservice.dto.SendOtpDTO;
 import org.example.authservice.service.AuthService;
+import org.example.common.enums.UserRole;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<Object>> getCurrentUser(HttpServletRequest request) {
+        try {
+            String token = JwtUtil.extractTokenFromHeader(request);
+            DecodedJWT jwt = JwtUtil.decodeJwt(token);
+
+            Object user;
+            String email = jwt.getClaim("email").asString();
+            UserRole role = JwtUtil.getRoleFromToken(token);
+
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponse.error("Email not found in token", HttpStatus.UNAUTHORIZED));
+            }
+
+            if (role == UserRole.JOB_SEEKER) {
+                user = authService.getJobSeekerByEmail(email);
+            } else if (role == UserRole.RECRUITER) {
+                user = authService.getRecruiterByEmail(email);
+            } else {
+                user = authService.getUserByEmail(email);
+            }
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(user, "Lấy thông tin người dùng hiện tại thành công", HttpStatus.OK)
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Unauthorized: " + e.getMessage(), HttpStatus.UNAUTHORIZED));
+        }
+    }
 
     @PostMapping("/register/job-seeker")
     public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> registerJobSeeker(@Valid @RequestBody JobSeekerCreationDTO request) {

@@ -35,6 +35,8 @@ public class User {
 
     private boolean otpVerified;
 
+    private String googleId;
+
     @CreatedDate
     @Field("created_at")
     private LocalDateTime createdAt;

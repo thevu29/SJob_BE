@@ -26,7 +26,7 @@ public class UserController {
     @GetMapping("all")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getAllUsers() {
         List<UserDTO> users = userService.getAllUsers();
-        return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(users, "Lấy danh sách user thành công", HttpStatus.OK));
     }
 
     @GetMapping
@@ -40,19 +40,25 @@ public class UserController {
             @RequestParam(value = "direction", defaultValue = "DESC") Sort.Direction direction
     ) {
         Page<UserDTO> pages = userService.findPagedUsers(query, active, role, page, size, sortBy, direction);
-        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Users fetched successfully"));
+        return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách user thành công"));
     }
 
     @GetMapping("ids")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsersByIds(@RequestParam("ids") List<String> ids) {
         List<UserDTO> users = userService.getUsersByIds(ids != null ? ids : List.of());
-        return ResponseEntity.ok(ApiResponse.success(users, "Users fetched successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(users, "Lấy danh sách user thành công", HttpStatus.OK));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable String id) {
         UserDTO user = userService.getUserById(id);
-        return ResponseEntity.ok(ApiResponse.success(user, "User fetched successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(user, "Lấy thông tin user thành công", HttpStatus.OK));
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<ApiResponse<UserDTO>> getUserByEmail(@PathVariable String email) {
+        UserDTO user = userService.getUserByEmail(email);
+        return ResponseEntity.ok(ApiResponse.success(user, "Lấy thông tin user thành công", HttpStatus.OK));
     }
 
     @PostMapping
@@ -60,42 +66,42 @@ public class UserController {
         UserDTO createdUser = userService.createUser(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ApiResponse.success(createdUser, "User created successfully", HttpStatus.CREATED));
+                .body(ApiResponse.success(createdUser, "Tạo user thành công", HttpStatus.CREATED));
     }
 
     @PutMapping("/update-otp")
     public ResponseEntity<ApiResponse<UserDTO>> updateUserOTP(@Valid @RequestBody UserUpdateOtpDTO request) {
         UserDTO updatedUser = userService.updateUserOtp(request);
-        return ResponseEntity.ok(ApiResponse.success(updatedUser, "User updated successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(updatedUser, "Update user thành công", HttpStatus.OK));
     }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<ApiResponse<UserDTO>> verifyUserOtp(@Valid @RequestBody UserVerifyOtpDTO request) {
         UserDTO verifiedUser = userService.verifyUserOtp(request);
-        return ResponseEntity.ok(ApiResponse.success(verifiedUser, "User verified successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(verifiedUser, "Verify OTP thành công", HttpStatus.OK));
     }
 
     @PutMapping("/update-password")
     public ResponseEntity<ApiResponse<UserDTO>> updateUserPassword(@Valid @RequestBody UserUpdatePasswordDTO request) {
         UserDTO updatedUser = userService.updateUserPassword(request);
-        return ResponseEntity.ok(ApiResponse.success(updatedUser, "User updated successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(updatedUser, "Update user thành công", HttpStatus.OK));
     }
 
     @PutMapping("/block/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> blockUser(@PathVariable String id) {
         UserDTO blockedUser = userService.updateUserStatus(id, false);
-        return ResponseEntity.ok(ApiResponse.success(blockedUser, "User blocked successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(blockedUser, "Chặn user thành công", HttpStatus.OK));
     }
 
     @PutMapping("/activate/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> activateUser(@PathVariable String id) {
         UserDTO activatedUser = userService.updateUserStatus(id, true);
-        return ResponseEntity.ok(ApiResponse.success(activatedUser, "User activated successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(activatedUser, "Kích hoạt user thành công", HttpStatus.OK));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<UserDTO>> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully", HttpStatus.OK));
+        return ResponseEntity.ok(ApiResponse.success(null, "Xoá user thành công", HttpStatus.OK));
     }
 }

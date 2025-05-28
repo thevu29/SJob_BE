@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface JobSeekerRepository extends JpaRepository<JobSeeker, String> {
     @Query(value = """
@@ -56,4 +57,6 @@ public interface JobSeekerRepository extends JpaRepository<JobSeeker, String> {
             @Param("seeking") Boolean seeking,
             Pageable pageable
     );
+
+    Optional<JobSeeker> findByUserId(String userId);
 }

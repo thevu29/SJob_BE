@@ -8,6 +8,7 @@ import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.common.dto.Recruiter.RecruiterCreationDTO;
 import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
+import org.example.common.dto.User.UserDTO;
 import org.example.common.dto.User.UserUpdateOtpDTO;
 import org.example.common.dto.response.ApiResponse;
 import org.example.authservice.client.JobSeekerServiceClient;
@@ -32,6 +33,21 @@ public class AuthService {
     private final RecruiterServiceClient recruiterServiceClient;
     private final KafkaTemplate<String, EmailMessageDTO> kafkaTemplate;
 
+    public UserDTO getUserByEmail(String email) {
+        ApiResponse<UserDTO> response = userServiceClient.getUserByEmail(email);
+        return response.getData();
+    }
+
+    public JobSeekerWithUserDTO getJobSeekerByEmail(String email) {
+        ApiResponse<JobSeekerWithUserDTO> response = jobSeekerServiceClient.getJobSeekerByEmail(email);
+        return response.getData();
+    }
+
+    public RecruiterWithUserDTO getRecruiterByEmail(String email) {
+        ApiResponse<RecruiterWithUserDTO> response = recruiterServiceClient.getRecruiterByEmail(email);
+        return response.getData();
+    }
+
     public JobSeekerWithUserDTO registerJobSeeker(JobSeekerCreationDTO request) {
         keycloakService.createJobSeeker(request);
         ApiResponse<JobSeekerWithUserDTO> response = jobSeekerServiceClient.createJobSeeker(request);
@@ -45,6 +61,18 @@ public class AuthService {
     }
 
     public TokenDTO login(LoginDTO request) {
+        ApiResponse<UserDTO> response = userServiceClient.getUserByEmail(request.getEmail());
+
+        UserDTO user = response.getData();
+
+        if (user.getGoogleId() != null) {
+            throw new IllegalArgumentException("Tài khoản này được đăng nhập bằng Google");
+        }
+
+        if (!user.isActive()) {
+            throw new IllegalArgumentException("Tài khoản của bạn đã bị khóa, vui lòng liên hệ quản trị viên để biết thêm chi tiết");
+        }
+
         return keycloakService.login(request);
     }
 
@@ -57,13 +85,25 @@ public class AuthService {
     }
 
     public void sendOtp(SendOtpDTO request) {
+        ApiResponse<UserDTO> response = userServiceClient.getUserByEmail(request.getEmail());
+
+        UserDTO user = response.getData();
+
+        if (user.getGoogleId() != null) {
+            throw new IllegalArgumentException("Tài khoản này được đăng nhập bằng Google, không thể gửi OTP");
+        }
+
+        if (!user.isActive()) {
+            throw new IllegalArgumentException("Tài khoản của bạn đã bị khóa, vui lòng liên hệ quản trị viên để biết thêm chi tiết");
+        }
+
         try {
             String otp = Generate.generateOtp();
 
             EmailMessageDTO emailMessageDTO = EmailMessageDTO.builder()
                     .to(request.getEmail())
-                    .subject("OTP for Job Portal")
-                    .body("Your OTP is: " + otp)
+                    .subject("Mã OTP xác thực")
+                    .body("Mã OTP của bạn là: " + otp)
                     .build();
 
             kafkaTemplate.send("send-email", emailMessageDTO).get();

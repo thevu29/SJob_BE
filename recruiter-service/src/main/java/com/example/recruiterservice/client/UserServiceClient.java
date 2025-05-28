@@ -12,6 +12,9 @@ import java.util.List;
 
 @FeignClient(name = "user-service", url = "${service.user.url}", path = "/api/users", configuration = FeignClientInterceptor.class)
 public interface UserServiceClient {
+    @GetMapping("/email/{email}")
+    ApiResponse<UserDTO> getUserByEmail(@PathVariable String email);
+
     @PostMapping
     ApiResponse<UserDTO> createUser(@RequestBody UserCreationDTO request);
 

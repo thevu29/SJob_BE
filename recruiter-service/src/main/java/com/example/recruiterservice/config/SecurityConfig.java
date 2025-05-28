@@ -25,7 +25,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/recruiters/**",
                                 "/api/invitations/**"
-                        ).permitAll()
+                        ).authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess

@@ -8,8 +8,11 @@ import org.springframework.data.mongodb.repository.Query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface RecruiterRepository extends MongoRepository<Recruiter, String> {
+    Optional<Recruiter> findByUserId(String userId);
+
     List<Recruiter> findByNameIn(Collection<String> recruiterNames);
 
     @Query(value = """

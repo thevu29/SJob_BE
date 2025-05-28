@@ -224,6 +224,40 @@ public class RecruiterService {
         );
     }
 
+    public RecruiterWithUserDTO getRecruiterByEmail(String email) {
+        ApiResponse<UserDTO> userResponse = userServiceClient.getUserByEmail(email);
+        UserDTO user = userResponse.getData();
+
+        if (user == null) {
+            throw new RuntimeException("Không tìm thấy user");
+        }
+
+        Recruiter recruiter = recruiterRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà tuyển dụng"));
+
+        FieldDTO field = getFieldById(recruiter.getFieldId());
+
+        return recruiterMapper.toDtoWithField(
+                recruiterMapper.toDto(recruiter),
+                user,
+                field
+        );
+    }
+
+    public RecruiterWithUserDTO getRecruiterByUserId(String userId) {
+        Recruiter recruiter = recruiterRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhà tuyển dụng"));
+
+        UserDTO user = getUserById(recruiter.getUserId());
+        FieldDTO field = getFieldById(recruiter.getFieldId());
+
+        return recruiterMapper.toDtoWithField(
+                recruiterMapper.toDto(recruiter),
+                user,
+                field
+        );
+    }
+
     public RecruiterWithUserDTO createRecruiter(RecruiterCreationDTO request) {
         UserDTO user = null;
 

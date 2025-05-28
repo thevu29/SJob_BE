@@ -11,34 +11,19 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class RecruiterWithUserDTO {
     private String id;
-
     private String userId;
-
     private String fieldId;
-
     private String name;
-
     private String about;
-
     private String image;
-
     private String website;
-
     private String address;
-
     private Integer members;
-
     private Boolean status;
-
     private String email;
-
     private String fieldName;
-
     private String role;
-
     private boolean active;
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 }

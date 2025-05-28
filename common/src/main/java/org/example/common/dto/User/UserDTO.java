@@ -11,6 +11,7 @@ public class UserDTO {
     private String email;
     private UserRole role;
     private boolean active;
+    private String googleId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

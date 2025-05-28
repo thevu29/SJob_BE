@@ -24,7 +24,7 @@ public class SecurityConfig {
                                 "/api/auth/**"
                         ).permitAll()
                         .requestMatchers(
-                                "/api/auth/refresh-token",
+                                "api/auth/me",
                                 "/api/auth/logout"
                         ).authenticated()
                         .anyRequest().authenticated()
