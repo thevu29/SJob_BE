@@ -46,7 +46,7 @@ public class SavedJobService {
     }
 
     public void unSaveJob(String id) {
-        ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(id);
+        jobServiceClient.getJobById(id);
         savedJobRepository.deleteById(id);
     }
 

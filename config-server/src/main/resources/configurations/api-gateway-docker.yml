@@ -1,0 +1,170 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://keycloak:8080/realms/sjob"
+          jwk-set-uri: "http://keycloak:8080/realms/sjob/protocol/openid-connect/certs"
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        # Swagger docs
+        - id: application-service-api-docs
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/application-service/v3/api-docs/**
+          filters:
+            - RewritePath=/application-service(?<segment>/?.*), /${segment}
+
+        - id: user-service-api-docs
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/v3/api-docs/**
+          filters:
+            - RewritePath=/user-service(?<segment>/?.*), /${segment}
+
+        - id: job-seeker-service-api-docs
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/job-seeker-service/v3/api-docs/**
+          filters:
+            - RewritePath=/job-seeker-service(?<segment>/?.*), /${segment}
+
+        - id: auth-service-api-docs
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/auth-service/v3/api-docs/**
+          filters:
+            - RewritePath=/auth-service(?<segment>/?.*), /${segment}
+
+        - id: job-service-api-docs
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/job-service/v3/api-docs/**
+          filters:
+            - RewritePath=/job-service(?<segment>/?.*), /${segment}
+
+        - id: recruiter-service-api-docs
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/recruiter-service/v3/api-docs/**
+          filters:
+            - RewritePath=/recruiter-service(?<segment>/?.*), /${segment}
+
+        # API routes
+        - id: application-service-viewed-jobs
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/api/viewed-jobs/**
+        - id: application-service-saved-jobs
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/api/saved-jobs/**
+        - id: application-service
+          uri: lb://APPLICATION-SERVICE
+          predicates:
+            - Path=/api/applications/**
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/users/**
+
+        - id: job-seeker-service
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/job-seekers/**
+        - id: job-seeker-service-educations
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/educations/**
+        - id: job-seeker-service-skills
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/skills/**
+        - id: job-seeker-service-certifications
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/certifications/**
+        - id: job-seeker-service-experiences
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/experiences/**
+        - id: job-seeker-service-resumes
+          uri: lb://JOB-SEEKER-SERVICE
+          predicates:
+            - Path=/api/resumes/**
+
+        - id: auth-service
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/api/auth/**
+
+        - id: recruiter-service
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/api/recruiters/**
+        - id: recruiter-service-invitations
+          uri: lb://RECRUITER-SERVICE
+          predicates:
+            - Path=/api/invitations/**
+
+        - id: job-service
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/jobs/**
+        - id: job-service-fields
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/fields/**
+        - id: job-service-field-details
+          uri: lb://JOB-SERVICE
+          predicates:
+            - Path=/api/field-details/**
+
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notifications/**
+        - id: notification-service-preferences
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notification-preferences/**
+        - id: notification-websocket
+          uri: lb:ws://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/ws-notifications/**
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Job Seeker Service
+        url: /job-seeker-service/v3/api-docs
+      - name: Auth Service
+        url: /auth-service/v3/api-docs
+      - name: Job Service
+        url: /job-service/v3/api-docs
+      - name: Recruiter Service
+        url: /recruiter-service/v3/api-docs
+      - name: Application Service
+        url: /application-service/v3/api-docs
+    disable-swagger-default-url: true
+    path: /swagger-ui.html
+    api-docs:
+      enabled: true
+
+server:
+  port: 8080
+
+eureka:
+  instance:
+    hostname: api-gateway
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka

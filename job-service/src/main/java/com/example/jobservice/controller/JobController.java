@@ -1,5 +1,6 @@
 package com.example.jobservice.controller;
 
+import com.example.jobservice.dto.Job.JobFieldDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.JobType;

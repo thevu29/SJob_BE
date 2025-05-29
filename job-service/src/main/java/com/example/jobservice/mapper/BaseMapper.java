@@ -1,6 +1,7 @@
 package com.example.jobservice.mapper;
 
 import com.example.jobservice.entity.Field;
+import com.example.jobservice.entity.Job;
 import org.example.common.exception.InvalidDateFormatException;
 import org.mapstruct.Named;
 
@@ -8,16 +9,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 public interface BaseMapper {
-    @Named("stringToLocalDate")
-    default LocalDate stringToLocalDate(String dateString) {
-        if (dateString == null) {
+    @Named("jobToJobId")
+    default String jobToJobId(Job job) {
+        if (job == null) {
             return null;
         }
-        try {
-            return LocalDate.parse(dateString);
-        } catch (DateTimeParseException e) {
-            throw new InvalidDateFormatException("Date must be in format yyyy-MM-dd");
-        }
+        return job.getId();
     }
 
     @Named("fieldToFieldId")
@@ -29,7 +26,7 @@ public interface BaseMapper {
     }
 
     @Named("fieldIdToField")
-    default Field fieldToFieldId(String fieldId) {
+    default Field fieldIdToField(String fieldId) {
         if (fieldId == null) {
             return null;
         }

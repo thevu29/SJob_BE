@@ -29,5 +29,4 @@ public class FieldDetail {
     @OneToMany(mappedBy = "fieldDetail", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<JobField> jobFields = new HashSet<>();
-
 }

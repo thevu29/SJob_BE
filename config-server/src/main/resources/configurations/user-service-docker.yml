@@ -1,0 +1,55 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://keycloak:8080/realms/sjob"
+          jwk-set-uri: "http://keycloak:8080/realms/sjob/protocol/openid-connect/certs"
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: user-service-db
+
+mongock:
+  migration-scan-package: org.example.userservice.database.migration
+  track-ignored: false
+  enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+server:
+  port: 8081
+
+gateway:
+  url: ${GATEWAY_URL}
+
+service:
+  notification:
+    url: http://notification-service:8086
+
+keycloak:
+  server-url: http://keycloak:8080
+  realm: sjob
+  client-id: admin-cli
+  username: admin
+  password: admin
+  client:
+    client-id: user-service
+    client-secret: ${KEYCLOAK_USER_SERVICE_CLIENT_SECRET}
+    token-uri: http://keycloak:8080/realms/sjob/protocol/openid-connect/token
+
+eureka:
+  instance:
+    hostname: user-service
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

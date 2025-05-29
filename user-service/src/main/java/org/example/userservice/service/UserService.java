@@ -7,6 +7,7 @@ import org.example.common.dto.User.UserDTO;
 import org.example.common.dto.User.UserUpdateOtpDTO;
 import org.example.common.enums.UserRole;
 import org.example.common.exception.ResourceNotFoundException;
+import org.example.common.util.GetKeycloakRole;
 import org.example.userservice.client.NotificationPreferenceServiceClient;
 import org.example.userservice.dto.UserUpdatePasswordDTO;
 import org.example.userservice.dto.UserVerifyOtpDTO;
@@ -104,6 +105,10 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User savedUser = userRepository.save(user);
+
+        String role = GetKeycloakRole.getKeycloakRole(savedUser.getRole());
+
+        keycloakService.createUser(savedUser.getEmail(), savedUser.getPassword(), role);
 
         NotificationPreferenceCreateDTO notificationPreferenceCreateDTO = NotificationPreferenceCreateDTO.builder()
                 .userId(savedUser.getId())

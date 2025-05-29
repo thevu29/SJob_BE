@@ -1,0 +1,63 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://keycloak:8080/realms/sjob"
+          jwk-set-uri: "http://keycloak:8080/realms/sjob/protocol/openid-connect/certs"
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: notification-service-db
+  kafka:
+    bootstrap-servers: kafka:19092
+    consumer:
+      group-id: notification-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+
+mongock:
+  migration-scan-package: com.example.notificationservice.database.migration
+  track-ignored: false
+  enabled: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+server:
+  port: 8086
+
+gateway:
+  url: ${GATEWAY_URL}
+
+keycloak:
+  client:
+    client-id: notification-service
+    client-secret: ${KEYCLOAK_NOTIFICATION_SERVICE_CLIENT_SECRET}
+    token-uri: http://keycloak:8080/realms/sjob/protocol/openid-connect/token
+
+eureka:
+  instance:
+    hostname: notification-service
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

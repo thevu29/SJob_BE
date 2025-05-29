@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.enums.UserRole;
 import org.example.userservice.entity.User;
+import org.example.userservice.keycloak.KeycloakService;
 import org.example.userservice.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class AdminSeed {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final KeycloakService keycloakService;
 
     @Bean
     public CommandLineRunner seed() {
@@ -28,6 +30,13 @@ public class AdminSeed {
                         .build();
 
                 userRepository.save(admin);
+
+                keycloakService.createUser(
+                        admin.getEmail(),
+                        "admin",
+                        "admin"
+                );
+
                 log.info("Seeding initial data completed");
             }
         };

@@ -138,9 +138,8 @@ public class FieldDetailService {
     }
 
     public List<FieldDetailDTO> getFieldDetailsByJobId(String jobId) {
-        // Verify job exists first
         if (!jobRepository.existsById(jobId)) {
-            throw new ResourceNotFoundException("Không tìm thấy việc làm với id: " + jobId);
+            throw new ResourceNotFoundException("Không tìm thấy việc làm");
         }
 
         List<FieldDetail> fieldDetails = jobRepository.findFieldDetailsByJobId(jobId);

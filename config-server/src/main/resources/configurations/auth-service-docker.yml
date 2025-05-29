@@ -1,0 +1,55 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://keycloak:8080/realms/sjob"
+          jwk-set-uri: "http://keycloak:8080/realms/sjob/protocol/openid-connect/certs"
+  kafka:
+    bootstrap-servers: kafka:19092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+server:
+  port: 8085
+
+gateway:
+  url: ${GATEWAY_URL}
+
+eureka:
+  instance:
+    hostname: auth-service
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+service:
+  user:
+    url: http://user-service:8081
+  job-seeker:
+    url: http://job-seeker-service:8082
+  recruiter:
+    url: http://recruiter-service:8083
+
+keycloak:
+  server-url: http://keycloak:8080
+  realm: sjob
+  client-id: admin-cli
+  username: admin
+  password: admin
+  client:
+    client-id: auth-service
+    client-secret: ${KEYCLOAK_AUTH_SERVICE_CLIENT_SECRET}
+    token-uri: http://keycloak:8080/realms/sjob/protocol/openid-connect/token
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

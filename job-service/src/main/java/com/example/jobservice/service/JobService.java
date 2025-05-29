@@ -413,7 +413,7 @@ public class JobService {
 
     public JobDTO getJobById(String id) {
         Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm"));
 
         return jobMapper.toDto(job);
     }
@@ -426,7 +426,7 @@ public class JobService {
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {
         try {
             if (!recruiterServiceClient.checkIfRecruiterExists(recruiterId)) {
-                throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng với id:" + recruiterId);
+                throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng");
             }
 
             Job job = jobMapper.toEntity(createJobRequest);
@@ -459,17 +459,15 @@ public class JobService {
 
     public JobDTO updateJob(UpdateJobRequest updateJobRequest, String jobId) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + jobId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm"));
+
         String oldName = job.getName();
         jobMapper.updateJobFromRequest(updateJobRequest, job);
 
-
-        // Update field details if provided
         if (updateJobRequest.getFieldDetails() != null) {
             updateJobFields(job, updateJobRequest.getFieldDetails());
         }
 
-        // If name has changed, publish event
         if (!oldName.equals(job.getName())) {
             JobUpdateEvent event = new JobUpdateEvent(jobId, job.getName());
             jobUpdateKafkaTemplate.send("job-update-events", event);
@@ -480,19 +478,17 @@ public class JobService {
     }
 
     private void updateJobFields(Job job, String[] fieldDetailIds) {
-        // Get existing job fields
         List<JobField> existingJobFields = jobFieldRepository.findByJobId(job.getId());
+
         Set<String> existingFieldDetailIds = existingJobFields.stream()
                 .map(jf -> jf.getFieldDetail().getId())
                 .collect(Collectors.toSet());
         Set<String> newFieldDetailIds = new HashSet<>(Arrays.asList(fieldDetailIds));
 
-        // Remove job fields that are no longer needed
         existingJobFields.stream()
                 .filter(jf -> !newFieldDetailIds.contains(jf.getFieldDetail().getId()))
                 .forEach(jobFieldRepository::delete);
 
-        // Add new job fields
         newFieldDetailIds.stream()
                 .filter(id -> !existingFieldDetailIds.contains(id))
                 .forEach(fieldDetailId -> {
@@ -506,7 +502,7 @@ public class JobService {
 
     public void deleteJob(String jobId) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm với id:" + jobId));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm"));
 
         jobRepository.delete(job);
     }

@@ -1,0 +1,65 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://keycloak:8080/realms/sjob"
+          jwk-set-uri: "http://keycloak:8080/realms/sjob/protocol/openid-connect/certs"
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_DATABASE}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  kafka:
+    bootstrap-servers: kafka:19092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: job_seeker_service
+  flyway:
+    enabled: true
+    baseline-version: 0
+    baseline-on-migrate: true
+    locations: classpath:database/migration
+    schemas: job_seeker_service
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+server:
+  port: 8082
+
+gateway:
+  url: ${GATEWAY_URL}
+
+eureka:
+  instance:
+    hostname: job-seeker-service
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+service:
+  user:
+    url: http://user-service:8081
+
+keycloak:
+  client:
+    client-id: job-seeker-service
+    client-secret: ${KEYCLOAK_JOB_SEEKER_SERVICE_CLIENT_SECRET}
+    token-uri: http://keycloak:8080/realms/sjob/protocol/openid-connect/token
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

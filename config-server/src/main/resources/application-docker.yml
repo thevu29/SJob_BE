@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/configurations
+        overrides:
+          mongo:
+            uri: ${MONGO_URI}
+          db:
+            host: ${DB_HOST}
+            port: ${DB_PORT}
+            database: ${DB_DATABASE}
+            user: ${DB_USER}
+            password: ${DB_PASSWORD}
+          aws:
+            region: ${AWS_REGION}
+            access-key: ${AWS_ACCESS_KEY}
+            secret-key: ${AWS_SECRET_KEY}
+            bucket-name: ${AWS_BUCKET_NAME}
+            access-user-key: ${AWS_ACCESS_USER_KEY}
+            secret-user-key: ${AWS_SECRET_USER_KEY}
+          gateway:
+            url: ${GATEWAY_URL}
+          keycloak:
+            application-service:
+              client:
+                secret: ${KEYCLOAK_APPLICATION_SERVICE_CLIENT_SECRET}
+            auth-service:
+              client:
+                secret: ${KEYCLOAK_AUTH_SERVICE_CLIENT_SECRET}
+            job-seeker-service:
+              client:
+                secret: ${KEYCLOAK_JOB_SEEKER_SERVICE_CLIENT_SECRET}
+            recruiter-service:
+              client:
+                secret: ${KEYCLOAK_RECRUITER_SERVICE_CLIENT_SECRET}
+            job-service:
+              client:
+                secret: ${KEYCLOAK_JOB_SERVICE_CLIENT_SECRET}
+            notification-service:
+              client:
+                secret: ${KEYCLOAK_NOTIFICATION_SERVICE_CLIENT_SECRET}
+            user-service:
+              client:
+                secret: ${KEYCLOAK_USER_SERVICE_CLIENT_SECRET}
+          mail:
+            username: ${MAIL_USERNAME}
+            password: ${MAIL_PASSWORD}
+
+server:
+  port: 8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
+    org.springframework.boot.env: DEBUG

@@ -1,0 +1,66 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: "http://keycloak:8080/realms/sjob"
+          jwk-set-uri: "http://keycloak:8080/realms/sjob/protocol/openid-connect/certs"
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+      database: recruiter-service-db  kafka:
+    bootstrap-servers: kafka:19092
+    consumer:
+      group-id: notification-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+aws:
+  access-key: ${AWS_ACCESS_KEY}
+  secret-key: ${AWS_SECRET_KEY}
+  region: ${AWS_REGION}
+  bucket-name: ${AWS_BUCKET_NAME}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+
+server:
+  port: 8083
+
+gateway:
+  url: ${GATEWAY_URL}
+
+service:
+  notification:
+    url: http://notification-service:8086
+
+keycloak:
+  client:
+    client-id: recruiter-service
+    client-secret: ${KEYCLOAK_RECRUITER_SERVICE_CLIENT_SECRET}
+    token-uri: http://keycloak:8080/realms/sjob/protocol/openid-connect/token
+
+eureka:
+  instance:
+    hostname: recruiter-service
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
