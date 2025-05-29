@@ -1,6 +1,5 @@
 package com.example.jobservice.controller;
 
-import com.example.jobservice.dto.Job.JobFieldDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.JobType;
@@ -10,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.Job.JobStatus;
 import org.example.common.dto.Job.JobWithRecruiterDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -65,6 +65,22 @@ public class JobController {
         );
     }
 
+    @GetMapping("/suggest-job-seekers/{jobId}")
+    public ResponseEntity<ApiResponse<List<JobSeekerWithUserDTO>>> suggestJobSeekers(@PathVariable String jobId) {
+        List<JobSeekerWithUserDTO> suggestedSeekers = jobService.suggestJobSeekers(jobId);
+        return ResponseEntity.ok(
+                ApiResponse.success(suggestedSeekers, "Gợi ý ứng viên thành công", HttpStatus.OK)
+        );
+    }
+
+    @GetMapping("/suggest-jobs/{jobSeekerId}")
+    public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> suggestJobs(@PathVariable String jobSeekerId) {
+        List<JobWithRecruiterDTO> suggestedJobs = jobService.suggestJobs(jobSeekerId);
+        return ResponseEntity.ok(
+                ApiResponse.success(suggestedJobs, "Gợi ý việc làm thành công", HttpStatus.OK)
+        );
+    }
+
     @PostMapping("/recruiters/{recruiterId}")
     public ResponseEntity<ApiResponse<JobDTO>> createJob(@Valid @RequestBody CreateJobRequest createJobRequest, @PathVariable String recruiterId) {
         JobDTO job = jobService.createJob(createJobRequest, recruiterId);
@@ -75,8 +91,8 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<JobDTO>> getJobById(@PathVariable String id) {
-        JobDTO job = jobService.getJobById(id);
+    public ResponseEntity<ApiResponse<JobWithRecruiterDTO>> getJobById(@PathVariable String id) {
+        JobWithRecruiterDTO job = jobService.getJobById(id);
         return ResponseEntity.ok(
                 ApiResponse.success(job, "Lấy chi tiết việc làm thành công", HttpStatus.OK)
         );

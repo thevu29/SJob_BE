@@ -1,13 +1,12 @@
 package com.example.jobservice.service;
 
+import com.example.jobservice.client.JobSeekerServiceClient;
 import com.example.jobservice.client.RecruiterServiceClient;
 import com.example.jobservice.client.UserServiceClient;
 import com.example.jobservice.dto.Job.JobImportDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.*;
-import com.example.jobservice.entity.QJob;
-import com.example.jobservice.entity.QJobField;
 import com.example.jobservice.mapper.JobMapper;
 import com.example.jobservice.repository.FieldDetailRepository;
 import com.example.jobservice.repository.JobFieldRepository;
@@ -24,6 +23,7 @@ import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.Job.JobStatus;
 import org.example.common.dto.Job.JobUpdateEvent;
 import org.example.common.dto.Job.JobWithRecruiterDTO;
+import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.common.dto.Notification.NotificationEvent;
 import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterDTO;
@@ -47,8 +47,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class JobService {
+    private final GeminiService geminiService;
     private final JPAQueryFactory queryFactory;
     private final JobRepository jobRepository;
+    private final JobSeekerServiceClient jobSeekerServiceClient;
     private final RecruiterServiceClient recruiterServiceClient;
     private final UserServiceClient userServiceClient;
     private final JobMapper jobMapper;
@@ -411,16 +413,75 @@ public class JobService {
         return convertJobsToDTO(combinedJobs, pageable, totalCount);
     }
 
-    public JobDTO getJobById(String id) {
+    public JobWithRecruiterDTO getJobById(String id) {
         Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm"));
 
-        return jobMapper.toDto(job);
+        ApiResponse<RecruiterWithUserDTO> response = recruiterServiceClient.getRecruiterById(job.getRecruiterId());
+
+        RecruiterWithUserDTO recruiter = response.getData();
+
+        if (recruiter == null) {
+            throw new ResourceNotFoundException("Không tìm thấy nhà tuyển dụng cho việc làm này");
+        }
+
+        JobDTO jobDTO = jobMapper.toDto(job);
+
+        return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
     }
 
     public List<JobDTO> getJobsByIds(List<String> ids) {
         List<Job> jobs = jobRepository.findAllById(ids);
         return jobs.stream().map(jobMapper::toDto).toList();
+    }
+
+    public List<JobSeekerWithUserDTO> suggestJobSeekers(String jobId) {
+        ApiResponse<List<JobSeekerWithUserDTO>> response = jobSeekerServiceClient.getAllJobSeekers();
+
+        List<JobSeekerWithUserDTO> jobSeekers = response.getData();
+
+        if (jobSeekers.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        JobWithRecruiterDTO job = getJobById(jobId);
+
+        try {
+            return geminiService.suggestJobSeekers(job, jobSeekers);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<JobWithRecruiterDTO> suggestJobs(String jobSeekerId) {
+        ApiResponse<JobSeekerWithUserDTO> response = jobSeekerServiceClient.getJobSeekerById(jobSeekerId);
+
+        JobSeekerWithUserDTO jobSeeker = response.getData();
+
+        if (jobSeeker.getField() == null || jobSeeker.getField().isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Job> jobs = jobRepository.findAll();
+
+        if (jobs.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String> recruiterIds = jobs.stream()
+                .map(Job::getRecruiterId)
+                .distinct()
+                .toList();
+
+        Map<String, RecruiterDTO> recruiterMap = getRecruiterMap(recruiterIds);
+
+        List<JobWithRecruiterDTO> jobWithRecruiterList = convertToJobWithRecruiterDTO(jobs, recruiterMap);
+
+        try {
+            return geminiService.suggestJobs(jobSeeker, jobWithRecruiterList);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public JobDTO createJob(CreateJobRequest createJobRequest, String recruiterId) {

@@ -37,6 +37,11 @@ spring:
       max-file-size: 5MB
       max-request-size: 5MB
 
+gemini:
+  api-key: ${gemini.api-key}
+  model: gemini-2.5-flash-preview-05-20
+  base-url: https://generativelanguage.googleapis.com/v1beta/models/${gemini.model}:generateContent
+
 springdoc:
   api-docs:
     path: /v3/api-docs
@@ -48,6 +53,8 @@ gateway:
   url: ${gateway.url}
 
 service:
+  job-seeker:
+    url: http://localhost:8082
   recruiter:
     url: http://localhost:8083
   user:

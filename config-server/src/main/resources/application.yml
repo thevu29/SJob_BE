@@ -11,6 +11,8 @@ spring:
         native:
           search-locations: classpath:/configurations
         overrides:
+          gemini:
+            api-key: ${gemini.api-key}
           mongo:
             uri: ${mongo.uri}
           db:
