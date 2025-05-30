@@ -12,6 +12,13 @@ spring:
           enabled: true
       routes:
         # Swagger docs
+        - id: report-service-api-docs
+          uri: lb://REPORT-SERVICE
+          predicates:
+            - Path=/report-service/v3/api-docs/**
+          filters:
+            - RewritePath=/report-service(?<segment>/?.*), /${segment}
+
         - id: application-service-api-docs
           uri: lb://APPLICATION-SERVICE
           predicates:
@@ -55,6 +62,11 @@ spring:
             - RewritePath=/recruiter-service(?<segment>/?.*), /${segment}
 
         # API routes
+        - id: report-service
+          uri: lb://REPORT-SERVICE
+          predicates:
+            - Path=/api/reports/**
+
         - id: application-service-viewed-jobs
           uri: lb://APPLICATION-SERVICE
           predicates:
@@ -140,6 +152,8 @@ spring:
 springdoc:
   swagger-ui:
     urls:
+      - name: Report Service
+        url: /report-service/v3/api-docs
       - name: User Service
         url: /user-service/v3/api-docs
       - name: Job Seeker Service

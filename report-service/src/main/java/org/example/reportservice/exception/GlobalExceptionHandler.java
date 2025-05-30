@@ -1,5 +1,10 @@
-package com.example.recruiterservice.exception;
+package org.example.reportservice.exception;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import jakarta.ws.rs.ProcessingException;
+import jakarta.ws.rs.WebApplicationException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.dto.response.ApiResponse;
 import org.example.common.exception.IllegalStateException;
@@ -7,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -77,16 +83,9 @@ public class GlobalExceptionHandler {
         String errorMessage = ex.getMessage();
         log.warn("Message not readable: {}", errorMessage);
 
-        if (errorMessage.contains("LocationType")) {
+        if (errorMessage.contains("ReportStatus")) {
             ApiResponse<Object> response = ApiResponse.error(
-                    "Invalid location type value. Allowed values: ONSITE, REMOTE, HYBRID",
-                    HttpStatus.BAD_REQUEST);
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(response);
-        } else if (errorMessage.contains("EmployeeType")) {
-            ApiResponse<Object> response = ApiResponse.error(
-                    "Invalid employee type value. Allowed values: FULL_TIME, PART_TIME, INTERNSHIP, FREE_LANCE",
+                    "Invalid report status value. Allowed values: PENDING, APPROVED, REJECTED",
                     HttpStatus.BAD_REQUEST);
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -117,5 +116,50 @@ public class GlobalExceptionHandler {
                 .body(response);
     }
 
+    @ExceptionHandler(WebApplicationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleKeycloakWebAppException(WebApplicationException ex) {
+        log.error("Keycloak WebApplicationException: ", ex);
+        ApiResponse<Object> response = ApiResponse.error("Keycloak error: " + ex.getMessage(), HttpStatus.BAD_GATEWAY);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(response);
+    }
 
+    @ExceptionHandler(ProcessingException.class)
+    public ResponseEntity<ApiResponse<Object>> handleKeycloakProcessingException(ProcessingException ex) {
+        log.error("Keycloak ProcessingException: ", ex);
+        ApiResponse<Object> response = ApiResponse.error("Keycloak connection error", HttpStatus.GATEWAY_TIMEOUT);
+        return ResponseEntity.status(HttpStatus.GATEWAY_TIMEOUT).body(response);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAuthenticationException(AuthenticationException ex) {
+        log.warn("Authentication failed: {}", ex.getMessage());
+        ApiResponse<Object> response = ApiResponse.error("Authentication failed: " + ex.getMessage(), HttpStatus.UNAUTHORIZED);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+    }
+
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<ApiResponse<Object>> handleFeignStatusException(FeignException ex) {
+        log.error("Feign exception: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.resolve(ex.status());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        String message = "Internal server error";
+        try {
+            String responseBody = ex.contentUTF8();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = mapper.readTree(responseBody);
+
+            if (json.has("message")) {
+                message = json.get("message").asText();
+            }
+        } catch (Exception parseEx) {
+            log.warn("Cannot parse message: {}", parseEx.getMessage());
+        }
+
+        ApiResponse<Object> response = ApiResponse.error(message, status);
+        return ResponseEntity.status(status).body(response);
+    }
 }

@@ -31,6 +31,9 @@ spring:
           gateway:
             url: ${gateway.url}
           keycloak:
+            report-service:
+              client:
+                secret: ${keycloak.report-service.client.secret}
             application-service:
               client:
                 secret: ${keycloak.application-service.client.secret}

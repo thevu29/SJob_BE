@@ -29,6 +29,7 @@
         <module>api-gateway</module>
         <module>notification-service</module>
         <module>s3-service</module>
+        <module>report-service</module>
     </modules>
 
 </project>
