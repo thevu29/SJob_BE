@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "recruiter-service", url = "${service.recruiter.url}", path = "/api/recruiters", configuration = FeignClientInterceptor.class)
 public interface RecruiterServiceClient {
+    @GetMapping("/user/{userId}")
+    ApiResponse<RecruiterWithUserDTO> getRecruiterByUserId(@PathVariable String userId);
+
     @GetMapping("/email/{email}")
     ApiResponse<RecruiterWithUserDTO> getRecruiterByEmail(@PathVariable String email);
 

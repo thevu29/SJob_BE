@@ -96,8 +96,14 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+    public UserDTO getOrCreateUserByEmail(UserCreationDTO request) {
+        return userRepository.findByEmail(request.getEmail())
+                .map(userMapper::toDto)
+                .orElseGet(() -> createUser(request));
+    }
+
     public UserDTO createUser(UserCreationDTO request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email đã được sử dụng");
         }
 
@@ -108,7 +114,9 @@ public class UserService {
 
         String role = GetKeycloakRole.getKeycloakRole(savedUser.getRole());
 
-        keycloakService.createUser(savedUser.getEmail(), savedUser.getPassword(), role);
+        if (savedUser.getGoogleId() == null) {
+            keycloakService.createUser(savedUser.getEmail(), savedUser.getPassword(), role);
+        }
 
         NotificationPreferenceCreateDTO notificationPreferenceCreateDTO = NotificationPreferenceCreateDTO.builder()
                 .userId(savedUser.getId())

@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "job-seeker-service", url = "${service.job-seeker.url}", path = "/api/job-seekers", configuration = FeignClientInterceptor.class)
 public interface JobSeekerServiceClient {
+    @PostMapping("/email-or-create")
+    ApiResponse<JobSeekerWithUserDTO> getOrCreateJobSeekerByEmail(@RequestBody JobSeekerCreationDTO request);
+
     @GetMapping("/email/{email}")
     ApiResponse<JobSeekerWithUserDTO> getJobSeekerByEmail(@PathVariable String email);
 

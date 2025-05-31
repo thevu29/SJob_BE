@@ -69,6 +69,12 @@ public class UserController {
                 .body(ApiResponse.success(createdUser, "Tạo user thành công", HttpStatus.CREATED));
     }
 
+    @PostMapping("/email-or-create")
+    public ResponseEntity<ApiResponse<UserDTO>> getOrCreateUserByEmail(@Valid @RequestBody UserCreationDTO request) {
+        UserDTO user = userService.getOrCreateUserByEmail(request);
+        return ResponseEntity.ok(ApiResponse.success(user, "Lấy hoặc tạo user thành công", HttpStatus.OK));
+    }
+
     @PutMapping("/update-otp")
     public ResponseEntity<ApiResponse<UserDTO>> updateUserOTP(@Valid @RequestBody UserUpdateOtpDTO request) {
         UserDTO updatedUser = userService.updateUserOtp(request);

@@ -29,6 +29,12 @@ service:
   recruiter:
     url: http://localhost:8083
 
+google:
+  client-id: ${google.client-id}
+
+jwt:
+  secret: ${jwt.secret}
+
 keycloak:
   server-url: http://localhost:9090
   realm: sjob
@@ -38,3 +44,7 @@ keycloak:
   client:
     client-id: auth-service
     client-secret: ${keycloak.auth-service.client.secret}
+  google-client:
+    client-id: google-client
+    client-secret: ${keycloak.google-client.client.secret}
+    redirect-uri: http://localhost:3000/oauth/callback

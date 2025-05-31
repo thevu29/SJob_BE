@@ -427,7 +427,7 @@ public class JobService {
 
         JobDTO jobDTO = jobMapper.toDto(job);
 
-        return jobMapper.toJobWithRecruiterDTO(jobDTO, recruiter);
+        return jobMapper.toJobWithRecruiterDTOWithUser(jobDTO, recruiter);
     }
 
     public List<JobDTO> getJobsByIds(List<String> ids) {

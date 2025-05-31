@@ -35,7 +35,9 @@ public class User {
 
     private boolean otpVerified;
 
-    private String googleId;
+    @Indexed(unique = true)
+    @Builder.Default
+    private String googleId = null;
 
     @CreatedDate
     @Field("created_at")

@@ -17,8 +17,6 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     Optional<User> findByEmail(String email);
 
-    boolean existsByEmail(String email);
-
     @Query("{'email': {$regex: ?0, $options: 'i'}, 'active': ?1, 'role': ?2}")
     Page<User> findByEmailAndActive(String emailRegex, boolean active, UserRole role, Pageable pageable);
 

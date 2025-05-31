@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class JobSeekerService {
-    private final JobSeekerRepository jobSeekerRepository;
-    private final UserServiceClient userServiceClient;
-    private final JobSeekerMapper jobSeekerMapper;
     private final FileHelper fileHelper;
+    private final JobSeekerMapper jobSeekerMapper;
+    private final UserServiceClient userServiceClient;
+    private final JobSeekerRepository jobSeekerRepository;
     private final KafkaTemplate<String, JobSeekerUpdateEvent> jobSeekerUpdateKafkaTemplate;
 
     private UserDTO getUserById(String userId) {
@@ -180,6 +180,37 @@ public class JobSeekerService {
         return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
     }
 
+    public JobSeekerWithUserDTO getOrCreateJobSeeker(JobSeekerCreationDTO request) {
+        UserCreationDTO userCreationRequest = UserCreationDTO.builder()
+                .email(request.getEmail())
+                .password(request.getPassword())
+                .role("JOB_SEEKER")
+                .googleId(request.getGoogleId())
+                .build();
+
+        ApiResponse<UserDTO> userResponse = userServiceClient.getOrCreateUserByEmail(userCreationRequest);
+        UserDTO user = userResponse.getData();
+
+        if (user == null) {
+            throw new ResourceNotFoundException("Không tìm thấy hoặc tạo được user");
+        }
+
+        try {
+            JobSeeker jobSeeker = jobSeekerRepository.findByUserId(user.getId())
+                    .orElseGet(() -> {
+                        JobSeeker newJobSeeker = jobSeekerMapper.toEntity(request);
+                        newJobSeeker.setUserId(user.getId());
+
+                        return jobSeekerRepository.save(newJobSeeker);
+                    });
+
+            return jobSeekerMapper.toDto(jobSeekerMapper.toDto(jobSeeker), user);
+        } catch (Exception e) {
+            handleUserRollback(user);
+            throw new RuntimeException("Tạo job seeker thất bại", e);
+        }
+    }
+
     public JobSeekerWithUserDTO createJobSeeker(JobSeekerCreationDTO request) {
         UserDTO user = null;
 
@@ -201,7 +232,7 @@ public class JobSeekerService {
             return jobSeekerMapper.toDto(jobSeekerMapper.toDto(savedJobSeeker), user);
         } catch (Exception e) {
             handleUserRollback(user);
-            throw new RuntimeException("Failed to create job seeker", e);
+            throw new RuntimeException("Tạo job seeker thất bại", e);
         }
     }
 
@@ -218,7 +249,7 @@ public class JobSeekerService {
 
     public JobSeekerWithUserDTO updateJobSeeker(String id, JobSeekerUpdateDTO request) {
         JobSeeker jobSeeker = jobSeekerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy job seeker"));
 
         String oldName = jobSeeker.getName();
         UserDTO user = getUserById(jobSeeker.getUserId());
@@ -250,7 +281,7 @@ public class JobSeekerService {
 
     public void deleteJobSeeker(String id) {
         JobSeeker jobSeeker = jobSeekerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Job Seeker not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy job seeker"));
 
         UserDTO user = getUserById(jobSeeker.getUserId());
 

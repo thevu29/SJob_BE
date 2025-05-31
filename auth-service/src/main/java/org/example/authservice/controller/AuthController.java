@@ -4,6 +4,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.authservice.dto.GoogleLoginCallbackDTO;
 import org.example.authservice.utils.JwtUtil;
 import org.example.common.dto.Auth.TokenDTO;
 import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
@@ -72,6 +73,14 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(createdRecruiter, "Recruiter register successfully", HttpStatus.CREATED));
+    }
+
+    @PostMapping("/google/callback")
+    public ResponseEntity<ApiResponse<TokenDTO>> googleLoginCallback(@RequestBody GoogleLoginCallbackDTO request) {
+        TokenDTO tokens = authService.handleGoogleCallback(request.getCode());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(tokens, "Google login successfully", HttpStatus.OK));
     }
 
     @PostMapping("/login")

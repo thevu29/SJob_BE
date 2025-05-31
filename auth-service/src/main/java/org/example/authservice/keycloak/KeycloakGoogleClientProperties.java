@@ -6,8 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties(prefix = "keycloak.client")
-public class KeycloakClientProperties {
+@ConfigurationProperties(prefix = "keycloak.google-client")
+public class KeycloakGoogleClientProperties {
     private String clientId;
     private String clientSecret;
+    private String redirectUri;
 }

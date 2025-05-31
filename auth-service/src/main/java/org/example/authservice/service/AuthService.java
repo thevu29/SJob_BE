@@ -2,6 +2,7 @@ package org.example.authservice.service;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.common.KafkaException;
+import org.example.authservice.dto.GoogleLoginDTO;
 import org.example.common.dto.Auth.TokenDTO;
 import org.example.common.dto.Email.EmailMessageDTO;
 import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
@@ -19,6 +20,7 @@ import org.example.authservice.dto.RefreshTokenDTO;
 import org.example.authservice.dto.SendOtpDTO;
 import org.example.authservice.keycloak.KeycloakService;
 import org.example.authservice.utils.Generate;
+import org.example.common.enums.UserRole;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +75,39 @@ public class AuthService {
             throw new IllegalArgumentException("Tài khoản của bạn đã bị khóa, vui lòng liên hệ quản trị viên để biết thêm chi tiết");
         }
 
+        if (user.getRole() == UserRole.RECRUITER) {
+            ApiResponse<RecruiterWithUserDTO> recruiterResponse = recruiterServiceClient.getRecruiterByEmail(user.getEmail());
+
+            if (recruiterResponse.getData().getStatus() != true) {
+                throw new IllegalArgumentException("Tài khoản của bạn chưa được duyệt, vui lòng chờ quản trị viên phê duyệt");
+            }
+        }
+
         return keycloakService.login(request);
+    }
+
+    public TokenDTO handleGoogleCallback(String code) {
+        GoogleLoginDTO googleLogin = keycloakService.googleLogin(code);
+
+        JobSeekerCreationDTO jobSeekerCreationDTO = JobSeekerCreationDTO.builder()
+                .email(googleLogin.getEmail())
+                .name(googleLogin.getName())
+                .password(googleLogin.getGoogleId())
+                .image(googleLogin.getImage())
+                .googleId(googleLogin.getGoogleId())
+                .build();
+
+        ApiResponse<JobSeekerWithUserDTO> jobSeekerResponse = jobSeekerServiceClient.getOrCreateJobSeekerByEmail(jobSeekerCreationDTO);
+
+        if (jobSeekerResponse.getData() == null) {
+            throw new IllegalArgumentException("Không thể tạo tài khoản Job Seeker");
+        }
+
+        return TokenDTO.builder()
+                .accessToken(googleLogin.getAccessToken())
+                .refreshToken(googleLogin.getRefreshToken())
+                .expiresIn(googleLogin.getExpiresIn())
+                .build();
     }
 
     public TokenDTO refreshToken(RefreshTokenDTO request) {

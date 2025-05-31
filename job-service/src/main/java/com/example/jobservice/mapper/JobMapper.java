@@ -60,5 +60,5 @@ public interface JobMapper {
     @Mapping(target = "experience", source = "jobDTO.experience")
     @Mapping(target = "closeWhenFull", source = "jobDTO.closeWhenFull")
     @Mapping(target = "status", source = "jobDTO.status")
-    JobWithRecruiterDTO toJobWithRecruiterDTO(JobDTO jobDTO, RecruiterWithUserDTO recruiterDTO);
+    JobWithRecruiterDTO toJobWithRecruiterDTOWithUser(JobDTO jobDTO, RecruiterWithUserDTO recruiterDTO);
 }

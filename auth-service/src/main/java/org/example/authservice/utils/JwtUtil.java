@@ -44,10 +44,8 @@ public class JwtUtil {
             return UserRole.ADMIN;
         } else if (roles.contains("recruiter")) {
             return UserRole.RECRUITER;
-        } else if (roles.contains("job_seeker")) {
+        } else {
             return UserRole.JOB_SEEKER;
         }
-
-        throw new RuntimeException("Invalid role in token");
     }
 }

@@ -111,8 +111,6 @@ public class RecruiterService {
     }
 
     private List<String> fetchMatchingUserIds(String query, Boolean active, int size, String sortBy, Sort.Direction direction) {
-        System.out.println("query: " + query);
-
         ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
                 query,
                 active,
@@ -123,11 +121,7 @@ public class RecruiterService {
                 direction
         );
 
-        System.out.println("user response: " + usersResponse);
-
         if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
-            System.out.println("user response data: " + usersResponse.getData().size());
-
             return usersResponse.getData().stream()
                     .map(UserDTO::getId)
                     .toList();

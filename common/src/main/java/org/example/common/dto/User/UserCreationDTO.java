@@ -19,4 +19,6 @@ public class UserCreationDTO {
 
     @NotBlank(message = "Role is required")
     private String role;
+
+    private String googleId;
 }

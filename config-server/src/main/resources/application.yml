@@ -11,6 +11,8 @@ spring:
         native:
           search-locations: classpath:/configurations
         overrides:
+          google:
+            client-id: ${google.client-id}
           gemini:
             api-key: ${gemini.api-key}
           mongo:
@@ -31,6 +33,9 @@ spring:
           gateway:
             url: ${gateway.url}
           keycloak:
+            google-client:
+              client:
+                secret: ${keycloak.google-client.client.secret}
             report-service:
               client:
                 secret: ${keycloak.report-service.client.secret}

@@ -69,6 +69,14 @@ public class JobSeekerController {
         );
     }
 
+    @PostMapping("/email-or-create")
+    public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> getOrCreateJobSeekerByEmail(@Valid @RequestBody JobSeekerCreationDTO request) {
+        JobSeekerWithUserDTO jobSeeker = jobSeekerService.getOrCreateJobSeeker(request);
+        return ResponseEntity.ok(
+                ApiResponse.success(jobSeeker, "Lấy hoặc tạo job seeker thành công", HttpStatus.OK)
+        );
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<JobSeekerWithUserDTO>> createJobSeeker(@Valid @RequestBody JobSeekerCreationDTO request) {
         JobSeekerWithUserDTO jobSeeker = jobSeekerService.createJobSeeker(request);
