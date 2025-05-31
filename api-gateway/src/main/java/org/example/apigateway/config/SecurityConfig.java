@@ -38,7 +38,8 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.GET,
                                 "/api/jobs/**",
                                 "/api/fields/**",
-                                "/api/field-details/**"
+                                "/api/field-details/**",
+                                "/api/recruiters/**"
                         ).permitAll()
                         .anyExchange().authenticated()
                 )
