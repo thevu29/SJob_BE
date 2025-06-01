@@ -47,7 +47,6 @@ public class RecruiterService {
                 .fieldId(fieldMap.get(dto.getFieldName()))
                 .name(dto.getName())
                 .about(dto.getAbout())
-//                .image(dto.getImage())
                 .website(dto.getWebsite())
                 .address(dto.getAddress())
                 .members(dto.getMembers())
@@ -261,8 +260,11 @@ public class RecruiterService {
             ApiResponse<UserDTO> userResponse = userServiceClient.createUser(createUserRequest);
             user = userResponse.getData();
 
+            FieldDTO field = getFieldById(request.getFieldId());
+
             Recruiter recruiter = recruiterMapper.toEntity(request);
             recruiter.setUserId(user.getId());
+            recruiter.setFieldId(field.getId());
 
             Recruiter savedRecruiter = recruiterRepository.save(recruiter);
 

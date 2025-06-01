@@ -17,4 +17,15 @@ public class RecruiterCreationDTO {
 
     @NotBlank(message = "Tên không được để trống")
     private String name;
+
+    @NotBlank(message = "Địa chỉ không được để trống")
+    private String address;
+
+    @NotBlank(message = "Lĩnh vực không được để trống")
+    private String fieldId;
+
+    @NotBlank(message = "Số điện thoại không được để trống")
+    private String phone;
+
+    private String website;
 }

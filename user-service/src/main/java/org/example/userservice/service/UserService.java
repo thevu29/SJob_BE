@@ -84,14 +84,14 @@ public class UserService {
 
     public UserDTO getUserById(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
 
         return userMapper.toDto(user);
     }
 
     public UserDTO getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
 
         return userMapper.toDto(user);
     }
@@ -115,7 +115,7 @@ public class UserService {
         String role = GetKeycloakRole.getKeycloakRole(savedUser.getRole());
 
         if (savedUser.getGoogleId() == null) {
-            keycloakService.createUser(savedUser.getEmail(), savedUser.getPassword(), role);
+            keycloakService.createUser(savedUser.getEmail(), request.getPassword(), role);
         }
 
         NotificationPreferenceCreateDTO notificationPreferenceCreateDTO = NotificationPreferenceCreateDTO.builder()
@@ -129,7 +129,7 @@ public class UserService {
 
     public UserDTO updateUserOtp(UserUpdateOtpDTO request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
 
         if (!request.getOtp().isBlank()) {
             user.setOtp(passwordEncoder.encode(request.getOtp()));
@@ -144,7 +144,7 @@ public class UserService {
 
     public UserDTO verifyUserOtp(UserVerifyOtpDTO request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
 
         if (!passwordEncoder.matches(request.getOtp(), user.getOtp()) ||
                 user.getOtpExpiresAt() == null ||
@@ -163,7 +163,7 @@ public class UserService {
 
     public UserDTO updateUserPassword(UserUpdatePasswordDTO request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
 
         if (user.getGoogleId() != null) {
             throw new IllegalArgumentException("Tài khoản này được đăng nhập bằng Google, không thể cập nhật mật khẩu");
@@ -184,7 +184,7 @@ public class UserService {
 
     public UserDTO updateUserStatus(String id, boolean active) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
 
         user.setActive(active);
         User updatedUser = userRepository.save(user);
@@ -194,7 +194,7 @@ public class UserService {
 
     public void deleteUser(String id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
 
         if (user.getRole() == UserRole.ADMIN) {
             throw new IllegalArgumentException("Không thể xoá tài khoản ADMIN");

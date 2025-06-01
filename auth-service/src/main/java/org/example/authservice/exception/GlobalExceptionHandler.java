@@ -1,6 +1,9 @@
 package org.example.authservice.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import lombok.extern.slf4j.Slf4j;
@@ -24,8 +27,49 @@ import java.util.Map;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    @ExceptionHandler({
+            FeignException.BadRequest.class,
+            FeignException.NotFound.class,
+            FeignException.InternalServerError.class,
+            FeignException.class
+    })
+    public ResponseEntity<ApiResponse<Object>> handleFeignStatusException(FeignException ex) {
+        log.error("Feign exception: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.resolve(ex.status());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        String message = "Internal server error";
+        try {
+            String responseBody = ex.contentUTF8();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = mapper.readTree(responseBody);
+
+            if (json.has("message")) {
+                message = json.get("message").asText();
+            }
+        } catch (Exception parseEx) {
+            log.warn("Cannot parse message: {}", parseEx.getMessage());
+        }
+
+        ApiResponse<Object> response = ApiResponse.error(message, status);
+        return ResponseEntity.status(status).body(response);
+    }
+
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleRuntimeException(Exception e) {
+        Throwable root = e;
+
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+
+        if (root instanceof FeignException feignEx) {
+            return handleFeignStatusException(feignEx);
+        }
+
         log.error("Internal server error: ", e);
 
         ApiResponse<Object> response = ApiResponse.error(
@@ -152,7 +196,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpClientErrorException.Unauthorized.class)
     public ResponseEntity<ApiResponse<Object>> handleUnauthorizedException(HttpClientErrorException.Unauthorized ex) {
         log.warn("Unauthorized access attempt: {}", ex.getMessage());
-        ApiResponse<Object> response = ApiResponse.error("Invalid credentials", HttpStatus.UNAUTHORIZED);
+        ApiResponse<Object> response = ApiResponse.error("Thông tin đăng nhập không chính xác", HttpStatus.UNAUTHORIZED);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 }

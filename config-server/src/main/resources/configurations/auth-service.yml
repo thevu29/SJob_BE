@@ -32,15 +32,7 @@ service:
 google:
   client-id: ${google.client-id}
 
-jwt:
-  secret: ${jwt.secret}
-
 keycloak:
-  server-url: http://localhost:9090
-  realm: sjob
-  client-id: admin-cli
-  username: admin
-  password: admin
   client:
     client-id: auth-service
     client-secret: ${keycloak.auth-service.client.secret}

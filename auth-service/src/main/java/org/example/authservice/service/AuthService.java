@@ -51,13 +51,11 @@ public class AuthService {
     }
 
     public JobSeekerWithUserDTO registerJobSeeker(JobSeekerCreationDTO request) {
-        keycloakService.createJobSeeker(request);
         ApiResponse<JobSeekerWithUserDTO> response = jobSeekerServiceClient.createJobSeeker(request);
         return response.getData();
     }
 
     public RecruiterWithUserDTO registerRecruiter(RecruiterCreationDTO request) {
-        keycloakService.createRecruiter(request);
         ApiResponse<RecruiterWithUserDTO> response = recruiterServiceClient.createRecruiter(request);
         return response.getData();
     }

@@ -1,5 +1,8 @@
 package org.example.jobseekerservice.exception;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.common.dto.response.ApiResponse;
 import org.example.common.exception.InvalidDateFormatException;
@@ -20,9 +23,50 @@ import java.util.Map;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+    @ExceptionHandler({
+            FeignException.BadRequest.class,
+            FeignException.NotFound.class,
+            FeignException.InternalServerError.class,
+            FeignException.class
+    })
+    public ResponseEntity<ApiResponse<Object>> handleFeignStatusException(FeignException ex) {
+        log.error("Feign exception: {}", ex.getMessage());
+
+        HttpStatus status = HttpStatus.resolve(ex.status());
+        if (status == null) {
+            status = HttpStatus.INTERNAL_SERVER_ERROR;
+        }
+
+        String message = "Internal server error";
+        try {
+            String responseBody = ex.contentUTF8();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = mapper.readTree(responseBody);
+
+            if (json.has("message")) {
+                message = json.get("message").asText();
+            }
+        } catch (Exception parseEx) {
+            log.warn("Cannot parse message: {}", parseEx.getMessage());
+        }
+
+        ApiResponse<Object> response = ApiResponse.error(message, status);
+        return ResponseEntity.status(status).body(response);
+    }
+
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleRuntimeException(Exception e) {
-        log.error("Internal server error: ", e);
+        Throwable root = e;
+
+        while (root.getCause() != null) {
+            root = root.getCause();
+        }
+
+        if (root instanceof FeignException feignEx) {
+            return handleFeignStatusException(feignEx);
+        }
+
+        log.error("Unhandled exception class: {}", e.getClass().getName(), e);
 
         ApiResponse<Object> response = ApiResponse.error(
                 "Internal server error",

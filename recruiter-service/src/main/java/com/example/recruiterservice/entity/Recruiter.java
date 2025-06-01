@@ -31,6 +31,8 @@ public class Recruiter {
 
     private String address;
 
+    private String phone;
+
     private Integer members;
 
     @Field("status")
