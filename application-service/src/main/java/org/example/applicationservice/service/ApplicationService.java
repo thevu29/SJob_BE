@@ -6,6 +6,7 @@ import org.example.applicationservice.client.JobServiceClient;
 import org.example.applicationservice.client.RecruiterServiceClient;
 import org.example.applicationservice.client.ResumeServiceClient;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
+import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
 import org.example.applicationservice.entity.Application;
 import org.example.applicationservice.mapper.ApplicationMapper;
 import org.example.applicationservice.repository.ApplicationRepository;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,10 +44,10 @@ public class ApplicationService {
 
     private void validateResumeSelection(ApplicationCreationDTO request) {
         if (request.getResumeId() != null && !request.getResumeId().isBlank() && request.getResumeFile() != null) {
-            throw new IllegalArgumentException("Chỉ có thể chọn một trong hai: CV có sẵn hoặc CV tải lên mới.");
+            throw new IllegalArgumentException("Chỉ có thể chọn một trong hai: CV có sẵn hoặc CV tải lên mới");
         }
         if ((request.getResumeId() == null || request.getResumeId().isBlank()) && request.getResumeFile() == null) {
-            throw new IllegalArgumentException("Vui lòng chọn CV để nộp.");
+            throw new IllegalArgumentException("Vui lòng chọn CV để nộp");
         }
     }
 
@@ -107,6 +109,18 @@ public class ApplicationService {
 
     @Transactional
     public ApplicationDTO createApplication(ApplicationCreationDTO request) {
+        CheckJobSeekerApplyJobDTO checkJobSeekerApplyJobDTO = CheckJobSeekerApplyJobDTO.builder()
+                .jobId(request.getJobId())
+                .jobSeekerId(request.getJobSeekerId())
+                .build();
+
+        System.out.println("getJobId: " + checkJobSeekerApplyJobDTO.getJobId());
+        System.out.println("getJobSeekerId: " + checkJobSeekerApplyJobDTO.getJobSeekerId());
+
+        if (hasJobSeekerAppliedForJob(checkJobSeekerApplyJobDTO)) {
+            throw new IllegalArgumentException("Bạn đã ứng tuyển cho công việc này");
+        }
+
         validateResumeSelection(request);
 
         ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(request.getJobId());
@@ -135,6 +149,11 @@ public class ApplicationService {
         }
 
         return applicationMapper.toDTO(createdApplication);
+    }
+
+    public boolean hasJobSeekerAppliedForJob(CheckJobSeekerApplyJobDTO request) {
+        Optional<Application> applicationOptional = applicationRepository.findByJobIdAndJobSeekerId(request.getJobId(), request.getJobSeekerId());
+        return applicationOptional.isPresent();
     }
 
     public ApplicationDTO getApplicationById(String id) {

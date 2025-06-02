@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,17 @@ public class ViewedJobService {
     private final JobSeekerServiceClient jobSeekerServiceClient;
 
     public ViewedJobDTO viewJob(ViewedJobCreationDTO request) {
+        Optional<ViewedJob> existingViewedJob = viewedJobRepository.findByJobIdAndJobSeekerId(
+                request.getJobId(), request.getJobSeekerId());
+
+        if (existingViewedJob.isPresent()) {
+            ViewedJob viewedJob = existingViewedJob.get();
+            ViewedJobDTO viewedJobDto = viewedJobMapper.toDTO(viewedJob);
+            viewedJobDto.setJob(jobServiceClient.getJobById(viewedJob.getJobId()).getData());
+
+            return viewedJobDto;
+        }
+
         ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(request.getJobId());
         ApiResponse<JobSeekerWithUserDTO> jobSeekerResponse = jobSeekerServiceClient.getJobSeekerById(request.getJobSeekerId());
 

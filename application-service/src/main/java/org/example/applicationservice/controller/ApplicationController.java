@@ -3,6 +3,7 @@ package org.example.applicationservice.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
+import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
 import org.example.applicationservice.service.ApplicationService;
 import org.example.common.dto.Application.ApplicationDTO;
 import org.example.common.dto.response.ApiResponse;
@@ -27,6 +28,12 @@ public class ApplicationController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(application, "Ứng tuyển thành công", HttpStatus.CREATED));
+    }
+
+    @PostMapping("/check-apply")
+    public ResponseEntity<ApiResponse<Boolean>> hasJobSeekerAppliedForJob(@Valid @RequestBody CheckJobSeekerApplyJobDTO request) {
+        Boolean result = applicationService.hasJobSeekerAppliedForJob(request);
+        return ResponseEntity.ok(ApiResponse.success(result, "Kiểm tra ứng tuyển thành công"));
     }
 
     @GetMapping
