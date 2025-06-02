@@ -2,6 +2,7 @@ package org.example.applicationservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.applicationservice.dto.CheckJobSeekerSaveJobDTO;
 import org.example.applicationservice.dto.SavedJobCreationDTO;
 import org.example.applicationservice.dto.SavedJobDTO;
 import org.example.applicationservice.service.SavedJobService;
@@ -19,6 +20,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SavedJobController {
     private final SavedJobService savedJobService;
+
+    @PostMapping("/check-save")
+    public ResponseEntity<ApiResponse<Boolean>> checkJobSeekerSaveJob(@Valid @RequestBody CheckJobSeekerSaveJobDTO request) {
+        boolean hasSaved = savedJobService.hasJobSeekerSavedJob(request);
+        return ResponseEntity.ok(ApiResponse.success(hasSaved, "Kiểm tra việc làm đã lưu thành công"));
+    }
 
     @PostMapping
     public ResponseEntity<ApiResponse<SavedJobDTO>> saveJob(@Valid @RequestBody SavedJobCreationDTO request) {

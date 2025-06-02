@@ -3,6 +3,7 @@ package org.example.applicationservice.service;
 import lombok.RequiredArgsConstructor;
 import org.example.applicationservice.client.JobSeekerServiceClient;
 import org.example.applicationservice.client.JobServiceClient;
+import org.example.applicationservice.dto.CheckJobSeekerSaveJobDTO;
 import org.example.applicationservice.dto.SavedJobCreationDTO;
 import org.example.applicationservice.dto.SavedJobDTO;
 import org.example.applicationservice.entity.SavedJob;
@@ -27,7 +28,21 @@ public class SavedJobService {
     private final SavedJobRepository savedJobRepository;
     private final JobSeekerServiceClient jobSeekerServiceClient;
 
+    public boolean hasJobSeekerSavedJob(CheckJobSeekerSaveJobDTO request) {
+        return savedJobRepository.findByJobIdAndJobSeekerId(request.getJobId(), request.getJobSeekerId())
+                .isPresent();
+    }
+
     public SavedJobDTO saveJob(SavedJobCreationDTO request) {
+        CheckJobSeekerSaveJobDTO checkRequest = CheckJobSeekerSaveJobDTO.builder()
+                .jobId(request.getJobId())
+                .jobSeekerId(request.getJobSeekerId())
+                .build();
+
+        if (hasJobSeekerSavedJob(checkRequest)) {
+            throw new IllegalArgumentException("Bạn đã lưu công việc này trước đó");
+        }
+
         ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(request.getJobId());
         ApiResponse<JobSeekerWithUserDTO> jobSeekerResponse = jobSeekerServiceClient.getJobSeekerById(request.getJobSeekerId());
 
