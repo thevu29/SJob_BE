@@ -10,6 +10,8 @@ public class JobWithRecruiterDTO {
     private String recruiterId;
     private String recruiterName;
     private String recruiterImage;
+    private String recruiterAddress;
+    private Integer recruiterMembers;
     private String name;
     private String description;
     private String salary;
