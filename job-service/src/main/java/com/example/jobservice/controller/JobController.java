@@ -1,5 +1,6 @@
 package com.example.jobservice.controller;
 
+import com.example.jobservice.dto.Job.JobStatisticsDTO;
 import com.example.jobservice.dto.Job.request.CreateJobRequest;
 import com.example.jobservice.dto.Job.request.UpdateJobRequest;
 import com.example.jobservice.entity.JobType;
@@ -10,6 +11,7 @@ import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.Job.JobStatus;
 import org.example.common.dto.Job.JobWithRecruiterDTO;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import com.example.jobservice.dto.Job.GetTopRecruiterDTO;
 import org.example.common.dto.response.ApiResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -25,6 +27,24 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobController {
     private final JobService jobService;
+
+    @GetMapping("/top-recruiters")
+    public ResponseEntity<ApiResponse<List<GetTopRecruiterDTO>>> getTopRecruitersWithMostJobs() {
+        List<GetTopRecruiterDTO> topRecruiters = jobService.getTopRecruitersWithMostJobs();
+        return ResponseEntity.ok(ApiResponse.success(topRecruiters, "Lấy danh sách nhà tuyển dụng hàng đầu thành công"));
+    }
+
+    @GetMapping("count-in-month")
+    public ResponseEntity<ApiResponse<JobStatisticsDTO>> getJobCountsInMonth() {
+        JobStatisticsDTO count = jobService.getJobCountsInMonth();
+        return ResponseEntity.ok(ApiResponse.success(count, "Lấy số lượng việc làm trong tháng thành công"));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<List<JobStatisticsDTO>>> getJobStatistics() {
+        List<JobStatisticsDTO> jobStats = jobService.getJobStatistics();
+        return ResponseEntity.ok(ApiResponse.success(jobStats, "Lấy thống kê việc làm thành công"));
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<JobWithRecruiterDTO>>> getPaginatedJobs(

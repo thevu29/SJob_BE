@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.common.dto.JobSeeker.JobSeekerCreationDTO;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.example.common.dto.response.ApiResponse;
+import org.example.jobseekerservice.dto.JobSeeker.GetJobSeekerStatisticsDTO;
 import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.service.JobSeekerService;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JobSeekerController {
     private final JobSeekerService jobSeekerService;
+
+    @GetMapping("/count-in-month")
+    public ResponseEntity<ApiResponse<GetJobSeekerStatisticsDTO>> getJobSeekerCountInMonth() {
+        GetJobSeekerStatisticsDTO result = jobSeekerService.getJobSeekerCountInMonth();
+        return ResponseEntity.ok(ApiResponse.success(result, "Lấy số lượng ứng viên trong tháng thành công"));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<List<GetJobSeekerStatisticsDTO>>> getJobSeekerStatistics() {
+        List<GetJobSeekerStatisticsDTO> stats = jobSeekerService.getJobSeekerStatistics();
+        return ResponseEntity.ok(ApiResponse.success(stats, "Lấy danh sách thống kê ứng viên thành công"));
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<JobSeekerWithUserDTO>>> getJobSeekers(

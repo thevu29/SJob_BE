@@ -1,9 +1,13 @@
 package com.example.recruiterservice.entity;
 
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.LocalDateTime;
 
 @Document(collection = "recruiters")
 @Getter
@@ -38,4 +42,12 @@ public class Recruiter {
     @Field("status")
     @Builder.Default
     private Boolean status = false;
+
+    @CreatedDate
+    @Field("created_at")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Field("updated_at")
+    private LocalDateTime updatedAt;
 }

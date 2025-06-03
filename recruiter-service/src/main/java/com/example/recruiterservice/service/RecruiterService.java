@@ -2,6 +2,7 @@ package com.example.recruiterservice.service;
 
 import com.example.recruiterservice.client.FieldServiceClient;
 import com.example.recruiterservice.client.UserServiceClient;
+import com.example.recruiterservice.dto.Recruiter.GetRecruiterStatisticsDTO;
 import com.example.recruiterservice.dto.Recruiter.RecruiterImportDTO;
 import com.example.recruiterservice.dto.Recruiter.request.CreateRecruiterRequest;
 import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.Year;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -40,107 +43,69 @@ public class RecruiterService {
     private final FileHelper fileHelper;
     private final CSVHelper csvHelper;
 
-    private CreateRecruiterRequest convertToCreateRequest(RecruiterImportDTO dto, Map<String, String> fieldMap) {
-        return CreateRecruiterRequest.builder()
-                .email(dto.getEmail())
-                .password(dto.getPassword())
-                .fieldId(fieldMap.get(dto.getFieldName()))
-                .name(dto.getName())
-                .about(dto.getAbout())
-                .website(dto.getWebsite())
-                .address(dto.getAddress())
-                .members(dto.getMembers())
+    public GetRecruiterStatisticsDTO getRecruiterCountInMonth() {
+        LocalDate today = LocalDate.now();
+
+        int year = today.getYear();
+        int month = today.getMonthValue();
+
+        Integer count = recruiterRepository.countRecruitersInMonth(year, month);
+
+        if (count == null) {
+            count = 0;
+        }
+
+        Integer lastMonthCount = recruiterRepository.countRecruitersInMonth(year, month - 1);
+
+        if (lastMonthCount == null) {
+            lastMonthCount = 0;
+        }
+
+        double percentageChange = 0.0;
+        if (lastMonthCount > 0) {
+            percentageChange = ((double) (count - lastMonthCount) / lastMonthCount) * 100.0;
+        } else if (count > 0) {
+            percentageChange = 100.0;
+        }
+
+        return GetRecruiterStatisticsDTO.builder()
+                .month(month)
+                .recruiters(count)
+                .percentageChange(percentageChange)
                 .build();
     }
 
-    private UserCreationDTO createUserRequest(String email, String password) {
-        return UserCreationDTO.builder()
-                .email(email)
-                .password(password)
-                .role("RECRUITER")
-                .build();
-    }
+    public List<GetRecruiterStatisticsDTO> getRecruiterStatistics() {
+        int year = Year.now().getValue();
 
-    private UserDTO getUserById(String userId) {
-        ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
-        return response.getData();
-    }
-
-    private FieldDTO getFieldById(String fieldId) {
-        ApiResponse<FieldDTO> response = fieldServiceClient.getField(fieldId);
-        return response.getData();
-    }
-
-    private Map<String, UserDTO> fetchAndMapUsers(List<String> userIds) {
-        if (userIds.isEmpty()) {
-            return Collections.emptyMap();
+        Map<Integer, Integer> monthlyCountMap = new HashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            monthlyCountMap.put(i, 0);
         }
 
-        ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
+        List<Map<String, Object>> monthlyData = recruiterRepository.countRecruitersByMonthInYear(year);
 
-        if (response != null && response.getData() != null) {
-            return response.getData().stream()
-                    .collect(Collectors.toMap(
-                            UserDTO::getId,
-                            Function.identity(),
-                            (existing, replacement) -> existing
-                    ));
+        for (Map<String, Object> doc : monthlyData) {
+            Integer month = (Integer) doc.get("_id");
+            Integer count = (Integer) doc.get("count");
+
+            if (month != null && count != null) {
+                monthlyCountMap.put(month, count);
+            }
         }
 
-        return Collections.emptyMap();
-    }
+        List<GetRecruiterStatisticsDTO> result = new ArrayList<>();
 
-    private List<RecruiterWithUserDTO> mapToRecruiterWithUserDTOs(
-            List<Recruiter> recruiters,
-            Map<String, UserDTO> userMap
-    ) {
+        for (int month = 1; month <= 12; month++) {
+            GetRecruiterStatisticsDTO monthData = GetRecruiterStatisticsDTO.builder()
+                    .month(month)
+                    .recruiters(monthlyCountMap.get(month))
+                    .build();
 
-        return recruiters.stream()
-                .filter(r -> r.getUserId() != null && userMap.containsKey(r.getUserId()))
-                .map(recruiter -> {
-                    FieldDTO field = getFieldById(recruiter.getFieldId());
-
-                    return recruiterMapper.toDtoWithField(
-                            recruiterMapper.toDto(recruiter),
-                            userMap.get(recruiter.getUserId()),
-                            field
-                    );
-                })
-                .collect(Collectors.toList());
-    }
-
-    private List<String> fetchMatchingUserIds(String query, Boolean active, int size, String sortBy, Sort.Direction direction) {
-        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
-                query,
-                active,
-                "RECRUITER",
-                1,
-                size,
-                sortBy,
-                direction
-        );
-
-        if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
-            return usersResponse.getData().stream()
-                    .map(UserDTO::getId)
-                    .toList();
+            result.add(monthData);
         }
 
-        return Collections.emptyList();
-    }
-
-    private Page<RecruiterWithUserDTO> buildRecruiterWithUserPage(Page<Recruiter> recruiters, Pageable pageable) {
-        List<String> userIds = recruiters.getContent().stream()
-                .map(Recruiter::getUserId)
-                .filter(Objects::nonNull)
-                .distinct()
-                .toList();
-
-        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
-
-        List<RecruiterWithUserDTO> content = mapToRecruiterWithUserDTOs(recruiters.getContent(), userMap);
-
-        return new PageImpl<>(content, pageable, recruiters.getTotalElements());
+        return result;
     }
 
     public Page<RecruiterWithUserDTO> findPagedRecruiters(
@@ -302,17 +267,6 @@ public class RecruiterService {
         }
     }
 
-    public void handleUserRollback(UserDTO user) {
-        if (user != null && user.getId() != null) {
-            try {
-                log.info("Rolling back user creation: {}", user.getId());
-                userServiceClient.deleteUser(user.getId());
-            } catch (Exception ex) {
-                log.error("Failed to roll back user creation: {}", user.getId(), ex);
-            }
-        }
-    }
-
     public boolean checkIfRecruiterExists(String id) {
         return recruiterRepository.existsById(id);
     }
@@ -399,5 +353,118 @@ public class RecruiterService {
         return recruiters.stream()
                 .map(recruiterMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    private CreateRecruiterRequest convertToCreateRequest(RecruiterImportDTO dto, Map<String, String> fieldMap) {
+        return CreateRecruiterRequest.builder()
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .fieldId(fieldMap.get(dto.getFieldName()))
+                .name(dto.getName())
+                .about(dto.getAbout())
+                .website(dto.getWebsite())
+                .address(dto.getAddress())
+                .members(dto.getMembers())
+                .build();
+    }
+
+    private UserCreationDTO createUserRequest(String email, String password) {
+        return UserCreationDTO.builder()
+                .email(email)
+                .password(password)
+                .role("RECRUITER")
+                .build();
+    }
+
+    private UserDTO getUserById(String userId) {
+        ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
+        return response.getData();
+    }
+
+    private FieldDTO getFieldById(String fieldId) {
+        ApiResponse<FieldDTO> response = fieldServiceClient.getField(fieldId);
+        return response.getData();
+    }
+
+    private Map<String, UserDTO> fetchAndMapUsers(List<String> userIds) {
+        if (userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
+
+        if (response != null && response.getData() != null) {
+            return response.getData().stream()
+                    .collect(Collectors.toMap(
+                            UserDTO::getId,
+                            Function.identity(),
+                            (existing, replacement) -> existing
+                    ));
+        }
+
+        return Collections.emptyMap();
+    }
+
+    private List<RecruiterWithUserDTO> mapToRecruiterWithUserDTOs(
+            List<Recruiter> recruiters,
+            Map<String, UserDTO> userMap
+    ) {
+
+        return recruiters.stream()
+                .filter(r -> r.getUserId() != null && userMap.containsKey(r.getUserId()))
+                .map(recruiter -> {
+                    FieldDTO field = getFieldById(recruiter.getFieldId());
+
+                    return recruiterMapper.toDtoWithField(
+                            recruiterMapper.toDto(recruiter),
+                            userMap.get(recruiter.getUserId()),
+                            field
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<String> fetchMatchingUserIds(String query, Boolean active, int size, String sortBy, Sort.Direction direction) {
+        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
+                query,
+                active,
+                "RECRUITER",
+                1,
+                size,
+                sortBy,
+                direction
+        );
+
+        if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
+            return usersResponse.getData().stream()
+                    .map(UserDTO::getId)
+                    .toList();
+        }
+
+        return Collections.emptyList();
+    }
+
+    private Page<RecruiterWithUserDTO> buildRecruiterWithUserPage(Page<Recruiter> recruiters, Pageable pageable) {
+        List<String> userIds = recruiters.getContent().stream()
+                .map(Recruiter::getUserId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        Map<String, UserDTO> userMap = fetchAndMapUsers(userIds);
+
+        List<RecruiterWithUserDTO> content = mapToRecruiterWithUserDTOs(recruiters.getContent(), userMap);
+
+        return new PageImpl<>(content, pageable, recruiters.getTotalElements());
+    }
+
+    private void handleUserRollback(UserDTO user) {
+        if (user != null && user.getId() != null) {
+            try {
+                userServiceClient.deleteUser(user.getId());
+            } catch (Exception ex) {
+                log.error("Failed to roll back user creation: {}", user.getId(), ex);
+            }
+        }
     }
 }

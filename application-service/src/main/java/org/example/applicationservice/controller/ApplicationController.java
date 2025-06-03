@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
+import org.example.applicationservice.dto.GetApplicationStatisticsDTO;
 import org.example.applicationservice.service.ApplicationService;
 import org.example.common.dto.Application.ApplicationDTO;
 import org.example.common.dto.response.ApiResponse;
@@ -21,6 +22,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApplicationController {
     private final ApplicationService applicationService;
+
+    @GetMapping("/count-in-month")
+    public ResponseEntity<ApiResponse<GetApplicationStatisticsDTO>> getApplicationCountInMonth() {
+        GetApplicationStatisticsDTO count = applicationService.getApplicationCountInMonth();
+        return ResponseEntity.ok(ApiResponse.success(count, "Đếm số lượng ứng tuyển trong tháng thành công"));
+    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<ApplicationDTO>> createApplication(@Valid @ModelAttribute ApplicationCreationDTO request) {

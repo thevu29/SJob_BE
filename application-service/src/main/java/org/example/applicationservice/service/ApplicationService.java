@@ -7,6 +7,7 @@ import org.example.applicationservice.client.RecruiterServiceClient;
 import org.example.applicationservice.client.ResumeServiceClient;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
+import org.example.applicationservice.dto.GetApplicationStatisticsDTO;
 import org.example.applicationservice.entity.Application;
 import org.example.applicationservice.mapper.ApplicationMapper;
 import org.example.applicationservice.repository.ApplicationRepository;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,69 +44,32 @@ public class ApplicationService {
     private final JobSeekerServiceClient jobSeekerServiceClient;
     private final RecruiterServiceClient recruiterServiceClient;
 
-    private void validateResumeSelection(ApplicationCreationDTO request) {
-        if (request.getResumeId() != null && !request.getResumeId().isBlank() && request.getResumeFile() != null) {
-            throw new IllegalArgumentException("Chỉ có thể chọn một trong hai: CV có sẵn hoặc CV tải lên mới");
+    public GetApplicationStatisticsDTO getApplicationCountInMonth() {
+        LocalDate today = LocalDate.now();
+
+        int year = today.getYear();
+        int month = today.getMonthValue();
+
+        Integer count = applicationRepository.countApplicationsInMonth(year, month);
+
+        if (count == null) {
+            count = 0;
         }
-        if ((request.getResumeId() == null || request.getResumeId().isBlank()) && request.getResumeFile() == null) {
-            throw new IllegalArgumentException("Vui lòng chọn CV để nộp");
+
+        Integer lastMonthCount = applicationRepository.countApplicationsInMonth(year, month - 1);
+
+        if (lastMonthCount == null) {
+            lastMonthCount = 0;
         }
-    }
 
-    private void attachExistingResume(Application application, String resumeId) {
-        ApiResponse<ResumeDTO> resumeResponse = resumeServiceClient.getResumeById(resumeId);
-        ResumeDTO resume = resumeResponse.getData();
-        if (resume != null) {
-            application.setResumeUrl(resume.getUrl());
+        double percentageChange = 0.0;
+        if (lastMonthCount > 0) {
+            percentageChange = ((double) (count - lastMonthCount) / lastMonthCount) * 100.0;
+        } else if (count > 0) {
+            percentageChange = 100.0;
         }
-    }
 
-    private void sendUploadFileMessage(String id, MultipartFile resumeFile) {
-        try {
-            UploadFileDTO uploadFileDTO = UploadFileDTO.builder()
-                    .id(id)
-                    .fileContent(resumeFile.getBytes())
-                    .fileName(resumeFile.getOriginalFilename())
-                    .contentType(resumeFile.getContentType())
-                    .build();
-
-            kafkaTemplate.send("upload-file", uploadFileDTO).get();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to send Kafka message for file upload", e);
-        }
-    }
-
-    private void sendEmail(
-            String jobSeekerEmail,
-            String recruiterEmail,
-            String jobTitle,
-            String applicationMessage,
-            String fileUrl
-    ) {
-        EmailMessageDTO jobSeekerEmailMessage = EmailMessageDTO.builder()
-                .to(jobSeekerEmail)
-                .subject("Ứng tuyển thành công")
-                .body("Chúc mừng bạn đã ứng tuyển thành công cho vị trí " + jobTitle)
-                .fileUrl(fileUrl)
-                .build();
-
-        EmailMessageDTO recruiterEmailMessage = EmailMessageDTO.builder()
-                .to(recruiterEmail)
-                .subject("Ứng viên mới ứng tuyển")
-                .body("Có một ứng viên mới đã ứng tuyển cho vị trí " + jobTitle + "<br>Nội dung ứng tuyển: " + applicationMessage)
-                .fileUrl(fileUrl)
-                .build();
-
-        kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
-        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
-    }
-
-    private void updateApplicationResume(String id, String resumeUrl) {
-        Application application = applicationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
-
-        application.setResumeUrl(resumeUrl);
-        applicationRepository.save(application);
+        return new GetApplicationStatisticsDTO(month, count, percentageChange);
     }
 
     @Transactional
@@ -113,9 +78,6 @@ public class ApplicationService {
                 .jobId(request.getJobId())
                 .jobSeekerId(request.getJobSeekerId())
                 .build();
-
-        System.out.println("getJobId: " + checkJobSeekerApplyJobDTO.getJobId());
-        System.out.println("getJobSeekerId: " + checkJobSeekerApplyJobDTO.getJobSeekerId());
 
         if (hasJobSeekerAppliedForJob(checkJobSeekerApplyJobDTO)) {
             throw new IllegalArgumentException("Bạn đã ứng tuyển cho công việc này");
@@ -218,5 +180,70 @@ public class ApplicationService {
         });
 
         return new PageImpl<>(content, pageable, applicationPage.getTotalElements());
+    }
+
+    private void validateResumeSelection(ApplicationCreationDTO request) {
+        if (request.getResumeId() != null && !request.getResumeId().isBlank() && request.getResumeFile() != null) {
+            throw new IllegalArgumentException("Chỉ có thể chọn một trong hai: CV có sẵn hoặc CV tải lên mới");
+        }
+        if ((request.getResumeId() == null || request.getResumeId().isBlank()) && request.getResumeFile() == null) {
+            throw new IllegalArgumentException("Vui lòng chọn CV để nộp");
+        }
+    }
+
+    private void attachExistingResume(Application application, String resumeId) {
+        ApiResponse<ResumeDTO> resumeResponse = resumeServiceClient.getResumeById(resumeId);
+        ResumeDTO resume = resumeResponse.getData();
+        if (resume != null) {
+            application.setResumeUrl(resume.getUrl());
+        }
+    }
+
+    private void sendUploadFileMessage(String id, MultipartFile resumeFile) {
+        try {
+            UploadFileDTO uploadFileDTO = UploadFileDTO.builder()
+                    .id(id)
+                    .fileContent(resumeFile.getBytes())
+                    .fileName(resumeFile.getOriginalFilename())
+                    .contentType(resumeFile.getContentType())
+                    .build();
+
+            kafkaTemplate.send("upload-file", uploadFileDTO).get();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send Kafka message for file upload", e);
+        }
+    }
+
+    private void sendEmail(
+            String jobSeekerEmail,
+            String recruiterEmail,
+            String jobTitle,
+            String applicationMessage,
+            String fileUrl
+    ) {
+        EmailMessageDTO jobSeekerEmailMessage = EmailMessageDTO.builder()
+                .to(jobSeekerEmail)
+                .subject("Ứng tuyển thành công")
+                .body("Chúc mừng bạn đã ứng tuyển thành công cho vị trí " + jobTitle)
+                .fileUrl(fileUrl)
+                .build();
+
+        EmailMessageDTO recruiterEmailMessage = EmailMessageDTO.builder()
+                .to(recruiterEmail)
+                .subject("Ứng viên mới ứng tuyển")
+                .body("Có một ứng viên mới đã ứng tuyển cho vị trí " + jobTitle + "<br>Nội dung ứng tuyển: " + applicationMessage)
+                .fileUrl(fileUrl)
+                .build();
+
+        kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
+        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+    }
+
+    private void updateApplicationResume(String id, String resumeUrl) {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
+
+        application.setResumeUrl(resumeUrl);
+        applicationRepository.save(application);
     }
 }

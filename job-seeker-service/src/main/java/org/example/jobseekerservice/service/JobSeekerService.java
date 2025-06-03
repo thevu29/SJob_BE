@@ -10,6 +10,7 @@ import org.example.common.dto.User.UserDTO;
 import org.example.common.dto.response.ApiResponse;
 import org.example.common.exception.ResourceNotFoundException;
 import org.example.jobseekerservice.client.UserServiceClient;
+import org.example.jobseekerservice.dto.JobSeeker.GetJobSeekerStatisticsDTO;
 import org.example.jobseekerservice.dto.JobSeeker.JobSeekerUpdateDTO;
 import org.example.jobseekerservice.entity.JobSeeker;
 import org.example.jobseekerservice.mapper.JobSeekerMapper;
@@ -20,10 +21,9 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.Year;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,61 +37,65 @@ public class JobSeekerService {
     private final JobSeekerRepository jobSeekerRepository;
     private final KafkaTemplate<String, JobSeekerUpdateEvent> jobSeekerUpdateKafkaTemplate;
 
-    private UserDTO getUserById(String userId) {
-        ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
-        return response.getData();
-    }
+    public GetJobSeekerStatisticsDTO getJobSeekerCountInMonth() {
+        LocalDate date = LocalDate.now();
+        int month = date.getMonthValue();
+        int year = date.getYear();
 
-    private Map<String, UserDTO> fetchAndMapUsers(List<String> userIds) {
-        if (userIds.isEmpty()) {
-            return Collections.emptyMap();
+        Integer count = jobSeekerRepository.countJobSeekersInMonth(month, year);
+
+        if (count == null) {
+            count = 0;
         }
 
-        ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
+        Integer lastMonthCount = jobSeekerRepository.countJobSeekersInMonth(month - 1, year);
 
-        if (response != null && response.getData() != null) {
-            return response.getData().stream()
-                    .collect(Collectors.toMap(
-                            UserDTO::getId,
-                            Function.identity(),
-                            (existing, replacement) -> existing
-                    ));
+        if (lastMonthCount == null) {
+            lastMonthCount = 0;
         }
 
-        return Collections.emptyMap();
-    }
-
-    private List<JobSeekerWithUserDTO> mapToJobSeekerWithUserDTOs(
-            List<JobSeeker> jobSeekers,
-            Map<String, UserDTO> userMap
-    ) {
-        return jobSeekers.stream()
-                .filter(js -> js.getUserId() != null && userMap.containsKey(js.getUserId()))
-                .map(js -> jobSeekerMapper.toDto(
-                        jobSeekerMapper.toDto(js),
-                        userMap.get(js.getUserId())
-                ))
-                .toList();
-    }
-
-    private List<String> fetchMatchingUserIds(String query, Boolean active, int size, String sortBy, Sort.Direction direction) {
-        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
-                query,
-                active,
-                "JOB_SEEKER",
-                1,
-                size,
-                sortBy,
-                direction
-        );
-
-        if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
-            return usersResponse.getData().stream()
-                    .map(UserDTO::getId)
-                    .toList();
+        double percentageChange = 0.0;
+        if (lastMonthCount > 0) {
+            percentageChange = ((double) (count - lastMonthCount) / lastMonthCount) * 100.0;
+        } else if (count > 0) {
+            percentageChange = 100.0;
         }
 
-        return Collections.emptyList();
+        return GetJobSeekerStatisticsDTO.builder()
+                .month(month)
+                .jobSeekers(count)
+                .percentageChange(percentageChange)
+                .build();
+    }
+
+    public List<GetJobSeekerStatisticsDTO> getJobSeekerStatistics() {
+        int year = Year.now().getValue();
+
+        List<GetJobSeekerStatisticsDTO> result = new ArrayList<>();
+
+        List<Object[]> monthlyData = jobSeekerRepository.countJobSeekersByMonthInYear(year);
+
+        Map<Integer, Long> countsByMonth = new HashMap<>();
+        for (int i = 1; i <= 12; i++) {
+            countsByMonth.put(i, 0L);
+        }
+
+        for (Object[] row : monthlyData) {
+            int month = ((Number) row[0]).intValue();
+            long count = ((Number) row[1]).longValue();
+            countsByMonth.put(month, count);
+        }
+
+        for (int month = 1; month <= 12; month++) {
+            GetJobSeekerStatisticsDTO monthData = GetJobSeekerStatisticsDTO.builder()
+                    .month(month)
+                    .jobSeekers(countsByMonth.get(month).intValue())
+                    .build();
+
+            result.add(monthData);
+        }
+
+        return result;
     }
 
     public Page<JobSeekerWithUserDTO> findPagedJobSeekers(
@@ -236,17 +240,6 @@ public class JobSeekerService {
         }
     }
 
-    private void handleUserRollback(UserDTO user) {
-        if (user != null && user.getId() != null) {
-            try {
-                log.info("Rolling back user creation: {}", user.getId());
-                userServiceClient.deleteUser(user.getId());
-            } catch (Exception ex) {
-                log.error("Failed to roll back user creation: {}", user.getId(), ex);
-            }
-        }
-    }
-
     public JobSeekerWithUserDTO updateJobSeeker(String id, JobSeekerUpdateDTO request) {
         JobSeeker jobSeeker = jobSeekerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy job seeker"));
@@ -287,5 +280,73 @@ public class JobSeekerService {
 
         jobSeekerRepository.delete(jobSeeker);
         userServiceClient.deleteUser(user.getId());
+    }
+
+
+    private void handleUserRollback(UserDTO user) {
+        if (user != null && user.getId() != null) {
+            try {
+                userServiceClient.deleteUser(user.getId());
+            } catch (Exception ex) {
+                log.error("Failed to roll back user creation: {}", user.getId(), ex);
+            }
+        }
+    }
+
+    private UserDTO getUserById(String userId) {
+        ApiResponse<UserDTO> response = userServiceClient.getUserById(userId);
+        return response.getData();
+    }
+
+    private Map<String, UserDTO> fetchAndMapUsers(List<String> userIds) {
+        if (userIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        ApiResponse<List<UserDTO>> response = userServiceClient.getUsersByIds(userIds);
+
+        if (response != null && response.getData() != null) {
+            return response.getData().stream()
+                    .collect(Collectors.toMap(
+                            UserDTO::getId,
+                            Function.identity(),
+                            (existing, replacement) -> existing
+                    ));
+        }
+
+        return Collections.emptyMap();
+    }
+
+    private List<JobSeekerWithUserDTO> mapToJobSeekerWithUserDTOs(
+            List<JobSeeker> jobSeekers,
+            Map<String, UserDTO> userMap
+    ) {
+        return jobSeekers.stream()
+                .filter(js -> js.getUserId() != null && userMap.containsKey(js.getUserId()))
+                .map(js -> jobSeekerMapper.toDto(
+                        jobSeekerMapper.toDto(js),
+                        userMap.get(js.getUserId())
+                ))
+                .toList();
+    }
+
+    private List<String> fetchMatchingUserIds(String query, Boolean active, int size, String sortBy, Sort.Direction direction) {
+        ApiResponse<List<UserDTO>> usersResponse = userServiceClient.findPagedUsers(
+                query,
+                active,
+                "JOB_SEEKER",
+                1,
+                size,
+                sortBy,
+                direction
+        );
+
+        if (usersResponse != null && usersResponse.getData() != null && !usersResponse.getData().isEmpty()) {
+            return usersResponse.getData().stream()
+                    .map(UserDTO::getId)
+                    .toList();
+        }
+
+        return Collections.emptyList();
     }
 }

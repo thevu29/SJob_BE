@@ -1,5 +1,6 @@
 package com.example.recruiterservice.controller;
 
+import com.example.recruiterservice.dto.Recruiter.GetRecruiterStatisticsDTO;
 import com.example.recruiterservice.dto.Recruiter.request.UpdateRecruiterRequest;
 import com.example.recruiterservice.service.RecruiterService;
 import jakarta.validation.Valid;
@@ -22,6 +23,18 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecruiterController {
     private final RecruiterService recruiterService;
+
+    @GetMapping("/count-in-month")
+    public ResponseEntity<ApiResponse<GetRecruiterStatisticsDTO>> getRecruiterCountInMonth() {
+        GetRecruiterStatisticsDTO stats = recruiterService.getRecruiterCountInMonth();
+        return ResponseEntity.ok(ApiResponse.success(stats, "Lấy số lượng nhà tuyển dụng trong tháng thành công"));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<ApiResponse<List<GetRecruiterStatisticsDTO>>> getRecruiterStatistics() {
+        List<GetRecruiterStatisticsDTO> statistics = recruiterService.getRecruiterStatistics();
+        return ResponseEntity.ok(ApiResponse.success(statistics, "Lấy thống kê nhà tuyển dụng thành công"));
+    }
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<RecruiterWithUserDTO>>> getRecruiters(
