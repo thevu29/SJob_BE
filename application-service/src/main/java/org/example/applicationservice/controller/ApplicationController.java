@@ -23,6 +23,15 @@ import java.util.List;
 public class ApplicationController {
     private final ApplicationService applicationService;
 
+    @GetMapping("/job/job-seeker")
+    public ResponseEntity<ApiResponse<ApplicationDTO>> getApplicationByJobIdAndJobSeekerId(
+            @RequestParam("jobId") String jobId,
+            @RequestParam("jobSeekerId") String jobSeekerId
+    ) {
+        ApplicationDTO application = applicationService.getApplicationByJobIdAndJobSeekerId(jobId, jobSeekerId);
+        return ResponseEntity.ok(ApiResponse.success(application, "Lấy thông tin ứng tuyển thành công"));
+    }
+
     @GetMapping("/count-in-month")
     public ResponseEntity<ApiResponse<GetApplicationStatisticsDTO>> getApplicationCountInMonth() {
         GetApplicationStatisticsDTO count = applicationService.getApplicationCountInMonth();

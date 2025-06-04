@@ -113,6 +113,12 @@ public class ApplicationService {
         return applicationMapper.toDTO(createdApplication);
     }
 
+    public ApplicationDTO getApplicationByJobIdAndJobSeekerId(String jobId, String jobSeekerId) {
+        return applicationRepository.findByJobIdAndJobSeekerId(jobId, jobSeekerId)
+                .map(applicationMapper::toDTO)
+                .orElse(null);
+    }
+
     public boolean hasJobSeekerAppliedForJob(CheckJobSeekerApplyJobDTO request) {
         Optional<Application> applicationOptional = applicationRepository.findByJobIdAndJobSeekerId(request.getJobId(), request.getJobSeekerId());
         return applicationOptional.isPresent();

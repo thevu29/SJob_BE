@@ -75,7 +75,6 @@ public class SavedJobService {
     }
 
     public void unSaveJob(String id) {
-        jobServiceClient.getJobById(id);
         savedJobRepository.deleteById(id);
     }
 

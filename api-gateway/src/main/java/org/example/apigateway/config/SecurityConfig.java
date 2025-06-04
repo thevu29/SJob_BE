@@ -39,7 +39,9 @@ public class SecurityConfig {
                                 "/api/jobs/**",
                                 "/api/fields/**",
                                 "/api/field-details/**",
-                                "/api/recruiters/**"
+                                "/api/recruiters/**",
+                                "/api/saved-jobs/**",
+                                "/api/viewed-jobs/**"
                         ).permitAll()
                         .anyExchange().authenticated()
                 )
