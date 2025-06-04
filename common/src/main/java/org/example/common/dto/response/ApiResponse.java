@@ -22,14 +22,15 @@ public class ApiResponse<T> {
     private boolean success;
     private String message;
     private Integer status;
+    private Meta meta;
+    private List<String> errors;
+    private Map<String, String> validationErrors;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 
+    @JsonInclude(JsonInclude.Include.ALWAYS)
     private T data;
-    private Meta meta;
-    private List<String> errors;
-    private Map<String, String> validationErrors;
 
     public static <T> ApiResponse<T> success(T data) {
         return ApiResponse.<T>builder()
