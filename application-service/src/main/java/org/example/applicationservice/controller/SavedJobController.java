@@ -21,6 +21,15 @@ import java.util.List;
 public class SavedJobController {
     private final SavedJobService savedJobService;
 
+    @GetMapping("/job/job-seeker")
+    public ResponseEntity<ApiResponse<SavedJobDTO>> getSavedJobByJobIdAndJobSeekerId(
+            @RequestParam String jobId,
+            @RequestParam String jobSeekerId
+    ) {
+        SavedJobDTO savedJob = savedJobService.getSavedJobByJobIdAndJobSeekerId(jobId, jobSeekerId);
+        return ResponseEntity.ok(ApiResponse.success(savedJob, "Lấy việc làm đã lưu thành công"));
+    }
+
     @PostMapping("/check-save")
     public ResponseEntity<ApiResponse<Boolean>> checkJobSeekerSaveJob(@Valid @RequestBody CheckJobSeekerSaveJobDTO request) {
         boolean hasSaved = savedJobService.hasJobSeekerSavedJob(request);

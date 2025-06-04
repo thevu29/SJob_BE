@@ -28,6 +28,20 @@ public class SavedJobService {
     private final SavedJobRepository savedJobRepository;
     private final JobSeekerServiceClient jobSeekerServiceClient;
 
+    public SavedJobDTO getSavedJobByJobIdAndJobSeekerId(String jobId, String jobSeekerId) {
+        return savedJobRepository.findByJobIdAndJobSeekerId(jobId, jobSeekerId)
+                .map(savedJob -> {
+                    ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(savedJob.getJobId());
+                    JobDTO job = jobResponse.getData();
+
+                    SavedJobDTO savedJobDto = savedJobMapper.toDTO(savedJob);
+                    savedJobDto.setJob(job);
+
+                    return savedJobDto;
+                })
+                .orElse(null);
+    }
+
     public boolean hasJobSeekerSavedJob(CheckJobSeekerSaveJobDTO request) {
         return savedJobRepository.findByJobIdAndJobSeekerId(request.getJobId(), request.getJobSeekerId())
                 .isPresent();
