@@ -9,6 +9,7 @@ import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
 import org.example.applicationservice.dto.GetApplicationStatisticsDTO;
 import org.example.applicationservice.entity.Application;
+import org.example.applicationservice.enums.ApplicationStatus;
 import org.example.applicationservice.mapper.ApplicationMapper;
 import org.example.applicationservice.repository.ApplicationRepository;
 import org.example.common.dto.Application.ApplicationDTO;
@@ -297,5 +298,16 @@ public class ApplicationService {
 
         application.setResumeUrl(resumeUrl);
         applicationRepository.save(application);
+    }
+
+    public ApplicationDTO updateApplicationStatus(String id, String status) {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
+
+        ApplicationStatus applicationStatus = ApplicationStatus.fromString(status);
+        application.setStatus(applicationStatus);
+        Application updatedApplication = applicationRepository.save(application);
+
+        return applicationMapper.toDTO(updatedApplication);
     }
 }

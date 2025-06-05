@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
 import org.example.applicationservice.dto.GetApplicationStatisticsDTO;
+import org.example.applicationservice.enums.ApplicationStatus;
 import org.example.applicationservice.service.ApplicationService;
 import org.example.common.dto.Application.ApplicationDTO;
 import org.example.common.dto.response.ApiResponse;
@@ -71,5 +72,16 @@ public class ApplicationController {
         );
 
         return ResponseEntity.ok(ApiResponse.successWithPage(pages, "Lấy danh sách các công việc đã ừng tuyển thành công"));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<ApplicationDTO>> updateApplicationStatus(
+            @PathVariable String id,
+            @RequestBody String status
+    ) {
+        ApplicationDTO updatedApplication = applicationService.updateApplicationStatus(id, status);
+        return ResponseEntity.ok(
+                ApiResponse.success(updatedApplication, "Cập nhật trạng thái đơn ứng tuyển thành công")
+        );
     }
 }
