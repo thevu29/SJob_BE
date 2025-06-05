@@ -15,6 +15,8 @@ import org.example.common.dto.Application.ApplicationDTO;
 import org.example.common.dto.Email.EmailMessageDTO;
 import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.Notification.NotificationEvent;
+import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.example.common.dto.Resume.ResumeDTO;
 import org.example.common.dto.S3.FileUploadedDTO;
@@ -106,6 +108,15 @@ public class ApplicationService {
 
         Application createdApplication = applicationRepository.save(application);
 
+        // Call sendNotification
+        sendNotification(
+                recruiterResponse.getData().getUserId(),
+                recruiterResponse.getData().getEmail(),
+                jobSeekerResponse.getData().getName(),
+                jobResponse.getData().getName(),
+                createdApplication.getId()
+        );
+
         if (request.getResumeFile() != null) {
             sendUploadFileMessage(createdApplication.getId(), request.getResumeFile());
         }
@@ -156,7 +167,7 @@ public class ApplicationService {
                 .build();
 
         kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
-        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+//        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
     }
 
     public Page<ApplicationDTO> getPaginatedJobSeekerApplications(
@@ -243,6 +254,26 @@ public class ApplicationService {
 
         kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
         kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+    }
+
+    private void sendNotification(
+            String userId,
+            String email,
+            String applicantName,
+            String jobTitle,
+            String applicationId
+    ) {
+        // Create notification request
+        NotificationRequestDTO notificationRequestDTO = NotificationEvent.jobApplication(
+                userId,
+                email,
+                applicantName,
+                jobTitle,
+                applicationId
+        );
+
+        // Send notification via Kafka
+        kafkaTemplate.send("notification-requests", notificationRequestDTO);
     }
 
     private void updateApplicationResume(String id, String resumeUrl) {

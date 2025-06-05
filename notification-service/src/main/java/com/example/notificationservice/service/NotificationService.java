@@ -108,8 +108,8 @@ public class NotificationService {
         return switch (type) {
             case JOB_INVITATION -> "/invitations/" + metaData.get("invitationId");
             case JOB_EXPIRY, JOB_RECOMMENDATION -> "/jobs/" + metaData.get("jobId");
-            case JOB_APPLICATION -> "/applications/" + metaData.get("applicationId");
-            default -> "/";
+//            case JOB_APPLICATION -> "/applications/" + metaData.get("applicationId");
+            default -> "";
         };
     }
 
