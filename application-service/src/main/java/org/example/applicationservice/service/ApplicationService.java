@@ -172,6 +172,7 @@ public class ApplicationService {
 
     public Page<ApplicationDTO> getPaginatedJobSeekerApplications(
             String jobSeekerId,
+            String jobId,
             int page,
             int size,
             String sortBy,
@@ -180,7 +181,15 @@ public class ApplicationService {
         Sort sort = Sort.by(direction, sortBy);
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Application> applicationPage = applicationRepository.findAllByJobSeekerId(jobSeekerId, pageable);
+        Page<Application> applicationPage;
+
+        if (jobSeekerId != null && !jobSeekerId.isBlank()) {
+            applicationPage = applicationRepository.findAllByJobSeekerId(jobSeekerId, pageable);
+        } else if (jobId != null && !jobId.isBlank()) {
+            applicationPage = applicationRepository.findAllByJobId(jobId, pageable);
+        } else {
+            applicationPage = applicationRepository.findAll(pageable);
+        }
 
         List<ApplicationDTO> content = new ArrayList<>();
 
@@ -189,8 +198,14 @@ public class ApplicationService {
 
             ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(application.getJobId());
 
+            ApiResponse<JobSeekerWithUserDTO> jobSeekerResponse = jobSeekerServiceClient.getJobSeekerById(application.getJobSeekerId());
+
             if (jobResponse.getData() != null) {
                 applicationDTO.setJob(jobResponse.getData());
+            }
+
+            if (jobSeekerResponse.getData() != null) {
+                applicationDTO.setJobSeeker(jobSeekerResponse.getData());
             }
 
             content.add(applicationDTO);
