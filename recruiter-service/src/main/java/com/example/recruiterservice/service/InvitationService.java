@@ -107,5 +107,10 @@ public class InvitationService {
         return new PageImpl<>(content, pageRequest, invitations.getTotalElements());
     }
 
+    public void deleteInvitation(String invitationId) {
+        Invitation invitation = invitationRepository.findById(invitationId)
+                .orElseThrow(() -> new IllegalStateException("Lời mời không tồn tại"));
 
+        invitationRepository.delete(invitation);
+    }
 }

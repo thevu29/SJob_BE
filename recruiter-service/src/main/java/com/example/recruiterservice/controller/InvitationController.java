@@ -29,6 +29,12 @@ public class InvitationController {
                 .body(ApiResponse.success(invitation, "Gửi lời mời ứng tuyển thành công", HttpStatus.CREATED));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteInvitation(@PathVariable("id") String id) {
+        invitationService.deleteInvitation(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Xóa lời mời ứng tuyển thành công"));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<List<InvitationDTO>>> getInvitations(
             @RequestParam(value = "query", required = false) String query,

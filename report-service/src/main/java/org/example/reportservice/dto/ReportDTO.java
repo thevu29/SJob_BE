@@ -13,4 +13,5 @@ public class ReportDTO {
     private String message;
     private String reason;
     private ReportStatus status;
+    private String evidence;
 }
