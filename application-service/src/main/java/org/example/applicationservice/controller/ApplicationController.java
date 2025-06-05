@@ -55,6 +55,7 @@ public class ApplicationController {
     @GetMapping
     public ResponseEntity<ApiResponse<List<ApplicationDTO>>> getPaginatedJobSeekerApplications(
             @RequestParam(value = "jobSeekerId", required = false) String jobSeekerId,
+            @RequestParam(value = "jobId", required = false) String jobId,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
             @RequestParam(value = "sortBy", defaultValue = "createdAt") String sortBy,
@@ -62,6 +63,7 @@ public class ApplicationController {
     ) {
         Page<ApplicationDTO> pages = applicationService.getPaginatedJobSeekerApplications(
                 jobSeekerId,
+                jobId,
                 page,
                 size,
                 sortBy,

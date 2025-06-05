@@ -20,5 +20,7 @@ public interface ApplicationRepository extends MongoRepository<Application, Stri
 
     Page<Application> findAllByJobSeekerId(String jobSeekerId, Pageable pageable);
 
+    Page<Application> findAllByJobId(String jobId, Pageable pageable);
+
     Optional<Application> findByJobIdAndJobSeekerId(String jobId, String jobSeekerId);
 }
