@@ -199,7 +199,7 @@ public class UserService {
         if (user.getRole() == UserRole.ADMIN) {
             throw new IllegalArgumentException("Không thể xoá tài khoản ADMIN");
         }
-
+        notificationPreferenceServiceClient.deleteNotificationPreference(id);
         userRepository.delete(user);
     }
 }

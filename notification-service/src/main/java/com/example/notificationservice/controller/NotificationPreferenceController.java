@@ -43,4 +43,12 @@ public class NotificationPreferenceController {
                 ApiResponse.success(updated, "Cập nhật cài đặt thông báo thành công", HttpStatus.OK)
         );
     }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<ApiResponse<Void>> deleteNotificationPreference(@PathVariable String userId) {
+        notificationPreferenceService.deleteNotificationPreference(userId);
+        return ResponseEntity.ok(
+                ApiResponse.success(null, "Xóa cài đặt thông báo thành công", HttpStatus.OK)
+        );
+    }
 }
