@@ -32,17 +32,6 @@ public class EmailService {
         helper.setSubject(request.getSubject());
         helper.setText(request.getBody(), true);
 
-        mailSender.send(message);
-    }
-
-    public void sendEmailWithAttachment(EmailMessageDTO request) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        helper.setTo(request.getTo());
-        helper.setSubject(request.getSubject());
-        helper.setText(request.getBody(), true);
-
         if (request.getFileUrl() != null && !request.getFileUrl().isBlank()) {
             String fileName = extractFileNameFromUrl(request.getFileUrl());
             byte[] fileContent = downloadFileFromS3(fileName);

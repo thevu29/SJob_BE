@@ -21,6 +21,7 @@ public interface ReportMapper {
         if (status == null) {
             return null;
         }
+
         try {
             return ReportStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {

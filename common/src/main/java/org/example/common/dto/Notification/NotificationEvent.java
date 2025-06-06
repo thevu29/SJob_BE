@@ -132,7 +132,8 @@ public class NotificationEvent {
             String email,
             String applicantName,
             String jobTitle,
-            String applicationId
+            String fileUrl,
+            String message
     ) {
         return NotificationRequestDTO.builder()
                 .userId(userId)
@@ -141,8 +142,9 @@ public class NotificationEvent {
                 .metaData(Map.of(
                         "jobTitle", jobTitle,
                         "applicantName", applicantName,
-                        "applicationId", applicationId,
-                        "applicationTime", new Date().toString()
+                        "applicationTime", new Date().toString(),
+                        "fileUrl", fileUrl,
+                        "message", message
                 ))
                 .build();
     }

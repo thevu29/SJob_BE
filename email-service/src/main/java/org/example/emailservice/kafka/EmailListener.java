@@ -16,9 +16,4 @@ public class EmailListener {
     public void listen(EmailMessageDTO emailMessage) throws MessagingException {
         emailService.sendEmail(emailMessage);
     }
-
-    @KafkaListener(topics = "send-email-with-attachment", groupId = "email-service")
-    public void listenWithAttachment(EmailMessageDTO emailMessage) throws MessagingException {
-        emailService.sendEmailWithAttachment(emailMessage);
-    }
 }

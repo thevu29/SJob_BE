@@ -55,8 +55,7 @@ public class NotificationService {
             Set<NotificationChannel> channels = determineEnabledChannels(preference, request);
             String url = generateUrlFromType(request.getType(), request.getMetaData());
 
-            Notification notification = notificationMapper.notificationRequestToEntity(
-                    request, message, channels, url);
+            Notification notification = notificationMapper.notificationRequestToEntity(request, message, channels, url);
 
             Notification savedNotification = notificationRepository.save(notification);
 
@@ -83,10 +82,12 @@ public class NotificationService {
             if (notification.getChannels().contains(NotificationChannel.EMAIL)) {
                 String title = notificationTemplateService.renderTitle(request.getType(), request.getMetaData());
                 String content = notificationTemplateService.renderContent(request.getType(), request.getMetaData());
+
                 EmailMessageDTO emailMessage = EmailMessageDTO.builder()
                         .to(request.getEmail())
                         .subject(title)
                         .body(content)
+                        .fileUrl((String) request.getMetaData().get("fileUrl"))
                         .build();
 
                 kafkaTemplate.send("send-email", emailMessage);

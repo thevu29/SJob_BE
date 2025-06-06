@@ -116,24 +116,24 @@ public class ApplicationService {
 
         if (request.getResumeId() != null && !request.getResumeId().isBlank()) {
             attachExistingResume(application, request.getResumeId());
+
             sendEmail(
                     jobSeekerResponse.getData().getEmail(),
-                    recruiterResponse.getData().getEmail(),
                     jobResponse.getData().getName(),
-                    request.getMessage(),
                     application.getResumeUrl()
+            );
+
+            sendNotification(
+                    recruiterResponse.getData().getUserId(),
+                    recruiterResponse.getData().getEmail(),
+                    jobSeekerResponse.getData().getName(),
+                    jobResponse.getData().getName(),
+                    application.getResumeUrl(),
+                    request.getMessage()
             );
         }
 
         Application createdApplication = applicationRepository.save(application);
-
-        sendNotification(
-                recruiterResponse.getData().getUserId(),
-                recruiterResponse.getData().getEmail(),
-                jobSeekerResponse.getData().getName(),
-                jobResponse.getData().getName(),
-                createdApplication.getId()
-        );
 
         if (request.getResumeFile() != null) {
             sendUploadFileMessage(createdApplication.getId(), request.getResumeFile());
@@ -177,15 +177,16 @@ public class ApplicationService {
                 .fileUrl(event.getFileUrl())
                 .build();
 
-        EmailMessageDTO recruiterEmailMessage = EmailMessageDTO.builder()
-                .to(recruiterResponse.getData().getEmail())
-                .subject("Ứng viên mới ứng tuyển")
-                .body("Có một ứng viên mới đã ứng tuyển cho vị trí " + jobResponse.getData().getName() + "<br>Nội dung ứng tuyển: " + application.getMessage())
-                .fileUrl(event.getFileUrl())
-                .build();
+        kafkaTemplate.send("send-email", jobSeekerEmailMessage);
 
-        kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
-        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+        sendNotification(
+                recruiterResponse.getData().getUserId(),
+                recruiterResponse.getData().getEmail(),
+                jobSeekerResponse.getData().getName(),
+                jobResponse.getData().getName(),
+                event.getFileUrl(),
+                application.getMessage()
+        );
     }
 
     public Page<ApplicationDTO> getPaginatedJobSeekerApplications(
@@ -264,13 +265,7 @@ public class ApplicationService {
         }
     }
 
-    private void sendEmail(
-            String jobSeekerEmail,
-            String recruiterEmail,
-            String jobTitle,
-            String applicationMessage,
-            String fileUrl
-    ) {
+    private void sendEmail(String jobSeekerEmail, String jobTitle, String fileUrl) {
         EmailMessageDTO jobSeekerEmailMessage = EmailMessageDTO.builder()
                 .to(jobSeekerEmail)
                 .subject("Ứng tuyển thành công")
@@ -278,15 +273,7 @@ public class ApplicationService {
                 .fileUrl(fileUrl)
                 .build();
 
-        EmailMessageDTO recruiterEmailMessage = EmailMessageDTO.builder()
-                .to(recruiterEmail)
-                .subject("Ứng viên mới ứng tuyển")
-                .body("Có một ứng viên mới đã ứng tuyển cho vị trí " + jobTitle + "<br>Nội dung ứng tuyển: " + applicationMessage)
-                .fileUrl(fileUrl)
-                .build();
-
-        kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
-        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+        kafkaTemplate.send("send-email", jobSeekerEmailMessage);
     }
 
     private void sendNotification(
@@ -294,14 +281,16 @@ public class ApplicationService {
             String email,
             String applicantName,
             String jobTitle,
-            String applicationId
+            String fileUrl,
+            String message
     ) {
         NotificationRequestDTO notificationRequestDTO = NotificationEvent.jobApplication(
                 userId,
                 email,
                 applicantName,
                 jobTitle,
-                applicationId
+                fileUrl,
+                message
         );
 
         kafkaTemplate.send("notification-requests", notificationRequestDTO);
