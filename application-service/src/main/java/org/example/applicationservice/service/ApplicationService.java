@@ -62,6 +62,22 @@ public class ApplicationService {
 
         Application updatedApplication = applicationRepository.save(application);
 
+        // Get related data to send notifications
+        ApiResponse<JobDTO> jobResponse = jobServiceClient.getJobById(application.getJobId());
+        ApiResponse<JobSeekerWithUserDTO> jobSeekerResponse = jobSeekerServiceClient.getJobSeekerById(application.getJobSeekerId());
+        ApiResponse<RecruiterWithUserDTO> recruiterResponse = recruiterServiceClient.getRecruiterById(jobResponse.getData().getRecruiterId());
+
+        // Send notification
+        NotificationRequestDTO notificationRequest = NotificationEvent.applicationStatusUpdate(
+                jobSeekerResponse.getData().getUserId(),
+                jobSeekerResponse.getData().getEmail(),
+                jobResponse.getData().getName(),
+                recruiterResponse.getData().getName(),
+                applicationStatus.getDisplayName()
+        );
+
+        kafkaTemplate.send("notification-requests", notificationRequest);
+
         return applicationMapper.toDTO(updatedApplication);
     }
 
@@ -302,5 +318,6 @@ public class ApplicationService {
 
         application.setResumeUrl(resumeUrl);
         applicationRepository.save(application);
+
     }
 }

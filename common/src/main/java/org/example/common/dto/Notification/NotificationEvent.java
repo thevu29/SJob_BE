@@ -24,44 +24,25 @@ public class NotificationEvent {
 //                .build();
 //    }
 //
-//    public static NotificationRequestDTO applicationStatusUpdate(
-//            String jobSeekerId,
-//            String jobId,
-//            String jobTitle,
-//            String companyName,
-//            String applicationId,
-//            String newStatus) {
-//
-//        return NotificationRequestDTO.builder()
-//                .recipientId(jobSeekerId)
-//                .recipientType("JOB_SEEKER")
-//                .type(NotificationType.APPLICATION_STATUS)
-//                .data(Map.of(
-//                        "jobId", jobId,
-//                        "jobTitle", jobTitle,
-//                        "companyName", companyName,
-//                        "applicationId", applicationId,
-//                        "newStatus", newStatus,
-//                        "updateTime", new Date().toString()
-//                ))
-//                .build();
-//    }
-//
-//    // Job Recommendation Events
-//    public static NotificationRequestDTO jobRecommendation(
-//            String jobSeekerId,
-//            List<Map<String, Object>> recommendedJobs) {
-//
-//        return NotificationRequestDTO.builder()
-//                .recipientId(jobSeekerId)
-//                .recipientType("JOB_SEEKER")
-//                .type(NotificationType.JOB_RECOMMENDATION)
-//                .data(Map.of(
-//                        "jobs", recommendedJobs,
-//                        "recommendationDate", new Date().toString()
-//                ))
-//                .build();
-//    }
+    public static NotificationRequestDTO applicationStatusUpdate(
+            String userId,
+            String email,
+            String jobTitle,
+            String companyName,
+            String newStatus) {
+
+        return NotificationRequestDTO.builder()
+                .userId(userId)
+                .email(email)
+                .type(NotificationType.APPLICATION_STATUS)
+                .metaData(Map.of(
+                        "jobTitle", jobTitle,
+                        "companyName", companyName,
+                        "newStatus", newStatus,
+                        "updateTime", new Date().toString()
+                ))
+                .build();
+    }
 
     // System Announcement Events
     public static NotificationRequestDTO systemAnnouncement(

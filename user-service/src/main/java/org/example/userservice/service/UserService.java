@@ -9,6 +9,7 @@ import org.example.common.enums.UserRole;
 import org.example.common.exception.ResourceNotFoundException;
 import org.example.common.util.GetKeycloakRole;
 import org.example.userservice.client.NotificationPreferenceServiceClient;
+import org.example.userservice.dto.UserChangePasswordDTO;
 import org.example.userservice.dto.UserUpdatePasswordDTO;
 import org.example.userservice.dto.UserVerifyOtpDTO;
 import org.example.userservice.entity.User;
@@ -182,6 +183,25 @@ public class UserService {
         return userMapper.toDto(updatedUser);
     }
 
+    public UserDTO changeUserPassword(UserChangePasswordDTO request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
+
+        if (user.getGoogleId() != null) {
+            throw new IllegalArgumentException("Tài khoản này được đăng nhập bằng Google, không thể thay đổi mật khẩu");
+        }
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không đúng");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        keycloakService.updateUserPassword(user.getEmail(), request.getNewPassword());
+
+        User updatedUser = userRepository.save(user);
+        return userMapper.toDto(updatedUser);
+    }
+
     public UserDTO updateUserStatus(String id, boolean active) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản của bạn"));
@@ -199,7 +219,7 @@ public class UserService {
         if (user.getRole() == UserRole.ADMIN) {
             throw new IllegalArgumentException("Không thể xoá tài khoản ADMIN");
         }
-
+        notificationPreferenceServiceClient.deleteNotificationPreference(id);
         userRepository.delete(user);
     }
 }

@@ -6,6 +6,7 @@ import org.example.common.dto.User.UserCreationDTO;
 import org.example.common.dto.User.UserDTO;
 import org.example.common.dto.User.UserUpdateOtpDTO;
 import org.example.common.dto.response.ApiResponse;
+import org.example.userservice.dto.UserChangePasswordDTO;
 import org.example.userservice.dto.UserUpdatePasswordDTO;
 import org.example.userservice.dto.UserVerifyOtpDTO;
 import org.example.userservice.service.UserService;
@@ -91,6 +92,12 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserDTO>> updateUserPassword(@Valid @RequestBody UserUpdatePasswordDTO request) {
         UserDTO updatedUser = userService.updateUserPassword(request);
         return ResponseEntity.ok(ApiResponse.success(updatedUser, "Update user thành công", HttpStatus.OK));
+    }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiResponse<UserDTO>> changeUserPassword(@Valid @RequestBody UserChangePasswordDTO request) {
+        UserDTO updatedUser = userService.changeUserPassword(request);
+        return ResponseEntity.ok(ApiResponse.success(updatedUser, "Thay đổi mật khẩu thành công", HttpStatus.OK));
     }
 
     @PutMapping("/block/{id}")

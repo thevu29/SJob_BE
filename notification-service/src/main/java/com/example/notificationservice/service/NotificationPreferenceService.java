@@ -30,7 +30,7 @@ public class NotificationPreferenceService {
                 Arrays.stream(NotificationType.values())
                         .collect(Collectors.toMap(
                                 type -> type,
-                                type -> false
+                                type -> true
                         ))
         );
 
@@ -60,5 +60,13 @@ public class NotificationPreferenceService {
         NotificationPreference saved = notificationPreferenceRepository.save(preference);
 
         return notificationPreferenceMapper.toDTO(saved);
+    }
+
+    public void deleteNotificationPreference(String userId) {
+        NotificationPreference preference = notificationPreferenceRepository.findByUserId(userId);
+        if (preference == null) {
+            throw new ResourceNotFoundException("Không tìm thấy cài đặt thông báo cho người dùng này");
+        }
+        notificationPreferenceRepository.delete(preference);
     }
 }
