@@ -262,10 +262,11 @@ public class JobSeekerService {
 
         jobSeekerMapper.toEntity(request, jobSeeker);
 
-        if (!oldName.equals(jobSeeker.getName())) {
+        if (!oldName.equals(jobSeeker.getName()) || !jobSeeker.getField().equals(request.getField())) {
             JobSeekerUpdateEvent event = new JobSeekerUpdateEvent(id, jobSeeker.getName());
             jobSeekerUpdateKafkaTemplate.send("job-seeker-update-events", event);
         }
+
 
         JobSeeker updatedJobSeeker = jobSeekerRepository.save(jobSeeker);
 

@@ -2,10 +2,11 @@ package org.example.common.dto.Job;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
-public class JobWithRecruiterDTO {
+public class JobWithRecruiterDTO implements Serializable {
     private String id;
     private String recruiterId;
     private String recruiterName;

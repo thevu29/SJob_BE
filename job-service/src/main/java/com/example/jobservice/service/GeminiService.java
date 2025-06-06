@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.common.dto.Job.JobWithRecruiterDTO;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,6 +21,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@EnableCaching
 public class GeminiService {
     @Value("${gemini.api-key}")
     private String GEMINI_API_KEY;
@@ -29,11 +32,10 @@ public class GeminiService {
     private final ObjectMapper objectMapper;
     private final RestTemplate restTemplate;
 
+    @Cacheable(value = "suggestJobSeekers", key = "#job.id")
     public List<JobSeekerWithUserDTO> suggestJobSeekers(JobWithRecruiterDTO job, List<JobSeekerWithUserDTO> seekers) throws Exception {
         String prompt = buildSuggestJobSeekersPrompt(job, seekers);
-
         String geminiResponse = callGemini(prompt);
-
         List<String> suggestedSeekerIds = extractIds(geminiResponse);
 
         return seekers.stream()
@@ -41,16 +43,13 @@ public class GeminiService {
                 .toList();
     }
 
+    @Cacheable(value = "suggestJobs", key = "#jobSeeker.id")
     public List<JobWithRecruiterDTO> suggestJobs(JobSeekerWithUserDTO jobSeeker, List<JobWithRecruiterDTO> jos) throws Exception {
         String prompt = buildSuggestJobsPrompt(jobSeeker, jos);
-
         String geminiResponse = callGemini(prompt);
-
         List<String> suggestedJobIds = extractIds(geminiResponse);
 
-        return jos.stream()
-                .filter(job -> suggestedJobIds.contains(job.getId()))
-                .toList();
+        return jos.stream().filter(job -> suggestedJobIds.contains(job.getId())).toList();
     }
 
     private String buildSuggestJobSeekersPrompt(JobWithRecruiterDTO job, List<JobSeekerWithUserDTO> seekers) throws JsonProcessingException {

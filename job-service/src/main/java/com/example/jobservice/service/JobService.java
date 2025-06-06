@@ -16,7 +16,9 @@ import com.example.jobservice.repository.JobRepository;
 import com.example.jobservice.utils.helpers.CSVHelper;
 import com.example.jobservice.utils.helpers.RangeFilter;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -237,6 +239,23 @@ public class JobService {
         }
     }
 
+    public List<JobWithRecruiterDTO> getAllJobs() {
+        List<Job> jobs = jobRepository.findAll();
+
+        if (jobs.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<String> recruiterIds = jobs.stream()
+                .map(Job::getRecruiterId)
+                .distinct()
+                .toList();
+
+        Map<String, RecruiterDTO> recruiterMap = getRecruiterMap(recruiterIds);
+
+        return convertToJobWithRecruiterDTO(jobs, recruiterMap);
+    }
+
     public List<JobWithRecruiterDTO> suggestJobs(String jobSeekerId) {
         ApiResponse<JobSeekerWithUserDTO> response = jobSeekerServiceClient.getJobSeekerById(jobSeekerId);
 
@@ -322,29 +341,6 @@ public class JobService {
         return jobMapper.toDto(updatedJob);
     }
 
-    private void updateJobFields(Job job, String[] fieldDetailIds) {
-        List<JobField> existingJobFields = jobFieldRepository.findByJobId(job.getId());
-
-        Set<String> existingFieldDetailIds = existingJobFields.stream()
-                .map(jf -> jf.getFieldDetail().getId())
-                .collect(Collectors.toSet());
-        Set<String> newFieldDetailIds = new HashSet<>(Arrays.asList(fieldDetailIds));
-
-        existingJobFields.stream()
-                .filter(jf -> !newFieldDetailIds.contains(jf.getFieldDetail().getId()))
-                .forEach(jobFieldRepository::delete);
-
-        newFieldDetailIds.stream()
-                .filter(id -> !existingFieldDetailIds.contains(id))
-                .forEach(fieldDetailId -> {
-                    JobField jobField = JobField.builder()
-                            .job(job)
-                            .fieldDetail(FieldDetail.builder().id(fieldDetailId).build())
-                            .build();
-                    jobFieldRepository.save(jobField);
-                });
-    }
-
     public void deleteJob(String jobId) {
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy việc làm"));
@@ -403,6 +399,29 @@ public class JobService {
         } catch (IOException e) {
             throw new FileUploadException("Nhập file thất bại: " + e.getMessage());
         }
+    }
+
+    private void updateJobFields(Job job, String[] fieldDetailIds) {
+        List<JobField> existingJobFields = jobFieldRepository.findByJobId(job.getId());
+
+        Set<String> existingFieldDetailIds = existingJobFields.stream()
+                .map(jf -> jf.getFieldDetail().getId())
+                .collect(Collectors.toSet());
+        Set<String> newFieldDetailIds = new HashSet<>(Arrays.asList(fieldDetailIds));
+
+        existingJobFields.stream()
+                .filter(jf -> !newFieldDetailIds.contains(jf.getFieldDetail().getId()))
+                .forEach(jobFieldRepository::delete);
+
+        newFieldDetailIds.stream()
+                .filter(id -> !existingFieldDetailIds.contains(id))
+                .forEach(fieldDetailId -> {
+                    JobField jobField = JobField.builder()
+                            .job(job)
+                            .fieldDetail(FieldDetail.builder().id(fieldDetailId).build())
+                            .build();
+                    jobFieldRepository.save(jobField);
+                });
     }
 
     private Map<String, String> validateRecruiters(Set<String> recruiterNames) {
@@ -564,6 +583,31 @@ public class JobService {
         }
     }
 
+    private List<OrderSpecifier<?>> getCustomOrderSpecifiers(String sortBy, Sort.Direction direction) {
+        QJob job = QJob.job;
+
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            sortBy = "date";
+        }
+
+        OrderSpecifier<Integer> expiredOrder = new OrderSpecifier<>(
+                Order.ASC,
+                new CaseBuilder()
+                        .when(job.deadline.before(LocalDate.now()))
+                        .then(1)
+                        .otherwise(0)
+        );
+
+        PathBuilder<Job> pathBuilder = new PathBuilder<>(Job.class, "job");
+
+        com.querydsl.core.types.Order order = direction == Sort.Direction.ASC ?
+                com.querydsl.core.types.Order.ASC : com.querydsl.core.types.Order.DESC;
+
+        OrderSpecifier<?> sortByOrder = new OrderSpecifier<>(order, pathBuilder.getString(sortBy));
+
+        return List.of(expiredOrder, sortByOrder);
+    }
+
     private OrderSpecifier<?> getOrderSpecifier(String sortBy, Sort.Direction direction) {
         PathBuilder<Job> pathBuilder = new PathBuilder<>(Job.class, "job");
 
@@ -599,10 +643,10 @@ public class JobService {
         applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
 
         List<Job> allJobs = queryFactory.selectFrom(job)
-                .distinct()
                 .leftJoin(job.jobFields, jobField)
                 .where(predicate)
-                .orderBy(getOrderSpecifier(sortBy, direction))
+                .groupBy(job.id)
+                .orderBy(getCustomOrderSpecifiers(sortBy, direction).toArray(new OrderSpecifier[0]))
                 .fetch();
 
         return allJobs.stream()
@@ -687,10 +731,10 @@ public class JobService {
         applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
 
         List<Job> allJobs = queryFactory.selectFrom(job)
-                .distinct()
                 .leftJoin(job.jobFields, jobField)
                 .where(predicate)
-                .orderBy(getOrderSpecifier(sortBy, direction))
+                .groupBy(job.id)
+                .orderBy(getCustomOrderSpecifiers(sortBy, direction).toArray(new OrderSpecifier[0]))
                 .fetch();
 
         return allJobs.stream()
@@ -772,10 +816,10 @@ public class JobService {
         applyCommonFilters(predicate, job, jobField, type, status, recruiterId, fieldDetailIds);
 
         List<Job> allJobs = queryFactory.selectFrom(job)
-                .distinct()
                 .leftJoin(job.jobFields, jobField)
                 .where(predicate)
-                .orderBy(getOrderSpecifier(sortBy, direction))
+                .groupBy(job.id)
+                .orderBy(getCustomOrderSpecifiers(sortBy, direction).toArray(new OrderSpecifier[0]))
                 .fetch();
 
         List<Job> filteredJobs = allJobs.stream()

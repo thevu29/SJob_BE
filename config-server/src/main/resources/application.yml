@@ -11,6 +11,11 @@ spring:
         native:
           search-locations: classpath:/configurations
         overrides:
+          redis:
+            host: ${redis.host}
+            port: ${redis.port}
+            user: ${redis.user}
+            password: ${redis.password}
           google:
             client-id: ${google.client-id}
           gemini:
