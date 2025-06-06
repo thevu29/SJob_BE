@@ -9,12 +9,15 @@ import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
 import org.example.applicationservice.dto.GetApplicationStatisticsDTO;
 import org.example.applicationservice.entity.Application;
+import org.example.applicationservice.enums.ApplicationStatus;
 import org.example.applicationservice.mapper.ApplicationMapper;
 import org.example.applicationservice.repository.ApplicationRepository;
 import org.example.common.dto.Application.ApplicationDTO;
 import org.example.common.dto.Email.EmailMessageDTO;
 import org.example.common.dto.Job.JobDTO;
 import org.example.common.dto.JobSeeker.JobSeekerWithUserDTO;
+import org.example.common.dto.Notification.NotificationEvent;
+import org.example.common.dto.Notification.NotificationRequestDTO;
 import org.example.common.dto.Recruiter.RecruiterWithUserDTO;
 import org.example.common.dto.Resume.ResumeDTO;
 import org.example.common.dto.S3.FileUploadedDTO;
@@ -106,6 +109,15 @@ public class ApplicationService {
 
         Application createdApplication = applicationRepository.save(application);
 
+        // Call sendNotification
+        sendNotification(
+                recruiterResponse.getData().getUserId(),
+                recruiterResponse.getData().getEmail(),
+                jobSeekerResponse.getData().getName(),
+                jobResponse.getData().getName(),
+                createdApplication.getId()
+        );
+
         if (request.getResumeFile() != null) {
             sendUploadFileMessage(createdApplication.getId(), request.getResumeFile());
         }
@@ -156,7 +168,7 @@ public class ApplicationService {
                 .build();
 
         kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
-        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+//        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
     }
 
     public Page<ApplicationDTO> getPaginatedJobSeekerApplications(
@@ -260,11 +272,42 @@ public class ApplicationService {
         kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
     }
 
+    private void sendNotification(
+            String userId,
+            String email,
+            String applicantName,
+            String jobTitle,
+            String applicationId
+    ) {
+        // Create notification request
+        NotificationRequestDTO notificationRequestDTO = NotificationEvent.jobApplication(
+                userId,
+                email,
+                applicantName,
+                jobTitle,
+                applicationId
+        );
+
+        // Send notification via Kafka
+        kafkaTemplate.send("notification-requests", notificationRequestDTO);
+    }
+
     private void updateApplicationResume(String id, String resumeUrl) {
         Application application = applicationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
 
         application.setResumeUrl(resumeUrl);
         applicationRepository.save(application);
+    }
+
+    public ApplicationDTO updateApplicationStatus(String id, String status) {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
+
+        ApplicationStatus applicationStatus = ApplicationStatus.fromString(status);
+        application.setStatus(applicationStatus);
+        Application updatedApplication = applicationRepository.save(application);
+
+        return applicationMapper.toDTO(updatedApplication);
     }
 }

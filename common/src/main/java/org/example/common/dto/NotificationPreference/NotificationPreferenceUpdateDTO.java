@@ -4,14 +4,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.example.common.dto.Notification.NotificationType;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class NotificationPreferenceUpdateDTO {
-    @NotNull(message = "Notification type không được để trống")
-    private NotificationType notificationType;
-
-    @NotNull(message = "Trạng thái không được để trống")
-    private Boolean enabled;}
+    private Map<NotificationType, Boolean> notificationTypeUpdates;}

@@ -82,26 +82,6 @@ public class NotificationEvent {
                 .build();
     }
 
-    //    // Profile View Events
-//    public static NotificationRequestDTO profileView(
-//            String jobSeekerId,
-//            String viewerId,
-//            String companyName,
-//            String recruiterName) {
-//
-//        return NotificationRequestDTO.builder()
-//                .recipientId(jobSeekerId)
-//                .recipientType("JOB_SEEKER")
-//                .type(NotificationType.PROFILE_VIEW)
-//                .data(Map.of(
-//                        "viewerId", viewerId,
-//                        "companyName", companyName,
-//                        "recruiterName", recruiterName,
-//                        "viewDate", new Date().toString()
-//                ))
-//                .build();
-//    }
-
     // Job Invitation Events
     public static NotificationRequestDTO jobInvitation(
             String userId,
@@ -150,9 +130,8 @@ public class NotificationEvent {
     public static NotificationRequestDTO jobApplication(
             String userId,
             String email,
-            String jobId,
+            String applicantName,
             String jobTitle,
-            String companyName,
             String applicationId
     ) {
         return NotificationRequestDTO.builder()
@@ -160,30 +139,11 @@ public class NotificationEvent {
                 .email(email)
                 .type(NotificationType.JOB_APPLICATION)
                 .metaData(Map.of(
-                        "jobId", jobId,
                         "jobTitle", jobTitle,
-                        "companyName", companyName,
+                        "applicantName", applicantName,
                         "applicationId", applicationId,
                         "applicationTime", new Date().toString()
                 ))
                 .build();
     }
-
-//    // Account Verification Events
-//    public static NotificationRequestDTO accountVerification(
-//            String userId,
-//            String userType,
-//            String verificationCode) {
-//
-//        return NotificationRequestDTO.builder()
-//                .recipientId(userId)
-//                .recipientType(userType)
-//                .type(NotificationType.ACCOUNT_VERIFICATION)
-//                .data(Map.of(
-//                        "verificationCode", verificationCode,
-//                        "expiryTime", new Date(System.currentTimeMillis() + 24*60*60*1000).toString() // 24 giờ
-//                ))
-//                .channels(Set.of(NotificationChannel.EMAIL)) // Chỉ gửi qua email
-//                .build();
-//    }
 }

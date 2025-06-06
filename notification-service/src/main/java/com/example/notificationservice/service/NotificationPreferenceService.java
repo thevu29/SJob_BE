@@ -52,9 +52,9 @@ public class NotificationPreferenceService {
             throw new ResourceNotFoundException("Không tìm thấy cài đặt thông báo cho người dùng này");
         }
 
-        // Cập nhật chỉ notification type được chỉ định
+        // Update only the specified notification types
         Map<NotificationType, Boolean> currentSettings = preference.getEnabledNotificationTypes();
-        currentSettings.put(updateDTO.getNotificationType(), updateDTO.getEnabled());
+        updateDTO.getNotificationTypeUpdates().forEach(currentSettings::put);
 
         preference.setEnabledNotificationTypes(currentSettings);
         NotificationPreference saved = notificationPreferenceRepository.save(preference);
