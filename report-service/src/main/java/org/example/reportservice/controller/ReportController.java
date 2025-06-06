@@ -28,7 +28,7 @@ public class ReportController {
             @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "date") String sortBy,
             @RequestParam(defaultValue = "DESC") Sort.Direction direction
     ) {
         Page<ReportDTO> pages = reportService.getPaginatedReports(query, status, page, size, sortBy, direction);

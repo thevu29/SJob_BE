@@ -1,9 +1,12 @@
 package org.example.reportservice.entity;
 
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.time.LocalDateTime;
 
 @Document(collection = "reports")
 @Getter
@@ -29,4 +32,8 @@ public class Report {
 
     @Builder.Default
     private ReportStatus status = ReportStatus.PENDING;
+
+    @CreatedDate
+    @Field("date")
+    private LocalDateTime date;
 }

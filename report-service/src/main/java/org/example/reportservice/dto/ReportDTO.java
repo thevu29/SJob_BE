@@ -3,6 +3,8 @@ package org.example.reportservice.dto;
 import lombok.Data;
 import org.example.reportservice.entity.ReportStatus;
 
+import java.time.LocalDateTime;
+
 @Data
 public class ReportDTO {
     private String id;
@@ -14,4 +16,5 @@ public class ReportDTO {
     private String reason;
     private ReportStatus status;
     private String evidence;
+    private LocalDateTime date;
 }
