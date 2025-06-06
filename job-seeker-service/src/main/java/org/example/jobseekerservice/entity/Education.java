@@ -32,7 +32,6 @@ public class Education {
     @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column()
     private LocalDate endDate;
 
     @ManyToOne

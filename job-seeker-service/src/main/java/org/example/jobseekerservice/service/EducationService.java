@@ -68,6 +68,11 @@ public class EducationService {
         }
 
         educationMapper.toEntity(request, education);
+
+        if (request.getEndDate() == null) {
+            education.setEndDate(null);
+        }
+
         Education updatedEducation = educationRepository.save(education);
 
         return educationMapper.toDto(updatedEducation);

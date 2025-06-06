@@ -21,8 +21,6 @@ public class EducationCreationDTO {
     @Pattern(regexp = "\\d{4}-\\d{2}", message = "Start date must be in format yyyy-MM")
     private String startDate;
 
-    @NotBlank(message = "End date is required")
-    @Pattern(regexp = "\\d{4}-\\d{2}", message = "End date must be in format yyyy-MM")
     private String endDate;
 
     @NotBlank(message = "Job seeker is required")
