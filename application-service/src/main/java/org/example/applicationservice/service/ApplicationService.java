@@ -8,6 +8,7 @@ import org.example.applicationservice.client.ResumeServiceClient;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
 import org.example.applicationservice.dto.GetApplicationStatisticsDTO;
+import org.example.applicationservice.dto.UpdateApplicationDTO;
 import org.example.applicationservice.entity.Application;
 import org.example.applicationservice.enums.ApplicationStatus;
 import org.example.applicationservice.mapper.ApplicationMapper;
@@ -46,6 +47,23 @@ public class ApplicationService {
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final JobSeekerServiceClient jobSeekerServiceClient;
     private final RecruiterServiceClient recruiterServiceClient;
+
+    public ApplicationDTO updateApplicationStatus(String id, UpdateApplicationDTO request) {
+        Application application = applicationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
+
+        ApplicationStatus applicationStatus = ApplicationStatus.fromString(request.getStatus());
+
+        if (application.getStatus() != ApplicationStatus.PENDING && applicationStatus == ApplicationStatus.PENDING) {
+            throw new IllegalArgumentException("Không thể đặt trạng thái đơn ứng tuyển là PENDING khi nó đã được xử lý trước đó");
+        }
+
+        application.setStatus(applicationStatus);
+
+        Application updatedApplication = applicationRepository.save(application);
+
+        return applicationMapper.toDTO(updatedApplication);
+    }
 
     public GetApplicationStatisticsDTO getApplicationCountInMonth() {
         LocalDate today = LocalDate.now();
@@ -109,7 +127,6 @@ public class ApplicationService {
 
         Application createdApplication = applicationRepository.save(application);
 
-        // Call sendNotification
         sendNotification(
                 recruiterResponse.getData().getUserId(),
                 recruiterResponse.getData().getEmail(),
@@ -168,7 +185,7 @@ public class ApplicationService {
                 .build();
 
         kafkaTemplate.send("send-email-with-attachment", jobSeekerEmailMessage);
-//        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
+        kafkaTemplate.send("send-email-with-attachment", recruiterEmailMessage);
     }
 
     public Page<ApplicationDTO> getPaginatedJobSeekerApplications(
@@ -279,7 +296,6 @@ public class ApplicationService {
             String jobTitle,
             String applicationId
     ) {
-        // Create notification request
         NotificationRequestDTO notificationRequestDTO = NotificationEvent.jobApplication(
                 userId,
                 email,
@@ -288,7 +304,6 @@ public class ApplicationService {
                 applicationId
         );
 
-        // Send notification via Kafka
         kafkaTemplate.send("notification-requests", notificationRequestDTO);
     }
 
@@ -298,16 +313,5 @@ public class ApplicationService {
 
         application.setResumeUrl(resumeUrl);
         applicationRepository.save(application);
-    }
-
-    public ApplicationDTO updateApplicationStatus(String id, String status) {
-        Application application = applicationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn ứng tuyển"));
-
-        ApplicationStatus applicationStatus = ApplicationStatus.fromString(status);
-        application.setStatus(applicationStatus);
-        Application updatedApplication = applicationRepository.save(application);
-
-        return applicationMapper.toDTO(updatedApplication);
     }
 }

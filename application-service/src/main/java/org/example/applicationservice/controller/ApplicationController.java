@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.applicationservice.dto.ApplicationCreationDTO;
 import org.example.applicationservice.dto.CheckJobSeekerApplyJobDTO;
 import org.example.applicationservice.dto.GetApplicationStatisticsDTO;
+import org.example.applicationservice.dto.UpdateApplicationDTO;
 import org.example.applicationservice.enums.ApplicationStatus;
 import org.example.applicationservice.service.ApplicationService;
 import org.example.common.dto.Application.ApplicationDTO;
@@ -77,9 +78,8 @@ public class ApplicationController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ApplicationDTO>> updateApplicationStatus(
             @PathVariable String id,
-            @RequestBody String status
-    ) {
-        ApplicationDTO updatedApplication = applicationService.updateApplicationStatus(id, status);
+            @Valid @RequestBody UpdateApplicationDTO request) {
+        ApplicationDTO updatedApplication = applicationService.updateApplicationStatus(id, request);
         return ResponseEntity.ok(
                 ApiResponse.success(updatedApplication, "Cập nhật trạng thái đơn ứng tuyển thành công")
         );
