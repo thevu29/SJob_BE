@@ -1,13 +1,17 @@
 package com.example.jobservice.dto.Job.request;
 
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreateJobRequest {
     @NotBlank(message = "Tên không được để trống")
     private String name;

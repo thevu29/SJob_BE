@@ -50,7 +50,7 @@ public class EducationService {
 
         Education education = educationMapper.toEntity(request);
 
-        if (education.getStartDate().isAfter(education.getEndDate())) {
+        if (education.getEndDate() != null && education.getStartDate().isAfter(education.getEndDate())) {
             throw new IllegalArgumentException("Start date must be before end date");
         }
 
