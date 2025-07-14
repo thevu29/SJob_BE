@@ -7,11 +7,11 @@ Frontend: https://github.com/thevu29/SJob_FE
 ---
 
 ## 📑 Table of Contents
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [System Architecture](#system-architecture)
-- [Setup and Installation](#setup-and-installation)
-- [API Documentation](#api-documentation)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [System Architecture](#%EF%B8%8F-system-architecture)
+- [Setup and Installation](#%EF%B8%8F-setup-and-installation)
+- [API Documentation](#-api-documentation)
 
 ---
 
